@@ -63,5 +63,53 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
 
--- 4) Ricarica la cache schema di PostgREST.
+-- 5) FULL POSTURE (SCA): run manuale -> asset -> finding per pacchetto.
+CREATE TABLE IF NOT EXISTS public.posture_runs (
+  id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  assets_scanned  integer,
+  total_packages  integer,
+  total_vulnerable integer,
+  total_vulns     integer,
+  avg_score       integer
+);
+
+CREATE TABLE IF NOT EXISTS public.posture_assets (
+  id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  run_id              bigint REFERENCES public.posture_runs(id) ON DELETE CASCADE,
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  ip                  text NOT NULL,
+  os_guess            text,
+  method              text,            -- 'ssh' | 'sim'
+  total_packages      integer,
+  vulnerable_packages integer,
+  total_vulns         integer,
+  score               integer,
+  sev_critical        integer,
+  sev_high            integer,
+  sev_medium          integer,
+  sev_low             integer,
+  sev_unknown         integer
+);
+
+CREATE TABLE IF NOT EXISTS public.posture_findings (
+  id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  asset_id     bigint REFERENCES public.posture_assets(id) ON DELETE CASCADE,
+  package      text NOT NULL,
+  version      text,
+  ecosystem    text,
+  category     text,
+  vuln_count   integer,
+  max_severity text,
+  cve_ids      jsonb DEFAULT '[]'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_posture_assets_run    ON public.posture_assets(run_id);
+CREATE INDEX IF NOT EXISTS idx_posture_findings_asset ON public.posture_findings(asset_id);
+
+-- Permessi anche sulle nuove tabelle.
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+
+-- 6) Ricarica la cache schema di PostgREST.
 NOTIFY pgrst, 'reload schema';

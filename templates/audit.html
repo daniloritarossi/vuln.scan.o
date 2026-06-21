@@ -78,6 +78,8 @@
     body { min-height: max(884px, 100dvh); }
   </style>
 <script src="/static/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="/static/tableutils.js"></script>
 </head>
 <body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
 <!-- White Cyber Background Shader -->
@@ -180,7 +182,7 @@
 </a>
 </li>
 <li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/intel">
 <span class="material-symbols-outlined">psychology</span>
 <span class="">INTEL</span>
 </a>
@@ -242,10 +244,21 @@
 </div>
 </section>
 
+<!-- Sort + Export toolbar -->
+<div class="flex items-center justify-between flex-wrap gap-3 -mb-2">
+<div id="auditSortBar" class="flex items-center gap-2">
+<span class="font-label-caps text-[10px] text-slate-400">SORT:</span>
+</div>
+<div class="flex items-center gap-2">
+<button id="exportAuditCSV" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">download</span>CSV</button>
+<button id="exportAuditXLS" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
+</div>
+</div>
 <!-- Scans list -->
 <section id="list" class="space-y-6">
 <div class="neural-panel rounded-2xl p-10 text-center font-code-sm text-code-sm text-slate-400" data-i18n="audit.loading">Loading history…</div>
 </section>
+<div id="auditPager"></div>
 </div>
 </main>
 </div>
@@ -354,7 +367,7 @@
   }
 
   function scanCard(s) {
-    const results = Array.isArray(s.scan_results) ? s.scan_results : [];
+    const results = sortArray(Array.isArray(s.scan_results) ? s.scan_results : [], innerSort.field, innerSort.dir);
     const deps = Array.isArray(s.dependencies) ? s.dependencies : [];
     const depChips = deps.length
       ? deps.map((d) => `<span class="font-code-sm text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">${esc(d)}</span>`).join(' ')
@@ -393,13 +406,13 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-200/70 bg-white/40">
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">IP</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_method')}</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('common.auth')}</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_outcome')}</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_found')}</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_version')}</th>
-                <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">CVE</th>
+                <th data-isort="ip" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">IP${sortIcon('ip',innerSort)}</th>
+                <th data-isort="method" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_method')}${sortIcon('method',innerSort)}</th>
+                <th data-isort="auth_required" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('common.auth')}${sortIcon('auth_required',innerSort)}</th>
+                <th data-isort="vuln_match" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_outcome')}${sortIcon('vuln_match',innerSort)}</th>
+                <th data-isort="product_found" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_found')}${sortIcon('product_found',innerSort)}</th>
+                <th data-isort="detected_version" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_version')}${sortIcon('detected_version',innerSort)}</th>
+                <th data-isort="cve_count" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">CVE${sortIcon('cve_count',innerSort)}</th>
                 <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_evidence')}</th>
               </tr>
             </thead>
@@ -427,6 +440,21 @@
   }
 
   let lastScans = null;  // cache per ri-render al cambio lingua / filtro
+  let auditSort = {field:'created_at', dir:'desc'};
+  let auditPage = 0, auditPageSize = 50;
+  let innerSort = {field:null, dir:'asc'};
+  let currentScans = [];
+
+  const ASORTS = [{f:'created_at',l:'DATE'},{f:'product',l:'PRODUCT'},{f:'cve_count',l:'CVEs'},{f:'results_count',l:'ASSETS'}];
+  function renderAuditSortBar(){
+    $('auditSortBar').innerHTML = '<span class="font-label-caps text-[10px] text-slate-400">SORT:</span>'
+      + ASORTS.map(s=>{
+          const act = s.f===auditSort.field;
+          const arrow = act ? (auditSort.dir==='asc' ? ' ↑' : ' ↓') : '';
+          const cls = act ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+          return `<button data-asort="${s.f}" class="font-label-caps text-[10px] px-3 py-1.5 rounded-lg border ${cls} transition-colors">${s.l}${arrow}</button>`;
+        }).join('');
+  }
 
   // KPI calcolati SEMPRE sul set completo (non sul filtrato).
   function setKPIs(scans) {
@@ -439,6 +467,7 @@
   }
 
   function renderCards(scans) {
+    currentScans = scans;
     if (!scans.length) {
       const q = ($('searchInput').value || '').trim();
       list.innerHTML = `
@@ -446,13 +475,20 @@
           <span class="material-symbols-outlined text-4xl text-slate-300">${q ? 'search_off' : 'history'}</span>
           <p class="font-code-sm text-code-sm text-slate-400 mt-3">${q ? t('audit.no_match') : t('audit.empty')}</p>
         </div>`;
+      $('auditPager').innerHTML = '';
       return;
     }
-    list.innerHTML = scans.map(scanCard).join('');
+    const enriched = scans.map(s => Object.assign({results_count:(s.scan_results||[]).length}, s));
+    const sorted = sortArray(enriched, auditSort.field, auditSort.dir);
+    const total = sorted.length;
+    const page = auditPageSize===0 ? sorted : sorted.slice(auditPage*auditPageSize, auditPage*auditPageSize+auditPageSize);
+    list.innerHTML = page.map(scanCard).join('');
+    renderPaginator('auditPager', total, auditPage, auditPageSize, (p,sz)=>{auditPage=p;auditPageSize=sz;renderCards(currentScans);});
   }
 
   function renderList(scans) {
     setKPIs(scans);
+    renderAuditSortBar();
     renderCards(scans);
   }
 
@@ -539,8 +575,42 @@
   });
 
   $('reload').addEventListener('click', load);
-  // Ridisegna i dati gia' caricati quando cambia la lingua (mantiene il filtro).
-  window.addEventListener('langchange', () => { if (lastScans) { setKPIs(lastScans); applyFilter(); } });
+  window.addEventListener('langchange', () => { if (lastScans) { setKPIs(lastScans); renderAuditSortBar(); applyFilter(); } });
+
+  // Sort bar click (scan card list sort)
+  $('auditSortBar').addEventListener('click', e=>{
+    const btn=e.target.closest('[data-asort]'); if(!btn) return;
+    const f=btn.dataset.asort;
+    auditSort.dir=(auditSort.field===f&&auditSort.dir==='asc')?'desc':'asc';
+    auditSort.field=f; auditPage=0;
+    renderAuditSortBar(); renderCards(currentScans);
+  });
+
+  // Inner result table sort (event delegation on #list)
+  list.addEventListener('click', e=>{
+    const th=e.target.closest('[data-isort]'); if(!th) return;
+    const f=th.dataset.isort;
+    innerSort.dir=(innerSort.field===f&&innerSort.dir==='asc')?'desc':'asc';
+    innerSort.field=f;
+    renderCards(currentScans);
+  });
+
+  // Export
+  function _buildAuditRows(){
+    return (currentScans.length?currentScans:lastScans||[]).flatMap(s=>
+      (s.scan_results||[]).map(r=>({
+        Scan_ID:s.id, Date:s.created_at, Product:s.product||'', Version:s.version||'',
+        Source:s.source||'', Description:(s.description||'').slice(0,120),
+        IP:r.ip, Method:r.method||'', Auth:r.auth_required?'Yes':'No',
+        Outcome:r.vuln_match||'', Found:r.product_found?'Yes':'No',
+        Detected_Version:r.detected_version||'', Affected_Version:r.affected_version||'',
+        Match_Basis:r.match_basis||'', CVE_Count:r.cve_count||0,
+        CVEs:(r.cve_ids||[]).join('; '), Evidence:(r.raw_evidence||'').slice(0,200)
+      }))
+    );
+  }
+  $('exportAuditCSV').addEventListener('click',()=>exportCSV(_buildAuditRows(),'audit_results.csv'));
+  $('exportAuditXLS').addEventListener('click',()=>exportXLS(_buildAuditRows(),'audit_results.xlsx'));
 
   // --- Ricerca espandibile ---
   const searchInput = $('searchInput');

@@ -65,6 +65,8 @@
     body { min-height: max(884px, 100dvh); }
   </style>
 <script src="/static/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="/static/tableutils.js"></script>
 </head>
 <body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
 <!-- White Cyber Background Shader -->
@@ -168,7 +170,7 @@
 </a>
 </li>
 <li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/intel">
 <span class="material-symbols-outlined">psychology</span>
 <span class="">INTEL</span>
 </a>
@@ -219,15 +221,19 @@
 
 <!-- Table -->
 <section class="neural-panel rounded-2xl overflow-hidden">
+<div class="p-4 border-b border-slate-100/70 flex items-center justify-end gap-2">
+<button id="exportAssetsCSV" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">download</span>CSV</button>
+<button id="exportAssetsXLS" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
+</div>
 <div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
+<table id="assetsTable" class="w-full text-left border-collapse">
+<thead id="assetsThead">
 <tr class="border-b border-slate-200/70 bg-white/40">
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4">#</th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_host">IP / HOST</th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_user">USERNAME</th>
+<th data-sort="index" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">#<span id="sicon-index"></span></th>
+<th data-sort="ip" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_host">IP / HOST<span id="sicon-ip"></span></th>
+<th data-sort="username" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_user">USERNAME<span id="sicon-username"></span></th>
 <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_pass">PASSWORD</th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_auth">AUTH</th>
+<th data-sort="auth_required" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_auth">AUTH<span id="sicon-auth_required"></span></th>
 <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4">
 <span class="inline-flex items-center gap-1">
 <span data-i18n="assets.th_active">ACTIVE</span>
@@ -244,6 +250,7 @@
 </table>
 </div>
 <div id="empty" class="hidden p-10 text-center font-code-sm text-code-sm text-slate-400" data-i18n="assets.empty">Inventory empty. Add the first asset.</div>
+<div id="assetsPager"></div>
 </section>
 <p id="toast" class="hidden font-code-sm text-code-sm px-4 py-2 rounded-lg"></p>
 </div>
@@ -270,6 +277,15 @@
   const toast = $('toast');
   let assets = [];
   let editingIndex = null;
+  let assetSort = {field:'index', dir:'asc'};
+  let assetPage = 0, assetPageSize = 50;
+
+  function updateSortIcons(){
+    ['index','ip','username','auth_required'].forEach(f=>{
+      const el=document.getElementById('sicon-'+f);
+      if(el) el.innerHTML=sortIcon(f,assetSort);
+    });
+  }
 
   function showToast(msg, ok = true) {
     toast.textContent = msg;
@@ -358,12 +374,17 @@
     rows.innerHTML = '';
     countEl.textContent = t('assets.count', { n: assets.length });
     empty.classList.toggle('hidden', assets.length > 0);
-    assets.forEach((a) => {
+    updateSortIcons();
+    const sorted = sortArray(assets, assetSort.field, assetSort.dir);
+    const total = sorted.length;
+    const page = assetPageSize===0 ? sorted : sorted.slice(assetPage*assetPageSize, assetPage*assetPageSize+assetPageSize);
+    page.forEach((a) => {
       const tr = document.createElement('tr');
       tr.className = 'hover:bg-white/60 transition-colors';
       tr.innerHTML = rowHtml(a);
       rows.appendChild(tr);
     });
+    renderPaginator('assetsPager', total, assetPage, assetPageSize, (p,sz)=>{assetPage=p;assetPageSize=sz;render();});
     runHealthChecks();
   }
 
@@ -428,8 +449,24 @@
   $('create').addEventListener('click', createAsset);
   $('new-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') createAsset(); });
   $('reload').addEventListener('click', load);
-  // Re-render dynamic rows when language changes (static text handled by i18n.js).
   window.addEventListener('langchange', render);
+
+  // Column sort
+  $('assetsTable').addEventListener('click', e=>{
+    const th=e.target.closest('[data-sort]'); if(!th||!th.closest('thead')) return;
+    const f=th.dataset.sort;
+    assetSort.dir=(assetSort.field===f&&assetSort.dir==='asc')?'desc':'asc';
+    assetSort.field=f; assetPage=0; render();
+  });
+
+  // Export (exclude password column)
+  function _buildAssetRows(){
+    return sortArray(assets,assetSort.field,assetSort.dir).map(a=>({
+      Index:a.index, IP_Host:a.ip, Username:a.username||'', Auth_Required:a.auth_required?'Yes':'No'
+    }));
+  }
+  $('exportAssetsCSV').addEventListener('click',()=>exportCSV(_buildAssetRows(),'assets.csv'));
+  $('exportAssetsXLS').addEventListener('click',()=>exportXLS(_buildAssetRows(),'assets.xlsx'));
 
   load();
 </script>

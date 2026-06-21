@@ -160,3 +160,100 @@ def update_scan_summary(scan_id: Optional[int], cve: dict) -> None:
         }).eq("id", scan_id).execute()
     except Exception as exc:
         logger.warning("update_scan_summary fallita: %s", exc)
+
+
+# ---------------------------------------------------------------------------
+# FULL POSTURE (SCA)
+# ---------------------------------------------------------------------------
+
+def create_posture_run() -> Optional[int]:
+    """Crea una riga posture_runs (vuota) e ritorna l'id. None se DB assente."""
+    client = _get_client()
+    if client is None:
+        return None
+    try:
+        resp = client.table("posture_runs").insert({"assets_scanned": 0}).execute()
+        return resp.data[0]["id"] if resp.data else None
+    except Exception as exc:
+        logger.warning("create_posture_run fallita: %s", exc)
+        return None
+
+
+def persist_posture_asset(run_id: Optional[int], report: dict) -> None:
+    """Inserisce un asset di postura + i suoi finding per-pacchetto."""
+    client = _get_client()
+    if client is None or run_id is None:
+        return
+    try:
+        row = {k: report.get(k) for k in (
+            "ip", "os_guess", "method", "total_packages", "vulnerable_packages",
+            "total_vulns", "score", "sev_critical", "sev_high", "sev_medium",
+            "sev_low", "sev_unknown")}
+        row["run_id"] = run_id
+        resp = client.table("posture_assets").insert(row).execute()
+        asset_id = resp.data[0]["id"] if resp.data else None
+        findings = report.get("findings") or []
+        if asset_id and findings:
+            client.table("posture_findings").insert([{
+                "asset_id": asset_id,
+                "package": f["package"], "version": f["version"],
+                "ecosystem": f["ecosystem"], "category": f["category"],
+                "vuln_count": f["vuln_count"], "max_severity": f["max_severity"],
+                "cve_ids": f["cve_ids"] or [],
+            } for f in findings]).execute()
+    except Exception as exc:
+        logger.warning("persist_posture_asset fallita (ip=%s): %s", report.get("ip"), exc)
+
+
+def finalize_posture_run(run_id: Optional[int], totals: dict) -> None:
+    """Aggiorna gli aggregati della run a fine scansione."""
+    client = _get_client()
+    if client is None or run_id is None:
+        return
+    try:
+        client.table("posture_runs").update({
+            "assets_scanned": totals.get("assets_scanned"),
+            "total_packages": totals.get("total_packages"),
+            "total_vulnerable": totals.get("total_vulnerable"),
+            "total_vulns": totals.get("total_vulns"),
+            "avg_score": totals.get("avg_score"),
+        }).eq("id", run_id).execute()
+    except Exception as exc:
+        logger.warning("finalize_posture_run fallita: %s", exc)
+
+
+def fetch_posture(run_id: Optional[int] = None):
+    """
+    Ritorna una run di postura con asset + findings annidati.
+    run_id None => ultima run. None se DB non raggiungibile, {} se nessuna run.
+    """
+    client = _get_client()
+    if client is None:
+        return None
+    try:
+        q = client.table("posture_runs").select(
+            "*, posture_assets(*, posture_findings(*))")
+        if run_id is not None:
+            q = q.eq("id", run_id)
+        else:
+            q = q.order("created_at", desc=True).limit(1)
+        resp = q.execute()
+        return (resp.data[0] if resp.data else {})
+    except Exception as exc:
+        logger.warning("fetch_posture fallita: %s", exc)
+        return None
+
+
+def fetch_posture_runs(limit: int = 30):
+    """Elenco sintetico delle run (per il selettore storico)."""
+    client = _get_client()
+    if client is None:
+        return None
+    try:
+        resp = (client.table("posture_runs")
+                .select("id, created_at, assets_scanned, total_vulns, avg_score")
+                .order("created_at", desc=True).limit(limit).execute())
+        return resp.data or []
+    except Exception as exc:
+        logger.warning("fetch_posture_runs fallita: %s", exc)
+        return None

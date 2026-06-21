@@ -83,6 +83,32 @@ def query_osv_ids(product: str, version: str | None, timeout: int = 15) -> dict:
     return _osv_raw(product, version, timeout)
 
 
+def query_osv_ecosystem(name: str, ecosystem: str | None, version: str | None,
+                        timeout: int = 20) -> dict:
+    """
+    Query OSV per (nome, ecosistema, versione) -> lista COMPLETA di id.
+    Usata dal 'show more' della tabella posture (ecosystem-aware: Debian, PyPI...).
+    Ritorna: {"count": int, "ids": [str], "error": str | None}.
+    """
+    if not name:
+        return {"count": 0, "ids": [], "error": None}
+    pkg = {"name": name.lower()}
+    if ecosystem:
+        pkg["ecosystem"] = ecosystem
+    payload = {"package": pkg}
+    if version:
+        payload["version"] = version
+    try:
+        resp = requests.post(OSV_URL, json=payload,
+                             headers={"Content-Type": "application/json"}, timeout=timeout)
+        resp.raise_for_status()
+        vulns = resp.json().get("vulns") or []
+        ids = [v.get("id") for v in vulns if v.get("id")]
+        return {"count": len(ids), "ids": ids, "error": None}
+    except Exception as exc:
+        return {"count": 0, "ids": [], "error": str(exc)}
+
+
 # Lingue supportate per la sintesi LLM (mappa codice -> nome usato nel prompt).
 _LANG_NAMES = {"en": "English", "it": "Italian"}
 
