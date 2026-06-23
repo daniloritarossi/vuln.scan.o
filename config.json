@@ -1,0 +1,29 @@
+{
+  "search_engine": {
+    "provider": "duckduckgo",
+    "serper_api_key": "",
+    "min_osint_hits": 2,
+    "min_osint_query": 4
+  },
+  "ai": {
+    "provider": "ollama",
+    "ollama_url": "http://localhost:11434/api/generate",
+    "ollama_model": "qwen2.5:7b",
+    "claude_api_key": "",
+    "claude_model": "claude-haiku-4-5-20251001",
+    "summary_timeout": 60,
+    "advisory_timeout": 60,
+    "extract_timeout": 30,
+    "remediation_timeout": 30,
+    "triage_timeout": 60,
+    "ai_remediation": false
+  },
+  "scanner": {
+    "simulate_auth": true,
+    "socket_timeout": 4
+  },
+  "osv": {
+    "url": "https://api.osv.dev/v1/query",
+    "timeout": 15
+  }
+}

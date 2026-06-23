@@ -1,105 +1,151 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Audit · Scan Results</title>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Theme Config -->
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-                "surface-tint": "#00daf3",
-                "error": "#ef4444",
-                "on-background": "#0f172a",
-                "primary-fixed-dim": "#06b6d4",
-                "on-surface-variant": "#64748b",
-                "on-surface": "#1e293b",
-                "background": "#ffffff"
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VULN.SCAN.IO · Audit Ledger</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Material Symbols -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Tailwind Theme Config -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#00daf3",
+            "error": "#ef4444",
+            "on-background": "#0f172a",
+            "primary-fixed-dim": "#06b6d4",
+            "on-surface-variant": "#64748b",
+            "on-surface": "#1e293b",
+            "background": "#ffffff"
+          },
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px" },
+          "spacing": { "base-unit": "4px", "gutter": "16px", "margin-desktop": "32px", "margin-mobile": "16px", "panel-padding": "24px" },
+          "fontFamily": {
+            "code-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "display-lg": ["Inter"],
+            "code-lg": ["JetBrains Mono"], "label-caps": ["Inter"], "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "code-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+            "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
         },
-        "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px" },
-        "spacing": { "base-unit": "4px", "gutter": "16px", "margin-desktop": "32px", "margin-mobile": "16px", "panel-padding": "24px" },
-        "fontFamily": {
-                "code-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "display-lg": ["Inter"],
-                "code-lg": ["JetBrains Mono"], "label-caps": ["Inter"], "body-md": ["Inter"]
-        },
-        "fontSize": {
-                "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
-                "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
-                "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-                "code-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
-                "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
-                "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }]
-        }
-},
-    },
-  }
-</script>
-<style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glow-sm { filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4)); }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .neural-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-        }
-        .shader-bg { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; background: #ffffff; }
-        /* Expandable search field: collapsed by default, grows on toggle. */
-        .search-box {
-            width: 0;
-            opacity: 0;
-            padding: 0;
-            transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-        }
-        .search-box.open {
-            width: 15rem;
-            opacity: 1;
-            padding: 0 0.25rem;
-        }
-        @media (max-width: 640px) { .search-box.open { width: 9rem; } }
-    </style>
-<style>
-    body { min-height: max(884px, 100dvh); }
-  </style>
-<script src="/static/i18n.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="/static/tableutils.js"></script>
-</head>
-<body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
-<!-- White Cyber Background Shader -->
-<div class="shader-bg">
-<canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
-<script>
-    (function() {
-      const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
-      function syncSize() {
-        const w = canvas.clientWidth  || window.innerWidth;
-        const h = canvas.clientHeight || window.innerHeight;
-        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .glow-sm {
+      filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .neural-panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .shader-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
+
+    /* Expandable search field: collapsed by default, grows on toggle. */
+    .search-box {
+      width: 0;
+      opacity: 0;
+      padding: 0;
+      transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+
+    .search-box.open {
+      width: 15rem;
+      opacity: 1;
+      padding: 0 0.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .search-box.open {
+        width: 9rem;
       }
-      if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(syncSize).observe(canvas); }
-      syncSize();
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) return;
-      const vs = `attribute vec2 a_position; varying vec2 v_texCoord;
+    }
+  </style>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  <script src="/static/i18n.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="/static/tableutils.js"></script>
+</head>
+
+<body
+  class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
+  <!-- White Cyber Background Shader -->
+  <div class="shader-bg">
+    <canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+        (function () {
+          const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
+          function syncSize() {
+            const w = canvas.clientWidth || window.innerWidth;
+            const h = canvas.clientHeight || window.innerHeight;
+            if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+          }
+          if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(syncSize).observe(canvas); }
+          syncSize();
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return;
+          const vs = `attribute vec2 a_position; varying vec2 v_texCoord;
     void main() { v_texCoord = a_position * 0.5 + 0.5; gl_Position = vec4(a_position, 0.0, 1.0); }`;
-      const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution;
+          const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution;
     float grid(vec2 uv, float res) {
         vec2 grid = fract(uv * res);
         return 1.0 - (smoothstep(0.0, 0.03, abs(grid.x - 0.5)) * smoothstep(0.0, 0.03, abs(grid.y - 0.5)));
@@ -118,275 +164,353 @@
         color += scanline * cyberBlue * 0.05;
         gl_FragColor = vec4(color, 1.0);
     }`;
-      function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
-      const prog = gl.createProgram();
-      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
-      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
-      gl.linkProgram(prog); gl.useProgram(prog);
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const pos = gl.getAttribLocation(prog, 'a_position');
-      gl.enableVertexAttribArray(pos);
-      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-      const uTime = gl.getUniformLocation(prog, 'u_time');
-      const uRes = gl.getUniformLocation(prog, 'u_resolution');
-      function render(t) {
-        if (typeof ResizeObserver === 'undefined') syncSize();
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        if (uTime) gl.uniform1f(uTime, t * 0.001);
-        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      render(0);
-    })();
+          function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+          const prog = gl.createProgram();
+          gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+          gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+          gl.linkProgram(prog); gl.useProgram(prog);
+          const buf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+          const pos = gl.getAttribLocation(prog, 'a_position');
+          gl.enableVertexAttribArray(pos);
+          gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+          const uTime = gl.getUniformLocation(prog, 'u_time');
+          const uRes = gl.getUniformLocation(prog, 'u_resolution');
+          function render(t) {
+            if (typeof ResizeObserver === 'undefined') syncSize();
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            if (uTime) gl.uniform1f(uTime, t * 0.001);
+            if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+          }
+          render(0);
+        })();
     </script>
-</div>
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_4px_12px_rgba(6,182,212,0.3)]">
-<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">security</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-slate-900">VULN_INTEL_CMD</h1>
-<span class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50" data-i18n="top.audit_ledger">AUDIT_LEDGER</span>
-</div>
-<div class="flex items-center gap-3">
-<div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
-<button data-lang-btn="en" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
-<button data-lang-btn="it" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
-</div>
-<div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
-<span class="material-symbols-outlined">sensors</span>
-</div>
-</div>
-</header>
-<div class="flex pt-16 h-screen w-full overflow-hidden">
-<!-- NavigationDrawer (Web) -->
-<nav class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
-<div class="px-6 mb-4">
-<span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
-</div>
-<ul class="flex flex-col w-full px-4 gap-2">
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="">DASHBOARD</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/assets">
-<span class="material-symbols-outlined">inventory_2</span>
-<span class="">ASSETS</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/intel">
-<span class="material-symbols-outlined">psychology</span>
-<span class="">INTEL</span>
-</a>
-</li>
-<!-- Active: AUDIT -->
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]" href="/audit">
-<span class="material-symbols-outlined text-cyan-400">fact_check</span>
-<span class="">AUDIT</span>
-</a>
-</li>
-</ul>
-</nav>
-<!-- Main Content Canvas -->
-<main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
-<div class="mx-auto space-y-8">
-<!-- Page header -->
-<div class="flex items-center justify-between flex-wrap gap-4">
-<div>
-<h2 class="font-display-lg text-3xl font-bold tracking-tight text-slate-900" data-i18n="audit.header">Audit Ledger</h2>
-<p class="font-code-sm text-code-sm text-slate-500 mt-1" data-i18n="audit.subtitle">Scan results history stored on <span class="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">Supabase</span> · most recent first</p>
-</div>
-<div class="flex items-center gap-3">
-<!-- Expandable search -->
-<div class="flex items-center bg-white border border-slate-200 rounded-full shadow-sm overflow-hidden">
-<button id="searchToggle" type="button" aria-label="Search" class="flex items-center justify-center w-10 h-10 text-slate-500 hover:text-cyan-600 transition-colors shrink-0">
-<span class="material-symbols-outlined text-[20px]">search</span>
-</button>
-<input id="searchInput" type="text" data-i18n-ph="audit.search_ph" placeholder="Search CVE, IP, version…"
-  class="search-box bg-transparent font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
-<button id="searchClear" type="button" aria-label="Clear" class="hidden items-center justify-center w-9 h-10 text-slate-400 hover:text-rose-500 transition-colors shrink-0">
-<span class="material-symbols-outlined text-[18px]">close</span>
-</button>
-</div>
-<button id="reload" class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">refresh</span> <span data-i18n="common.reload">RELOAD</span>
-</button>
-</div>
-</div>
+  </div>
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
+    <div class="flex items-center gap-4">
+      <img src="/static/logo-icon.svg" class="w-11 h-11" alt="VULN.SCAN.IO" />
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tight"><span
+          class="text-orange-500">VULN</span><span class="text-slate-400">.</span><span
+          class="text-orange-500">SCAN</span><span class="text-slate-400">.</span><span class="text-cyan-500">IO</span>
+      </h1>
+      <span
+        class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50"
+        data-i18n="top.audit_ledger">AUDIT_LEDGER</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+        <button data-lang-btn="en"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
+        <button data-lang-btn="it"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
+      </div>
+      <div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">sensors</span>
+      </div>
+    </div>
+  </header>
+  <div class="flex pt-16 h-screen w-full overflow-hidden">
+    <!-- NavigationDrawer (Web) -->
+    <nav
+      class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
+      <div class="px-6 mb-4">
+        <span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
+      </div>
+      <ul class="flex flex-col w-full px-4 gap-2">
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="">DASHBOARD</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/assets">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="">ASSETS</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/intel">
+            <span class="material-symbols-outlined">psychology</span>
+            <span class="">INTEL</span>
+          </a>
+        </li>
+        <!-- Active: AUDIT -->
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]"
+            href="/audit">
+            <span class="material-symbols-outlined text-cyan-400">fact_check</span>
+            <span class="">AUDIT</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/settings">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="">SETTINGS</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- Main Content Canvas -->
+    <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
+      <div class="mx-auto space-y-8">
+        <!-- Page header -->
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="font-display-lg text-3xl font-bold tracking-tight text-slate-900" data-i18n="audit.header">Audit
+              Ledger</h2>
+            <p class="font-code-sm text-code-sm text-slate-500 mt-1" data-i18n="audit.subtitle">Scan results history
+              stored on <span class="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">Supabase</span> · most recent
+              first</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Expandable search -->
+            <div class="flex items-center bg-white border border-slate-200 rounded-full shadow-sm overflow-hidden">
+              <button id="searchToggle" type="button" aria-label="Search"
+                class="flex items-center justify-center w-10 h-10 text-slate-500 hover:text-cyan-600 transition-colors shrink-0">
+                <span class="material-symbols-outlined text-[20px]">search</span>
+              </button>
+              <input id="searchInput" type="text" data-i18n-ph="audit.search_ph" placeholder="Search CVE, IP, version…"
+                class="search-box bg-transparent font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+              <button id="searchClear" type="button" aria-label="Clear"
+                class="hidden items-center justify-center w-9 h-10 text-slate-400 hover:text-rose-500 transition-colors shrink-0">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+            <button id="reload"
+              class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">refresh</span> <span
+                data-i18n="common.reload">RELOAD</span>
+            </button>
+          </div>
+        </div>
 
-<!-- KPI strip -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500"></div>
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="audit.kpi_scans">TOTAL SCANS</h3>
-<span id="kpiScans" class="font-display-lg text-display-lg text-slate-900">0</span>
-</div>
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="audit.kpi_results">ASSET RESULTS</h3>
-<span id="kpiResults" class="font-display-lg text-display-lg text-slate-900">0</span>
-</div>
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500"></div>
-<h3 class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span> <span data-i18n="audit.kpi_vuln">VULNERABLE OUTCOMES</span>
-</h3>
-<span id="kpiVuln" class="font-display-lg text-display-lg text-error">0</span>
-</div>
-</section>
+        <!-- KPI strip -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="neural-panel p-6 rounded-2xl relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-t-2xl">
+            </div>
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-2 flex items-center gap-1.5">
+              <span data-i18n="audit.kpi_scans">TOTAL SCANS</span>
+              <span class="relative group inline-flex items-center">
+                <span class="material-symbols-outlined text-[14px] text-slate-400 hover:text-cyan-600 cursor-help"
+                  style="font-variation-settings:'FILL' 0,'wght' 300;">info</span>
+                <span
+                  class="pointer-events-none absolute bottom-full left-0 mb-2 w-64 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl">
+                  Number of distinct scan sessions. Each session is triggered by one CVE/product query and checks all
+                  assets in the inventory.
+                </span>
+              </span>
+            </h3>
+            <span id="kpiScans" class="font-display-lg text-display-lg text-slate-900">0</span>
+          </div>
+          <div class="neural-panel p-6 rounded-2xl relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-t-2xl">
+            </div>
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-2 flex items-center gap-1.5">
+              <span data-i18n="audit.kpi_results">ASSET RESULTS</span>
+              <span class="relative group inline-flex items-center">
+                <span class="material-symbols-outlined text-[14px] text-slate-400 hover:text-cyan-600 cursor-help"
+                  style="font-variation-settings:'FILL' 0,'wght' 300;">info</span>
+                <span
+                  class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl">
+                  Total individual asset checks across all scan sessions — one entry per asset per scan. Counts both
+                  vulnerable and clean outcomes.
+                </span>
+              </span>
+            </h3>
+            <span id="kpiResults" class="font-display-lg text-display-lg text-slate-900">0</span>
+          </div>
+          <div class="neural-panel p-6 rounded-2xl relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500 rounded-t-2xl"></div>
+            <h3 class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-error animate-pulse shrink-0"></span>
+              <span data-i18n="audit.kpi_vuln">VULNERABLE OUTCOMES</span>
+              <span class="relative group inline-flex items-center ml-auto">
+                <span class="material-symbols-outlined text-[14px] text-slate-400 hover:text-cyan-600 cursor-help"
+                  style="font-variation-settings:'FILL' 0,'wght' 300;">info</span>
+                <span
+                  class="pointer-events-none absolute bottom-full right-0 mb-2 w-64 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl">
+                  Asset results where the scanned product was detected and the vulnerability verdict was <strong
+                    class="text-rose-300">VULNERABILE</strong>. Does not count assets where the product was not found.
+                </span>
+              </span>
+            </h3>
+            <span id="kpiVuln" class="font-display-lg text-display-lg text-error">0</span>
+          </div>
+        </section>
 
-<!-- Sort + Export toolbar -->
-<div class="flex items-center justify-between flex-wrap gap-3 -mb-2">
-<div id="auditSortBar" class="flex items-center gap-2">
-<span class="font-label-caps text-[10px] text-slate-400">SORT:</span>
-</div>
-<div class="flex items-center gap-2">
-<button id="exportAuditCSV" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">download</span>CSV</button>
-<button id="exportAuditXLS" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
-</div>
-</div>
-<!-- Scans list -->
-<section id="list" class="space-y-6">
-<div class="neural-panel rounded-2xl p-10 text-center font-code-sm text-code-sm text-slate-400" data-i18n="audit.loading">Loading history…</div>
-</section>
-<div id="auditPager"></div>
-</div>
-</main>
-</div>
-<!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/assets">
-<span class="material-symbols-outlined">inventory_2</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white" href="/audit">
-<span class="material-symbols-outlined">fact_check</span>
-</a>
-</nav>
+        <!-- Sort + Export toolbar -->
+        <div class="flex items-center justify-between flex-wrap gap-3 -mb-2">
+          <div id="auditSortBar" class="flex items-center gap-2">
+            <span class="font-label-caps text-[10px] text-slate-400">SORT:</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="exportAuditCSV"
+              class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span
+                class="material-symbols-outlined text-[14px]">download</span>CSV</button>
+            <button id="exportAuditXLS"
+              class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span
+                class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
+          </div>
+        </div>
+        <!-- Scans list -->
+        <section id="list" class="space-y-6">
+          <div class="neural-panel rounded-2xl p-10 text-center font-code-sm text-code-sm text-slate-400"
+            data-i18n="audit.loading">Loading history…</div>
+        </section>
+        <div id="auditPager"></div>
+      </div>
+    </main>
+  </div>
+  <!-- BottomNavBar (Mobile) -->
+  <nav
+    class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
+      <span class="material-symbols-outlined">dashboard</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all"
+      href="/assets">
+      <span class="material-symbols-outlined">inventory_2</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white"
+      href="/audit">
+      <span class="material-symbols-outlined">fact_check</span>
+    </a>
+  </nav>
 
-<script>
-  const $ = (id) => document.getElementById(id);
-  const list = $('list');
-  const esc = (s) => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const list = $('list');
+    const esc = (s) => (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-  function fmtDate(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    return isNaN(d) ? iso : d.toLocaleString();
-  }
-
-  // Badge esito matching (light theme).
-  const MATCH = {
-    'VULNERABILE':     'text-rose-700 bg-rose-50 border-rose-200',
-    'NON VULNERABILE': 'text-emerald-700 bg-emerald-50 border-emerald-200',
-    'INCERTO':         'text-amber-700 bg-amber-50 border-amber-200',
-  };
-  function matchBadge(m) {
-    const cls = MATCH[m] || 'text-slate-600 bg-slate-50 border-slate-200';
-    const label = m ? t('vuln.' + m) : t('common.na');
-    return `<span class="px-2.5 py-1 border ${cls} font-label-caps text-[10px] rounded-full">${esc(label)}</span>`;
-  }
-  // Chip distinto per il verdetto da advisory AI (vulnerabilita' senza CVE).
-  function advisoryBadge(r) {
-    if (r.match_basis !== 'ai-advisory') return '';
-    return `<div class="mt-1"><span class="inline-flex items-center gap-1 font-code-sm text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded" title="${esc(t('audit.advisory_t'))}">`
-      + `<span class="material-symbols-outlined text-[12px]">smart_toy</span>${t('audit.advisory')} · ${t('audit.affected')} ${esc(r.affected_version || '')}</span></div>`;
-  }
-  // Numero di chip CVE mostrate prima del "show more".
-  const CVE_LIMIT = 5;
-  let cveSeq = 0;
-
-  // URL alla risorsa esterna: CVE-* -> NVD, altri id OSV (GHSA, PYSEC, ...) -> osv.dev.
-  function cveUrl(id) {
-    return /^CVE-/i.test(id)
-      ? `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(id)}`
-      : `https://osv.dev/vulnerability/${encodeURIComponent(id)}`;
-  }
-  function cveChip(id) {
-    return `<a href="${cveUrl(id)}" target="_blank" rel="noopener noreferrer"`
-      + ` class="inline-block font-code-sm text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded hover:bg-indigo-100 hover:border-indigo-300 hover:underline transition-colors"`
-      + ` title="${esc(id)}">${esc(id)}</a>`;
-  }
-
-  // Cella CVE espandibile: mostra fino a CVE_LIMIT chip + toggle "+N show more".
-  // 'count' e' il totale reale OSV (puo' superare gli id salvati: il toggle li
-  // recupera on-demand da /api/cve). 'product'/'version' servono al fetch.
-  function cveChips(ids, count, product, version) {
-    const arr = Array.isArray(ids) ? ids : [];
-    const total = (typeof count === 'number' && count > arr.length) ? count : arr.length;
-    if (!total) return '<span class="font-code-sm text-[11px] text-slate-300">—</span>';
-
-    const cid = 'cve-' + (cveSeq++);
-    const visible = arr.slice(0, CVE_LIMIT);
-    const chips = visible.map(cveChip).join(' ');
-    let toggle = '';
-    if (total > visible.length) {
-      const hidden = total - visible.length;
-      toggle = `<button type="button" data-cve-toggle data-cid="${cid}"`
-        + ` data-product="${esc(product || '')}" data-version="${esc(version || '')}"`
-        + ` data-count="${total}" data-ids='${JSON.stringify(arr)}' data-expanded="0"`
-        + ` class="mt-1 inline-block font-code-sm text-[10px] text-indigo-600 hover:text-indigo-800 underline cursor-pointer">`
-        + `${t('audit.show_more', { n: hidden })}</button>`;
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return isNaN(d) ? iso : d.toLocaleString();
     }
-    return `<div class="cve-cell"><div class="flex flex-wrap gap-1" id="${cid}-chips">${chips}</div>${toggle}</div>`;
-  }
 
-  function resultRow(r, product) {
-    const ver = r.detected_version ? esc(r.detected_version) : '<span class="text-slate-300">—</span>';
-    const found = r.product_found
-      ? `<span class="text-emerald-600">${t('common.yes')}</span>`
-      : `<span class="text-slate-400">${t('common.no')}</span>`;
-    const auth = r.auth_required
-      ? `<span class="px-2 py-0.5 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.auth')}</span>`
-      : `<span class="px-2 py-0.5 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.noauth')}</span>`;
-    const evidence = r.raw_evidence
-      ? `<span class="font-code-sm text-[11px] text-slate-500" title="${esc(r.raw_evidence)}">${esc(String(r.raw_evidence).slice(0,80))}${String(r.raw_evidence).length>80?'…':''}</span>`
-      : '<span class="text-slate-300">—</span>';
-    return `
+    // Badge esito matching (light theme).
+    const MATCH = {
+      'VULNERABILE': 'text-rose-700 bg-rose-50 border-rose-200',
+      'NON VULNERABILE': 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      'INCERTO': 'text-amber-700 bg-amber-50 border-amber-200',
+    };
+    function matchBadge(m) {
+      const cls = MATCH[m] || 'text-slate-600 bg-slate-50 border-slate-200';
+      const label = m ? t('vuln.' + m) : t('common.na');
+      return `<span class="px-2.5 py-1 border ${cls} font-label-caps text-[10px] rounded-full">${esc(label)}</span>`;
+    }
+    // Chip distinto per il verdetto da advisory AI (vulnerabilita' senza CVE).
+    function advisoryBadge(r) {
+      if (r.match_basis !== 'ai-advisory') return '';
+      return `<div class="mt-1"><span class="inline-flex items-center gap-1 font-code-sm text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded" title="${esc(t('audit.advisory_t'))}">`
+        + `<span class="material-symbols-outlined text-[12px]">smart_toy</span>${t('audit.advisory')} · ${t('audit.affected')} ${esc(r.affected_version || '')}</span></div>`;
+    }
+    // Numero di chip CVE mostrate prima del "show more".
+    const CVE_LIMIT = 5;
+    let cveSeq = 0;
+
+    // URL alla risorsa esterna: CVE-* -> NVD, altri id OSV (GHSA, PYSEC, ...) -> osv.dev.
+    function cveUrl(id) {
+      return /^CVE-/i.test(id)
+        ? `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(id)}`
+        : `https://osv.dev/vulnerability/${encodeURIComponent(id)}`;
+    }
+    function cveChip(id) {
+      return `<a href="${cveUrl(id)}" target="_blank" rel="noopener noreferrer"`
+        + ` class="inline-block font-code-sm text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded hover:bg-indigo-100 hover:border-indigo-300 hover:underline transition-colors"`
+        + ` title="${esc(id)}">${esc(id)}</a>`;
+    }
+
+    // Cella CVE espandibile: mostra fino a CVE_LIMIT chip + toggle "+N show more".
+    // 'count' e' il totale reale OSV (puo' superare gli id salvati: il toggle li
+    // recupera on-demand da /api/cve). 'product'/'version' servono al fetch.
+    function cveChips(ids, count, product, version) {
+      const arr = Array.isArray(ids) ? ids : [];
+      const total = (typeof count === 'number' && count > arr.length) ? count : arr.length;
+      if (!total) return '<span class="font-code-sm text-[11px] text-slate-300">—</span>';
+
+      const cid = 'cve-' + (cveSeq++);
+      const visible = arr.slice(0, CVE_LIMIT);
+      const chips = visible.map(cveChip).join(' ');
+      let toggle = '';
+      if (total > visible.length) {
+        const hidden = total - visible.length;
+        toggle = `<button type="button" data-cve-toggle data-cid="${cid}"`
+          + ` data-product="${esc(product || '')}" data-version="${esc(version || '')}"`
+          + ` data-count="${total}" data-ids='${JSON.stringify(arr)}' data-expanded="0"`
+          + ` class="mt-1 inline-block font-code-sm text-[10px] text-indigo-600 hover:text-indigo-800 underline cursor-pointer">`
+          + `${t('audit.show_more', { n: hidden })}</button>`;
+      }
+      return `<div class="cve-cell"><div class="flex flex-wrap gap-1" id="${cid}-chips">${chips}</div>${toggle}</div>`;
+    }
+
+    function osChip(os_type, os_major_version) {
+      const os = (os_type || '').toLowerCase();
+      const ver = os_major_version ? ' ' + esc(os_major_version) : '';
+      if (os === 'linux')
+        return `<span class="px-2 py-0.5 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">LNX${ver}</span>`;
+      if (os === 'windows')
+        return `<span class="px-2 py-0.5 border border-blue-100 bg-blue-50 text-blue-700 font-label-caps text-[10px] rounded-full">WIN${ver}</span>`;
+      return '<span class="text-slate-300">—</span>';
+    }
+
+    function resultRow(r, product) {
+      const ver = r.detected_version ? esc(r.detected_version) : '<span class="text-slate-300">—</span>';
+      const found = r.product_found
+        ? `<span class="text-emerald-600">${t('common.yes')}</span>`
+        : `<span class="text-slate-400">${t('common.no')}</span>`;
+      const auth = r.auth_required
+        ? `<span class="px-2 py-0.5 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.auth')}</span>`
+        : `<span class="px-2 py-0.5 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.noauth')}</span>`;
+      const evidence = r.raw_evidence
+        ? `<span class="font-code-sm text-[11px] text-slate-500" title="${esc(r.raw_evidence)}">${esc(String(r.raw_evidence).slice(0, 80))}${String(r.raw_evidence).length > 80 ? '…' : ''}</span>`
+        : '<span class="text-slate-300">—</span>';
+      return `
       <tr class="hover:bg-white/60 transition-colors">
         <td class="px-4 py-3 font-code-sm text-code-sm text-slate-900 font-semibold">${esc(r.ip)}</td>
         <td class="px-4 py-3 font-code-sm text-[11px] text-slate-500">${esc(r.method || '—')}</td>
         <td class="px-4 py-3">${auth}</td>
+        <td class="px-4 py-3">${osChip(r.os_type, r.os_major_version)}</td>
         <td class="px-4 py-3">${matchBadge(r.vuln_match)}${advisoryBadge(r)}</td>
         <td class="px-4 py-3 font-code-sm text-code-sm text-slate-700">${found}</td>
         <td class="px-4 py-3 font-code-sm text-code-sm text-slate-700">${ver}</td>
         <td class="px-4 py-3">${cveChips(r.cve_ids, r.cve_count, product || r.product, r.detected_version)}</td>
         <td class="px-4 py-3">${evidence}</td>
       </tr>`;
-  }
+    }
 
-  function scanCard(s) {
-    const results = sortArray(Array.isArray(s.scan_results) ? s.scan_results : [], innerSort.field, innerSort.dir);
-    const deps = Array.isArray(s.dependencies) ? s.dependencies : [];
-    const depChips = deps.length
-      ? deps.map((d) => `<span class="font-code-sm text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">${esc(d)}</span>`).join(' ')
-      : `<span class="text-slate-300 text-[11px]">${t('common.none')}</span>`;
-    const cveCount = (typeof s.cve_count === 'number') ? s.cve_count : 0;
-    const cveBadge = cveCount > 0
-      ? `<span class="font-label-caps text-[10px] text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full">${t('audit.cve_n', { n: cveCount })}</span>`
-      : `<span class="font-label-caps text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">${t('audit.cve_n', { n: 0 })}</span>`;
-    const rowsHtml = results.length
-      ? results.map((r) => resultRow(r, s.product)).join('')
-      : `<tr><td colspan="8" class="px-4 py-6 text-center font-code-sm text-code-sm text-slate-400">${t('audit.no_results')}</td></tr>`;
+    function scanCard(s) {
+      const results = sortArray(Array.isArray(s.scan_results) ? s.scan_results : [], innerSort.field, innerSort.dir);
+      const deps = Array.isArray(s.dependencies) ? s.dependencies : [];
+      const depChips = deps.length
+        ? deps.map((d) => `<span class="font-code-sm text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">${esc(d)}</span>`).join(' ')
+        : `<span class="text-slate-300 text-[11px]">${t('common.none')}</span>`;
+      const cveCount = (typeof s.cve_count === 'number') ? s.cve_count : 0;
+      const cveBadge = cveCount > 0
+        ? `<span class="font-label-caps text-[10px] text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full">${t('audit.cve_n', { n: cveCount })}</span>`
+        : `<span class="font-label-caps text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">${t('audit.cve_n', { n: 0 })}</span>`;
+      const rowsHtml = results.length
+        ? results.map((r) => resultRow(r, s.product)).join('')
+        : `<tr><td colspan="9" class="px-4 py-6 text-center font-code-sm text-code-sm text-slate-400">${t('audit.no_results')}</td></tr>`;
 
-    return `
+      return `
       <div class="neural-panel rounded-2xl overflow-hidden">
         <div class="p-6 border-b border-slate-100/70">
           <div class="flex items-start justify-between flex-wrap gap-3">
             <div>
               <div class="flex items-center gap-3 flex-wrap">
-                <h3 class="font-code-lg text-code-lg text-slate-900 font-semibold">${esc(s.product || t('audit.no_product'))}${s.version ? ' <span class="text-cyan-700">v'+esc(s.version)+'</span>' : ''}</h3>
+                <h3 class="font-code-lg text-code-lg text-slate-900 font-semibold">${esc(s.product || t('audit.no_product'))}${s.version ? ' <span class="text-cyan-700">v' + esc(s.version) + '</span>' : ''}</h3>
                 ${cveBadge}
                 <span class="font-label-caps text-[10px] text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">SRC: ${esc((s.source || 'n/d').toUpperCase())}</span>
               </div>
@@ -406,13 +530,14 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-200/70 bg-white/40">
-                <th data-isort="ip" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">IP${sortIcon('ip',innerSort)}</th>
-                <th data-isort="method" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_method')}${sortIcon('method',innerSort)}</th>
-                <th data-isort="auth_required" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('common.auth')}${sortIcon('auth_required',innerSort)}</th>
-                <th data-isort="vuln_match" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_outcome')}${sortIcon('vuln_match',innerSort)}</th>
-                <th data-isort="product_found" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_found')}${sortIcon('product_found',innerSort)}</th>
-                <th data-isort="detected_version" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_version')}${sortIcon('detected_version',innerSort)}</th>
-                <th data-isort="cve_count" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">CVE${sortIcon('cve_count',innerSort)}</th>
+                <th data-isort="ip" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">IP${sortIcon('ip', innerSort)}</th>
+                <th data-isort="method" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_method')}${sortIcon('method', innerSort)}</th>
+                <th data-isort="auth_required" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('common.auth')}${sortIcon('auth_required', innerSort)}</th>
+                <th data-isort="os_type" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">OS${sortIcon('os_type', innerSort)}</th>
+                <th data-isort="vuln_match" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_outcome')}${sortIcon('vuln_match', innerSort)}</th>
+                <th data-isort="product_found" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_found')}${sortIcon('product_found', innerSort)}</th>
+                <th data-isort="detected_version" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">${t('audit.th_version')}${sortIcon('detected_version', innerSort)}</th>
+                <th data-isort="cve_count" class="font-label-caps text-label-caps text-slate-500 px-4 py-3 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">CVE${sortIcon('cve_count', innerSort)}</th>
                 <th class="font-label-caps text-label-caps text-slate-500 px-4 py-3">${t('audit.th_evidence')}</th>
               </tr>
             </thead>
@@ -420,222 +545,226 @@
           </table>
         </div>
       </div>`;
-  }
+    }
 
-  function renderError(msg) {
-    list.innerHTML = `
+    function renderError(msg) {
+      list.innerHTML = `
       <div class="neural-panel rounded-2xl p-10 text-center">
         <span class="material-symbols-outlined text-4xl text-rose-400">cloud_off</span>
         <p class="font-code-sm text-code-sm text-rose-600 mt-3">${esc(msg)}</p>
         <p class="font-code-sm text-[11px] text-slate-400 mt-2">${t('audit.start_supabase')} <span class="bg-slate-100 px-1.5 py-0.5 rounded">cd supabase &amp;&amp; ./setup.sh</span></p>
       </div>`;
-  }
+    }
 
-  function renderEmpty() {
-    list.innerHTML = `
+    function renderEmpty() {
+      list.innerHTML = `
       <div class="neural-panel rounded-2xl p-10 text-center">
         <span class="material-symbols-outlined text-4xl text-slate-300">history</span>
         <p class="font-code-sm text-code-sm text-slate-400 mt-3">${t('audit.empty')}</p>
       </div>`;
-  }
+    }
 
-  let lastScans = null;  // cache per ri-render al cambio lingua / filtro
-  let auditSort = {field:'created_at', dir:'desc'};
-  let auditPage = 0, auditPageSize = 50;
-  let innerSort = {field:null, dir:'asc'};
-  let currentScans = [];
+    let lastScans = null;  // cache per ri-render al cambio lingua / filtro
+    let auditSort = { field: 'created_at', dir: 'desc' };
+    let auditPage = 0, auditPageSize = 50;
+    let innerSort = { field: null, dir: 'asc' };
+    let currentScans = [];
 
-  const ASORTS = [{f:'created_at',l:'DATE'},{f:'product',l:'PRODUCT'},{f:'cve_count',l:'CVEs'},{f:'results_count',l:'ASSETS'}];
-  function renderAuditSortBar(){
-    $('auditSortBar').innerHTML = '<span class="font-label-caps text-[10px] text-slate-400">SORT:</span>'
-      + ASORTS.map(s=>{
-          const act = s.f===auditSort.field;
-          const arrow = act ? (auditSort.dir==='asc' ? ' ↑' : ' ↓') : '';
+    const ASORTS = [{ f: 'created_at', l: 'DATE' }, { f: 'product', l: 'PRODUCT' }, { f: 'cve_count', l: 'CVEs' }, { f: 'results_count', l: 'ASSETS' }];
+    function renderAuditSortBar() {
+      $('auditSortBar').innerHTML = '<span class="font-label-caps text-[10px] text-slate-400">SORT:</span>'
+        + ASORTS.map(s => {
+          const act = s.f === auditSort.field;
+          const arrow = act ? (auditSort.dir === 'asc' ? ' ↑' : ' ↓') : '';
           const cls = act ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
           return `<button data-asort="${s.f}" class="font-label-caps text-[10px] px-3 py-1.5 rounded-lg border ${cls} transition-colors">${s.l}${arrow}</button>`;
         }).join('');
-  }
+    }
 
-  // KPI calcolati SEMPRE sul set completo (non sul filtrato).
-  function setKPIs(scans) {
-    const totalResults = scans.reduce((n, s) => n + ((s.scan_results || []).length), 0);
-    const totalVuln = scans.reduce((n, s) =>
-      n + (s.scan_results || []).filter((r) => r.vuln_match === 'VULNERABILE').length, 0);
-    $('kpiScans').textContent = scans.length.toLocaleString();
-    $('kpiResults').textContent = totalResults.toLocaleString();
-    $('kpiVuln').textContent = totalVuln.toLocaleString();
-  }
+    // KPI calcolati SEMPRE sul set completo (non sul filtrato).
+    function setKPIs(scans) {
+      const totalResults = scans.reduce((n, s) => n + ((s.scan_results || []).length), 0);
+      const totalVuln = scans.reduce((n, s) =>
+        n + (s.scan_results || []).filter((r) => r.vuln_match === 'VULNERABILE').length, 0);
+      $('kpiScans').textContent = scans.length.toLocaleString();
+      $('kpiResults').textContent = totalResults.toLocaleString();
+      $('kpiVuln').textContent = totalVuln.toLocaleString();
+    }
 
-  function renderCards(scans) {
-    currentScans = scans;
-    if (!scans.length) {
-      const q = ($('searchInput').value || '').trim();
-      list.innerHTML = `
+    function renderCards(scans) {
+      currentScans = scans;
+      if (!scans.length) {
+        const q = ($('searchInput').value || '').trim();
+        list.innerHTML = `
         <div class="neural-panel rounded-2xl p-10 text-center">
           <span class="material-symbols-outlined text-4xl text-slate-300">${q ? 'search_off' : 'history'}</span>
           <p class="font-code-sm text-code-sm text-slate-400 mt-3">${q ? t('audit.no_match') : t('audit.empty')}</p>
         </div>`;
-      $('auditPager').innerHTML = '';
-      return;
-    }
-    const enriched = scans.map(s => Object.assign({results_count:(s.scan_results||[]).length}, s));
-    const sorted = sortArray(enriched, auditSort.field, auditSort.dir);
-    const total = sorted.length;
-    const page = auditPageSize===0 ? sorted : sorted.slice(auditPage*auditPageSize, auditPage*auditPageSize+auditPageSize);
-    list.innerHTML = page.map(scanCard).join('');
-    renderPaginator('auditPager', total, auditPage, auditPageSize, (p,sz)=>{auditPage=p;auditPageSize=sz;renderCards(currentScans);});
-  }
-
-  function renderList(scans) {
-    setKPIs(scans);
-    renderAuditSortBar();
-    renderCards(scans);
-  }
-
-  // Filtro testuale su tutti i campi (tabella + header scansione).
-  function applyFilter() {
-    if (!lastScans) return;
-    const q = ($('searchInput').value || '').trim().toLowerCase();
-    if (!q) { renderCards(lastScans); return; }
-    const filtered = lastScans.map((s) => {
-      const head = [s.product, s.version, s.source, s.description,
-        (s.cve_ids || []).join(' '), s.cve_summary].join(' ').toLowerCase();
-      const headMatch = head.includes(q);
-      const rows = (s.scan_results || []).filter((r) => {
-        if (headMatch) return true;
-        const hay = [r.ip, r.method, r.vuln_match, r.detected_version, r.raw_evidence,
-          (r.cve_ids || []).join(' '), r.affected_version, r.match_basis,
-          r.product_found ? 'found' : 'not found',
-          r.auth_required ? 'auth' : 'no-auth'].join(' ').toLowerCase();
-        return hay.includes(q);
-      });
-      return Object.assign({}, s, { scan_results: rows });
-    }).filter((s) => s.scan_results.length > 0);
-    renderCards(filtered);
-  }
-
-  async function load() {
-    list.innerHTML = `<div class="neural-panel rounded-2xl p-10 text-center font-code-sm text-code-sm text-slate-400">${t('audit.loading')}</div>`;
-    let resp;
-    try {
-      resp = await fetch('/api/audit');
-    } catch (e) {
-      renderError(t('audit.err_network')); return;
-    }
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) { renderError(t('audit.err_unreachable')); return; }
-    lastScans = data.scans || [];
-    setKPIs(lastScans);
-    applyFilter();   // rispetta l'eventuale ricerca attiva
-  }
-
-  // Toggle "show more / show less" delle CVE (delega eventi sulla lista).
-  list.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-cve-toggle]');
-    if (!btn) return;
-    const chipsEl = document.getElementById(btn.dataset.cid + '-chips');
-    if (!chipsEl) return;
-    const total = parseInt(btn.dataset.count, 10) || 0;
-    let stored = [];
-    try { stored = JSON.parse(btn.dataset.ids || '[]'); } catch (_) {}
-
-    // Stato espanso -> richiudi a CVE_LIMIT.
-    if (btn.dataset.expanded === '1') {
-      chipsEl.innerHTML = stored.slice(0, CVE_LIMIT).map(cveChip).join(' ');
-      btn.dataset.expanded = '0';
-      btn.textContent = t('audit.show_more', { n: total - Math.min(CVE_LIMIT, stored.length) });
-      return;
-    }
-
-    // Espandi. Se mancano id (salvati < totale OSV) li recupero on-demand.
-    let all = stored;
-    if (total > stored.length && btn.dataset.product) {
-      const prev = btn.textContent;
-      btn.textContent = t('audit.cve_loading');
-      try {
-        const r = await fetch(`/api/cve?product=${encodeURIComponent(btn.dataset.product)}`
-          + `&version=${encodeURIComponent(btn.dataset.version || '')}`);
-        const d = await r.json();
-        if (Array.isArray(d.ids) && d.ids.length >= stored.length) {
-          all = d.ids;
-          btn.dataset.ids = JSON.stringify(all);
-        }
-      } catch (_) {
-        btn.textContent = t('audit.cve_failed');
-        setTimeout(() => { btn.textContent = prev; }, 1500);
+        $('auditPager').innerHTML = '';
         return;
       }
+      const enriched = scans.map(s => Object.assign({ results_count: (s.scan_results || []).length }, s));
+      const sorted = sortArray(enriched, auditSort.field, auditSort.dir);
+      const total = sorted.length;
+      const page = auditPageSize === 0 ? sorted : sorted.slice(auditPage * auditPageSize, auditPage * auditPageSize + auditPageSize);
+      list.innerHTML = page.map(scanCard).join('');
+      renderPaginator('auditPager', total, auditPage, auditPageSize, (p, sz) => { auditPage = p; auditPageSize = sz; renderCards(currentScans); });
     }
-    chipsEl.innerHTML = all.map(cveChip).join(' ');
-    btn.dataset.expanded = '1';
-    const stillHidden = total - all.length;  // CVE ancora non recuperate (se OSV offline)
-    btn.textContent = stillHidden > 0
-      ? `${t('audit.show_less')} · ${t('audit.show_more', { n: stillHidden })}`
-      : t('audit.show_less');
-  });
 
-  $('reload').addEventListener('click', load);
-  window.addEventListener('langchange', () => { if (lastScans) { setKPIs(lastScans); renderAuditSortBar(); applyFilter(); } });
+    function renderList(scans) {
+      setKPIs(scans);
+      renderAuditSortBar();
+      renderCards(scans);
+    }
 
-  // Sort bar click (scan card list sort)
-  $('auditSortBar').addEventListener('click', e=>{
-    const btn=e.target.closest('[data-asort]'); if(!btn) return;
-    const f=btn.dataset.asort;
-    auditSort.dir=(auditSort.field===f&&auditSort.dir==='asc')?'desc':'asc';
-    auditSort.field=f; auditPage=0;
-    renderAuditSortBar(); renderCards(currentScans);
-  });
+    // Filtro testuale su tutti i campi (tabella + header scansione).
+    function applyFilter() {
+      if (!lastScans) return;
+      const q = ($('searchInput').value || '').trim().toLowerCase();
+      if (!q) { renderCards(lastScans); return; }
+      const filtered = lastScans.map((s) => {
+        const head = [s.product, s.version, s.source, s.description,
+        (s.cve_ids || []).join(' '), s.cve_summary].join(' ').toLowerCase();
+        const headMatch = head.includes(q);
+        const rows = (s.scan_results || []).filter((r) => {
+          if (headMatch) return true;
+          const hay = [r.ip, r.method, r.vuln_match, r.detected_version, r.raw_evidence,
+          (r.cve_ids || []).join(' '), r.affected_version, r.match_basis,
+          r.os_type, r.os_major_version,
+          r.product_found ? 'found' : 'not found',
+          r.auth_required ? 'auth' : 'no-auth'].join(' ').toLowerCase();
+          return hay.includes(q);
+        });
+        return Object.assign({}, s, { scan_results: rows });
+      }).filter((s) => s.scan_results.length > 0);
+      renderCards(filtered);
+    }
 
-  // Inner result table sort (event delegation on #list)
-  list.addEventListener('click', e=>{
-    const th=e.target.closest('[data-isort]'); if(!th) return;
-    const f=th.dataset.isort;
-    innerSort.dir=(innerSort.field===f&&innerSort.dir==='asc')?'desc':'asc';
-    innerSort.field=f;
-    renderCards(currentScans);
-  });
+    async function load() {
+      list.innerHTML = `<div class="neural-panel rounded-2xl p-10 text-center font-code-sm text-code-sm text-slate-400">${t('audit.loading')}</div>`;
+      let resp;
+      try {
+        resp = await fetch('/api/audit');
+      } catch (e) {
+        renderError(t('audit.err_network')); return;
+      }
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) { renderError(t('audit.err_unreachable')); return; }
+      lastScans = data.scans || [];
+      setKPIs(lastScans);
+      applyFilter();   // rispetta l'eventuale ricerca attiva
+    }
 
-  // Export
-  function _buildAuditRows(){
-    return (currentScans.length?currentScans:lastScans||[]).flatMap(s=>
-      (s.scan_results||[]).map(r=>({
-        Scan_ID:s.id, Date:s.created_at, Product:s.product||'', Version:s.version||'',
-        Source:s.source||'', Description:(s.description||'').slice(0,120),
-        IP:r.ip, Method:r.method||'', Auth:r.auth_required?'Yes':'No',
-        Outcome:r.vuln_match||'', Found:r.product_found?'Yes':'No',
-        Detected_Version:r.detected_version||'', Affected_Version:r.affected_version||'',
-        Match_Basis:r.match_basis||'', CVE_Count:r.cve_count||0,
-        CVEs:(r.cve_ids||[]).join('; '), Evidence:(r.raw_evidence||'').slice(0,200)
-      }))
-    );
-  }
-  $('exportAuditCSV').addEventListener('click',()=>exportCSV(_buildAuditRows(),'audit_results.csv'));
-  $('exportAuditXLS').addEventListener('click',()=>exportXLS(_buildAuditRows(),'audit_results.xlsx'));
+    // Toggle "show more / show less" delle CVE (delega eventi sulla lista).
+    list.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-cve-toggle]');
+      if (!btn) return;
+      const chipsEl = document.getElementById(btn.dataset.cid + '-chips');
+      if (!chipsEl) return;
+      const total = parseInt(btn.dataset.count, 10) || 0;
+      let stored = [];
+      try { stored = JSON.parse(btn.dataset.ids || '[]'); } catch (_) { }
 
-  // --- Ricerca espandibile ---
-  const searchInput = $('searchInput');
-  const searchClear = $('searchClear');
-  function openSearch() {
-    searchInput.classList.add('open');
-    searchClear.classList.remove('hidden');
-    searchClear.classList.add('flex');
-    searchInput.focus();
-  }
-  function closeSearch() {
-    searchInput.value = '';
-    searchInput.classList.remove('open');
-    searchClear.classList.add('hidden');
-    searchClear.classList.remove('flex');
-    applyFilter();
-  }
-  $('searchToggle').addEventListener('click', () => {
-    if (searchInput.classList.contains('open') && !searchInput.value) closeSearch();
-    else openSearch();
-  });
-  searchClear.addEventListener('click', closeSearch);
-  searchInput.addEventListener('input', applyFilter);
-  searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearch(); });
+      // Stato espanso -> richiudi a CVE_LIMIT.
+      if (btn.dataset.expanded === '1') {
+        chipsEl.innerHTML = stored.slice(0, CVE_LIMIT).map(cveChip).join(' ');
+        btn.dataset.expanded = '0';
+        btn.textContent = t('audit.show_more', { n: total - Math.min(CVE_LIMIT, stored.length) });
+        return;
+      }
 
-  load();
-</script>
-</body></html>
+      // Espandi. Se mancano id (salvati < totale OSV) li recupero on-demand.
+      let all = stored;
+      if (total > stored.length && btn.dataset.product) {
+        const prev = btn.textContent;
+        btn.textContent = t('audit.cve_loading');
+        try {
+          const r = await fetch(`/api/cve?product=${encodeURIComponent(btn.dataset.product)}`
+            + `&version=${encodeURIComponent(btn.dataset.version || '')}`);
+          const d = await r.json();
+          if (Array.isArray(d.ids) && d.ids.length >= stored.length) {
+            all = d.ids;
+            btn.dataset.ids = JSON.stringify(all);
+          }
+        } catch (_) {
+          btn.textContent = t('audit.cve_failed');
+          setTimeout(() => { btn.textContent = prev; }, 1500);
+          return;
+        }
+      }
+      chipsEl.innerHTML = all.map(cveChip).join(' ');
+      btn.dataset.expanded = '1';
+      const stillHidden = total - all.length;  // CVE ancora non recuperate (se OSV offline)
+      btn.textContent = stillHidden > 0
+        ? `${t('audit.show_less')} · ${t('audit.show_more', { n: stillHidden })}`
+        : t('audit.show_less');
+    });
+
+    $('reload').addEventListener('click', load);
+    window.addEventListener('langchange', () => { if (lastScans) { setKPIs(lastScans); renderAuditSortBar(); applyFilter(); } });
+
+    // Sort bar click (scan card list sort)
+    $('auditSortBar').addEventListener('click', e => {
+      const btn = e.target.closest('[data-asort]'); if (!btn) return;
+      const f = btn.dataset.asort;
+      auditSort.dir = (auditSort.field === f && auditSort.dir === 'asc') ? 'desc' : 'asc';
+      auditSort.field = f; auditPage = 0;
+      renderAuditSortBar(); renderCards(currentScans);
+    });
+
+    // Inner result table sort (event delegation on #list)
+    list.addEventListener('click', e => {
+      const th = e.target.closest('[data-isort]'); if (!th) return;
+      const f = th.dataset.isort;
+      innerSort.dir = (innerSort.field === f && innerSort.dir === 'asc') ? 'desc' : 'asc';
+      innerSort.field = f;
+      renderCards(currentScans);
+    });
+
+    // Export
+    function _buildAuditRows() {
+      return (currentScans.length ? currentScans : lastScans || []).flatMap(s =>
+        (s.scan_results || []).map(r => ({
+          Scan_ID: s.id, Date: s.created_at, Product: s.product || '', Version: s.version || '',
+          Source: s.source || '', Description: (s.description || '').slice(0, 120),
+          IP: r.ip, Method: r.method || '', Auth: r.auth_required ? 'Yes' : 'No',
+          OS_Type: r.os_type || '', OS_Version: r.os_major_version || '',
+          Outcome: r.vuln_match || '', Found: r.product_found ? 'Yes' : 'No',
+          Detected_Version: r.detected_version || '', Affected_Version: r.affected_version || '',
+          Match_Basis: r.match_basis || '', CVE_Count: r.cve_count || 0,
+          CVEs: (r.cve_ids || []).join('; '), Evidence: (r.raw_evidence || '').slice(0, 200)
+        }))
+      );
+    }
+    $('exportAuditCSV').addEventListener('click', () => exportCSV(_buildAuditRows(), 'audit_results.csv'));
+    $('exportAuditXLS').addEventListener('click', () => exportXLS(_buildAuditRows(), 'audit_results.xlsx'));
+
+    // --- Ricerca espandibile ---
+    const searchInput = $('searchInput');
+    const searchClear = $('searchClear');
+    function openSearch() {
+      searchInput.classList.add('open');
+      searchClear.classList.remove('hidden');
+      searchClear.classList.add('flex');
+      searchInput.focus();
+    }
+    function closeSearch() {
+      searchInput.value = '';
+      searchInput.classList.remove('open');
+      searchClear.classList.add('hidden');
+      searchClear.classList.remove('flex');
+      applyFilter();
+    }
+    $('searchToggle').addEventListener('click', () => {
+      if (searchInput.classList.contains('open') && !searchInput.value) closeSearch();
+      else openSearch();
+    });
+    searchClear.addEventListener('click', closeSearch);
+    searchInput.addEventListener('input', applyFilter);
+    searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearch(); });
+
+    load();
+  </script>
+</body>
+
+</html>

@@ -18,7 +18,7 @@ Nessuna dipendenza nuova: usa 'requests' (gia' presente) verso OSV.
 import hashlib
 import requests
 
-from scanner import SIMULATE_AUTH, SOCKET_TIMEOUT
+from scanner import _get_simulate_auth as _sim_auth, _get_socket_timeout as _sock_timeout
 
 OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
 
@@ -106,9 +106,10 @@ def _ssh_inventory(asset):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.RejectPolicy())
     try:
+        _t = _sock_timeout()
         client.connect(asset.ip, username=asset.username, password=asset.password,
-                       timeout=SOCKET_TIMEOUT, allow_agent=False, look_for_keys=False)
-        _, stdout, _ = client.exec_command(cmd, timeout=SOCKET_TIMEOUT * 4)
+                       timeout=_t, allow_agent=False, look_for_keys=False)
+        _, stdout, _ = client.exec_command(cmd, timeout=_t * 4)
         out = stdout.read().decode("utf-8", errors="replace")
     finally:
         client.close()
@@ -134,7 +135,7 @@ def collect_inventory(asset):
     Ritorna (os_guess, inventory, method).
     method: 'ssh' (reale) | 'sim' (simulato).
     """
-    if not SIMULATE_AUTH and asset.auth_required:
+    if not _sim_auth() and asset.auth_required:
         try:
             os_guess, inv = _ssh_inventory(asset)
             return os_guess, inv, "ssh"

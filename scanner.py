@@ -28,14 +28,31 @@ from dataclasses import dataclass
 from typing import Optional
 
 from assets import Asset
+from config import load_config
+from crypto import decrypt_password
 from osint import TargetInfo
 
-# Interruttore di sicurezza: True => il path autenticato e' simulato.
-# Impostare a False solo per host di propria titolarita' (richiede paramiko).
-SIMULATE_AUTH = True
 
-# Timeout breve per non bloccare la scansione su host non raggiungibili.
-SOCKET_TIMEOUT = 4.0
+def _scanner_cfg():
+    return load_config()["scanner"]
+
+
+# Mantenuti per compatibilita' con import esterni (app.py usa SIMULATE_AUTH).
+@property
+def _simulate_auth_prop():
+    return _scanner_cfg().get("simulate_auth", True)
+
+
+def _get_simulate_auth() -> bool:
+    return bool(_scanner_cfg().get("simulate_auth", True))
+
+
+def _get_socket_timeout() -> float:
+    return float(_scanner_cfg().get("socket_timeout", 4.0))
+
+
+# Retrocompatibilità: app.py importa SIMULATE_AUTH
+SIMULATE_AUTH = True  # valore iniziale; scan_asset legge config a runtime
 
 # Porte tipiche per prodotto (usate sia per banner grab che per la simulazione).
 PRODUCT_PORTS = {
@@ -100,9 +117,10 @@ def _grab_banner(ip: str, port: int) -> str:
     Per le porte HTTP invia una HEAD minima per sollecitare l'header Server.
     Ritorna stringa vuota in caso di porta chiusa/timeout.
     """
+    timeout = _get_socket_timeout()
     try:
-        with socket.create_connection((ip, port), timeout=SOCKET_TIMEOUT) as sock:
-            sock.settimeout(SOCKET_TIMEOUT)
+        with socket.create_connection((ip, port), timeout=timeout) as sock:
+            sock.settimeout(timeout)
             if port in _HTTP_PORTS:
                 req = (
                     f"HEAD / HTTP/1.0\r\nHost: {ip}\r\n"
@@ -117,9 +135,10 @@ def _grab_banner(ip: str, port: int) -> str:
 
 def _http_get(ip: str, port: int, path: str = "/", maxbytes: int = 8192) -> str:
     """GET HTTP completo (header + corpo) per il deep probe. '' se fallisce."""
+    timeout = _get_socket_timeout()
     try:
-        with socket.create_connection((ip, port), timeout=SOCKET_TIMEOUT) as sock:
-            sock.settimeout(SOCKET_TIMEOUT)
+        with socket.create_connection((ip, port), timeout=timeout) as sock:
+            sock.settimeout(timeout)
             req = (
                 f"GET {path} HTTP/1.1\r\nHost: {ip}\r\n"
                 "User-Agent: VulnFeedAggregator/1.0\r\nAccept: */*\r\n"
@@ -357,12 +376,12 @@ def _scan_auth_real(asset: Asset, target: TargetInfo) -> ScanResult:
         client.connect(
             asset.ip,
             username=asset.username,
-            password=asset.password,
-            timeout=SOCKET_TIMEOUT,
+            password=decrypt_password(asset.password),
+            timeout=_get_socket_timeout(),
             allow_agent=False,
             look_for_keys=False,
         )
-        _, stdout, _ = client.exec_command(cmd, timeout=SOCKET_TIMEOUT)
+        _, stdout, _ = client.exec_command(cmd, timeout=_get_socket_timeout())
         out = stdout.read().decode("utf-8", errors="replace")
     except Exception as exc:
         return ScanResult(
@@ -396,7 +415,7 @@ def scan_asset(asset: Asset, target: TargetInfo, deep: bool = False) -> ScanResu
     """
     if not asset.auth_required:
         return _scan_noauth(asset, target, deep=deep)
-    if SIMULATE_AUTH:
+    if _get_simulate_auth():
         return _scan_auth_simulated(asset, target)
     return _scan_auth_real(asset, target)
 

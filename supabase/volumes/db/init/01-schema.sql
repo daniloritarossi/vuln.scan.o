@@ -48,8 +48,10 @@ ALTER TABLE public.scans
   ADD COLUMN IF NOT EXISTS affected_version text,   -- vincolo AI (es. '<2.5.0')
   ADD COLUMN IF NOT EXISTS affected_source  text;   -- 'input' | 'ai' | null
 ALTER TABLE public.scan_results
-  ADD COLUMN IF NOT EXISTS affected_version text,    -- vincolo valutato per l'asset
-  ADD COLUMN IF NOT EXISTS match_basis      text;    -- 'input-version'|'ai-advisory'|'none'
+  ADD COLUMN IF NOT EXISTS affected_version  text,   -- vincolo valutato per l'asset
+  ADD COLUMN IF NOT EXISTS match_basis       text,   -- 'input-version'|'ai-advisory'|'none'
+  ADD COLUMN IF NOT EXISTS os_type           text,   -- 'linux' | 'windows' (da inventario)
+  ADD COLUMN IF NOT EXISTS os_major_version  text;   -- es. '22.04', '10', '2019'
 
 CREATE INDEX IF NOT EXISTS idx_scan_results_scan_id ON public.scan_results(scan_id);
 CREATE INDEX IF NOT EXISTS idx_scan_results_ip      ON public.scan_results(ip);
@@ -89,7 +91,9 @@ CREATE TABLE IF NOT EXISTS public.posture_assets (
   sev_high            integer,
   sev_medium          integer,
   sev_low             integer,
-  sev_unknown         integer
+  sev_unknown         integer,
+  os_type             text,    -- 'linux' | 'windows' (da inventario asset)
+  os_major_version    text     -- es. '22.04', '10', '2019'
 );
 
 CREATE TABLE IF NOT EXISTS public.posture_findings (
@@ -103,6 +107,10 @@ CREATE TABLE IF NOT EXISTS public.posture_findings (
   max_severity text,
   cve_ids      jsonb DEFAULT '[]'::jsonb
 );
+
+ALTER TABLE public.posture_assets
+  ADD COLUMN IF NOT EXISTS os_type          text,
+  ADD COLUMN IF NOT EXISTS os_major_version text;
 
 CREATE INDEX IF NOT EXISTS idx_posture_assets_run    ON public.posture_assets(run_id);
 CREATE INDEX IF NOT EXISTS idx_posture_findings_asset ON public.posture_findings(asset_id);

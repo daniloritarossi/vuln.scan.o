@@ -1,248 +1,270 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Vulnerability Intelligence &amp; Asset Verification Center</title>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Theme Config -->
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-                "surface-tint": "#00daf3",
-                "on-tertiary-fixed": "#23005c",
-                "on-secondary-fixed-variant": "#004395",
-                "on-secondary": "#002e6a",
-                "surface-dim": "#f8fafc",
-                "tertiary-fixed": "#e9ddff",
-                "on-error": "#690005",
-                "primary-fixed": "#9cf0ff",
-                "on-tertiary-container": "#6834d1",
-                "on-error-container": "#ffdad6",
-                "inverse-on-surface": "#f1f5f9",
-                "on-primary-container": "#00626e",
-                "error": "#ef4444",
-                "surface-container-lowest": "#ffffff",
-                "on-background": "#0f172a",
-                "inverse-primary": "#00daf3",
-                "secondary": "#adc6ff",
-                "secondary-container": "#0566d9",
-                "primary-fixed-dim": "#06b6d4",
-                "tertiary-container": "#d9c8ff",
-                "surface-variant": "#f1f5f9",
-                "outline": "#94a3b8",
-                "on-primary-fixed-variant": "#004f58",
-                "surface-container-high": "#e2e8f0",
-                "surface": "#ffffff",
-                "outline-variant": "#cbd5e1",
-                "primary": "#c3f5ff",
-                "secondary-fixed-dim": "#3b82f6",
-                "on-secondary-fixed": "#001a42",
-                "tertiary": "#f2e9ff",
-                "primary-container": "#00e5ff",
-                "secondary-fixed": "#d8e2ff",
-                "tertiary-fixed-dim": "#8b5cf6",
-                "on-tertiary": "#3c0091",
-                "on-primary": "#00363d",
-                "on-surface-variant": "#64748b",
-                "error-container": "#93000a",
-                "on-surface": "#1e293b",
-                "on-tertiary-fixed-variant": "#5516be",
-                "surface-container-low": "#f8fafc",
-                "on-primary-fixed": "#001f24",
-                "on-secondary-container": "#e6ecff",
-                "surface-container": "#f1f5f9",
-                "surface-bright": "#ffffff",
-                "background": "#ffffff",
-                "surface-container-highest": "#cbd5e1",
-                "inverse-surface": "#0f172a"
-        },
-        "borderRadius": {
-                "DEFAULT": "0.25rem",
-                "lg": "0.5rem",
-                "xl": "1rem",
-                "full": "9999px"
-        },
-        "spacing": {
-                "base-unit": "4px",
-                "gutter": "16px",
-                "margin-desktop": "32px",
-                "margin-mobile": "16px",
-                "panel-padding": "24px"
-        },
-        "fontFamily": {
-                "code-sm": [
-                        "JetBrains Mono"
-                ],
-                "headline-md": [
-                        "Inter"
-                ],
-                "display-lg": [
-                        "Inter"
-                ],
-                "code-lg": [
-                        "JetBrains Mono"
-                ],
-                "label-caps": [
-                        "Inter"
-                ],
-                "body-md": [
-                        "Inter"
-                ]
-        },
-        "fontSize": {
-                "code-sm": [
-                        "13px",
-                        {
-                                "lineHeight": "18px",
-                                "fontWeight": "400"
-                        }
-                ],
-                "headline-md": [
-                        "20px",
-                        {
-                                "lineHeight": "28px",
-                                "fontWeight": "600"
-                        }
-                ],
-                "display-lg": [
-                        "48px",
-                        {
-                                "lineHeight": "56px",
-                                "letterSpacing": "-0.02em",
-                                "fontWeight": "700"
-                        }
-                ],
-                "code-lg": [
-                        "16px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "500"
-                        }
-                ],
-                "label-caps": [
-                        "11px",
-                        {
-                                "lineHeight": "16px",
-                                "letterSpacing": "0.1em",
-                                "fontWeight": "700"
-                        }
-                ],
-                "body-md": [
-                        "15px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "400"
-                        }
-                ]
-        }
-},
-    },
-  }
-</script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .glow-sm {
-            filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        .neural-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-        }
+<html class="light" lang="en">
 
-        .shader-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-        }
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VULN.SCAN.IO · Intelligence Center</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Material Symbols -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Tailwind Theme Config -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#00daf3",
+            "on-tertiary-fixed": "#23005c",
+            "on-secondary-fixed-variant": "#004395",
+            "on-secondary": "#002e6a",
+            "surface-dim": "#f8fafc",
+            "tertiary-fixed": "#e9ddff",
+            "on-error": "#690005",
+            "primary-fixed": "#9cf0ff",
+            "on-tertiary-container": "#6834d1",
+            "on-error-container": "#ffdad6",
+            "inverse-on-surface": "#f1f5f9",
+            "on-primary-container": "#00626e",
+            "error": "#ef4444",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#0f172a",
+            "inverse-primary": "#00daf3",
+            "secondary": "#adc6ff",
+            "secondary-container": "#0566d9",
+            "primary-fixed-dim": "#06b6d4",
+            "tertiary-container": "#d9c8ff",
+            "surface-variant": "#f1f5f9",
+            "outline": "#94a3b8",
+            "on-primary-fixed-variant": "#004f58",
+            "surface-container-high": "#e2e8f0",
+            "surface": "#ffffff",
+            "outline-variant": "#cbd5e1",
+            "primary": "#c3f5ff",
+            "secondary-fixed-dim": "#3b82f6",
+            "on-secondary-fixed": "#001a42",
+            "tertiary": "#f2e9ff",
+            "primary-container": "#00e5ff",
+            "secondary-fixed": "#d8e2ff",
+            "tertiary-fixed-dim": "#8b5cf6",
+            "on-tertiary": "#3c0091",
+            "on-primary": "#00363d",
+            "on-surface-variant": "#64748b",
+            "error-container": "#93000a",
+            "on-surface": "#1e293b",
+            "on-tertiary-fixed-variant": "#5516be",
+            "surface-container-low": "#f8fafc",
+            "on-primary-fixed": "#001f24",
+            "on-secondary-container": "#e6ecff",
+            "surface-container": "#f1f5f9",
+            "surface-bright": "#ffffff",
+            "background": "#ffffff",
+            "surface-container-highest": "#cbd5e1",
+            "inverse-surface": "#0f172a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "1rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base-unit": "4px",
+            "gutter": "16px",
+            "margin-desktop": "32px",
+            "margin-mobile": "16px",
+            "panel-padding": "24px"
+          },
+          "fontFamily": {
+            "code-sm": [
+              "JetBrains Mono"
+            ],
+            "headline-md": [
+              "Inter"
+            ],
+            "display-lg": [
+              "Inter"
+            ],
+            "code-lg": [
+              "JetBrains Mono"
+            ],
+            "label-caps": [
+              "Inter"
+            ],
+            "body-md": [
+              "Inter"
+            ]
+          },
+          "fontSize": {
+            "code-sm": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-md": [
+              "20px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "600"
+              }
+            ],
+            "display-lg": [
+              "48px",
+              {
+                "lineHeight": "56px",
+                "letterSpacing": "-0.02em",
+                "fontWeight": "700"
+              }
+            ],
+            "code-lg": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "500"
+              }
+            ],
+            "label-caps": [
+              "11px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.1em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-md": [
+              "15px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
 
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
+    .glow-sm {
+      filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
+    }
 
-        /* --- White query pill with a single azure outline + soft glow --- */
-        .gemini-field {
-            border-radius: 9999px;
-            background: #ffffff;
-            border: 2px solid #38bdf8; /* azure */
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15),
-                        0 0 18px rgba(56, 189, 248, 0.25);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .gemini-field:focus-within {
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25),
-                        0 0 24px rgba(56, 189, 248, 0.40);
-        }
-    </style>
-<style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .neural-panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .shader-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    /* --- White query pill with a single azure outline + soft glow --- */
+    .gemini-field {
+      border-radius: 9999px;
+      background: #ffffff;
+      border: 2px solid #38bdf8;
+      /* azure */
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15),
+        0 0 18px rgba(56, 189, 248, 0.25);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gemini-field:focus-within {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25),
+        0 0 24px rgba(56, 189, 248, 0.40);
+    }
+  </style>
+  <style>
     body {
       min-height: max(884px, 100dvh);
     }
   </style>
-<script src="/static/i18n.js"></script>
+  <script src="/static/i18n.js"></script>
 </head>
-<body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
-<!-- White Cyber Background Shader -->
-<div class="shader-bg">
-<canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
-<script>
-    (function() {
-      const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
-      function syncSize() {
-        const w = canvas.clientWidth  || window.innerWidth;
-        const h = canvas.clientHeight || window.innerHeight;
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width  = w;
-          canvas.height = h;
-        }
-      }
-      if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(syncSize).observe(canvas);
-      }
-      syncSize();
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) return;
-      const vs = `attribute vec2 a_position;
+
+<body
+  class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
+  <!-- White Cyber Background Shader -->
+  <div class="shader-bg">
+    <canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+        (function () {
+          const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
+          function syncSize() {
+            const w = canvas.clientWidth || window.innerWidth;
+            const h = canvas.clientHeight || window.innerHeight;
+            if (canvas.width !== w || canvas.height !== h) {
+              canvas.width = w;
+              canvas.height = h;
+            }
+          }
+          if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(syncSize).observe(canvas);
+          }
+          syncSize();
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return;
+          const vs = `attribute vec2 a_position;
     varying vec2 v_texCoord;
     void main() {
       v_texCoord = a_position * 0.5 + 0.5;
       gl_Position = vec4(a_position, 0.0, 1.0);
     }`;
-      const fs = `precision highp float;
+          const fs = `precision highp float;
     uniform float u_time;
     uniform vec2 u_resolution;
     float grid(vec2 uv, float res) {
@@ -263,463 +285,613 @@
         color += scanline * cyberBlue * 0.05;
         gl_FragColor = vec4(color, 1.0);
     }`;
-      function cs(type, src) {
-        const s = gl.createShader(type);
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        return s;
-      }
-      const prog = gl.createProgram();
-      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
-      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
-      gl.linkProgram(prog);
-      gl.useProgram(prog);
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const pos = gl.getAttribLocation(prog, 'a_position');
-      gl.enableVertexAttribArray(pos);
-      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-      const uTime = gl.getUniformLocation(prog, 'u_time');
-      const uRes = gl.getUniformLocation(prog, 'u_resolution');
-      function render(t) {
-        if (typeof ResizeObserver === 'undefined') syncSize();
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        if (uTime) gl.uniform1f(uTime, t * 0.001);
-        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      render(0);
-    })();
+          function cs(type, src) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            return s;
+          }
+          const prog = gl.createProgram();
+          gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+          gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+          gl.linkProgram(prog);
+          gl.useProgram(prog);
+          const buf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+          const pos = gl.getAttribLocation(prog, 'a_position');
+          gl.enableVertexAttribArray(pos);
+          gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+          const uTime = gl.getUniformLocation(prog, 'u_time');
+          const uRes = gl.getUniformLocation(prog, 'u_resolution');
+          function render(t) {
+            if (typeof ResizeObserver === 'undefined') syncSize();
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            if (uTime) gl.uniform1f(uTime, t * 0.001);
+            if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+          }
+          render(0);
+        })();
     </script>
-</div>
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_4px_12px_rgba(6,182,212,0.3)]">
-<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">security</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-slate-900">VULN_INTEL_CMD</h1>
-<span class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50" data-i18n="top.status_active">SYSTEM_ACTIVE</span>
-</div>
-<div class="flex items-center gap-3">
-<div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
-<button data-lang-btn="en" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
-<button data-lang-btn="it" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
-</div>
-<div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
-<span class="material-symbols-outlined">sensors</span>
-</div>
-</div>
-</header>
-<div class="flex pt-16 h-screen w-full overflow-hidden">
-<!-- NavigationDrawer (Web) -->
-<nav class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
-<div class="px-6 mb-4">
-<span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
-</div>
-<ul class="flex flex-col w-full px-4 gap-2">
-<!-- Active: DASHBOARD -->
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]" href="#">
-<span class="material-symbols-outlined text-cyan-400">dashboard</span>
-<span class="">DASHBOARD</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/assets">
-<span class="material-symbols-outlined">inventory_2</span>
-<span class="">ASSETS</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/intel">
-<span class="material-symbols-outlined">psychology</span>
-<span class="">INTEL</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/audit">
-<span class="material-symbols-outlined">fact_check</span>
-<span class="">AUDIT</span>
-</a>
-</li>
-</ul>
-</nav>
-<!-- Main Content Canvas -->
-<main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
-<div class="mx-auto space-y-8">
-<!-- Executive Summary KPIs (Bento Grid) -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- KPI 1 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="dash.posture_title">SECURITY POSTURE SCORE</h2>
-<div class="flex items-baseline gap-2">
-<span id="postureScore" class="font-display-lg text-display-lg text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700">0</span>
-<span class="font-code-sm text-code-sm text-cyan-600">%</span>
-</div>
-<div class="w-full bg-slate-100 h-1.5 mt-4 rounded-full overflow-hidden">
-<div id="postureBar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full relative transition-all duration-700" style="width:0%">
-<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-</div>
-</div>
-<p id="postureNote" class="font-code-sm text-[11px] text-slate-400 mt-2">product not detected on 0 asset(s)</p>
-</div>
-<!-- KPI 2 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="dash.verified_title">VERIFIED ASSETS</h2>
-<div class="flex items-baseline gap-2">
-<span id="kpiAssets" class="font-display-lg text-display-lg text-slate-900">0</span>
-<span class="material-symbols-outlined text-blue-500 text-sm bg-blue-50 p-1 rounded-full">trending_up</span>
-</div>
-<p class="font-code-sm text-code-sm text-blue-600 mt-2 flex items-center gap-1">
-<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> <span id="kpiAssetsDelta">awaiting scan</span>
-</p>
-</div>
-<!-- KPI 3 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
-<span data-i18n="dash.vulns_title">ACTIVE VULNERABILITIES</span>
-                        </h2>
-<div class="flex items-baseline gap-2">
-<span id="kpiVulns" class="font-display-lg text-display-lg text-error">0</span>
-</div>
-<p class="font-code-sm text-code-sm text-error/80 mt-2 bg-error/5 py-1 px-2 rounded inline-block" data-i18n="dash.vulns_triage">Requires immediate triage</p>
-</div>
-</section>
-<!-- Network + Asset Auth affiancati in due colonne -->
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-<!-- Colonna A: Detected Products Network -->
-<div class="lg:col-span-2 neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.network_title">DETECTED PRODUCTS NETWORK</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-<!-- Colonna 1: grafo -->
-<div class="flex items-center justify-center w-full">
-<div id="graph-canvas" class="relative w-full max-w-md aspect-square flex items-center justify-center transition-opacity duration-500 ease-in-out">
-<!-- Popolato dinamicamente alla fine della scansione -->
-</div>
-</div>
-<!-- Colonna 2: legenda -->
-<div id="graph-legend" class="w-full space-y-4 transition-opacity duration-500 ease-in-out">
-<div class="flex items-center justify-center h-full min-h-[12rem] text-slate-300 font-code-sm text-code-sm text-center px-4" data-i18n="dash.network_hint">Run a scan to map the product dependency graph.</div>
-</div>
-</div>
-</div>
-<!-- Colonna B: Asset Authentication -->
-<div class="lg:col-span-1 neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.authn_title">ASSET AUTHENTICATION</h2>
-<div class="space-y-6">
-<div>
-<div class="flex justify-between mb-2">
-<span class="font-code-sm text-code-sm text-slate-600" data-i18n="dash.authn_auth_nodes">Authenticated Nodes</span>
-<span id="authCount" class="font-code-sm text-code-sm text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">0</span>
-</div>
-<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-<div id="authBar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full relative transition-all duration-700" style="width:0%">
-<div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_2s_linear_infinite]"></div>
-</div>
-</div>
-</div>
-<div>
-<div class="flex justify-between mb-2">
-<span class="font-code-sm text-code-sm text-slate-600" data-i18n="dash.authn_unauth_nodes">Unauthenticated Nodes</span>
-<span id="unauthCount" class="font-code-sm text-code-sm text-error font-semibold bg-error/5 px-2 py-0.5 rounded-full">0</span>
-</div>
-<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-<div id="unauthBar" class="bg-gradient-to-r from-red-400 to-rose-500 h-full transition-all duration-700" style="width:0%"></div>
-</div>
-</div>
-<div class="pt-4 border-t border-slate-100/50">
-<p class="font-code-sm text-[11px] text-slate-400 flex items-center gap-2">
-<span class="material-symbols-outlined text-[14px] text-cyan-500">dns</span>
-<span id="authTotal">0</span> <span data-i18n="dash.authn_total">total assets in inventory</span>
-</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Input & Intelligence Section -->
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Vulnerability Input -->
-<div class="lg:col-span-2 neural-panel rounded-2xl p-6 flex flex-col focus-within:shadow-xl transition-all duration-300 relative">
-<label class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2" for="vuln-input">
-<span class="material-symbols-outlined text-sm text-cyan-500">manage_search</span>
-<span data-i18n="dash.query_title">THREAT INTELLIGENCE QUERY</span>
-                        </label>
-<div class="gemini-field flex-1 flex items-center gap-4 bg-white rounded-full px-6 py-4">
-<span class="font-code-lg text-code-lg text-cyan-600 animate-pulse">&gt;</span>
-<input class="bg-transparent border-none outline-none w-full font-code-lg text-code-lg text-slate-900 placeholder:text-slate-300 focus:ring-0 p-0" id="vuln-input" data-i18n-ph="dash.query_placeholder" placeholder="Describe Vulnerability or input CVE..." type="text"/>
-</div>
-<div class="flex justify-between items-end mt-6 gap-4">
-<div class="flex flex-col gap-3">
-<span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.query_hint">Press ENTER to initiate scan sequence</span>
-<label class="flex items-center gap-2 cursor-pointer select-none">
-<input type="checkbox" id="deepProbe" class="peer sr-only"/>
-<span class="w-9 h-5 rounded-full bg-slate-200 peer-checked:bg-cyan-500 relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow after:transition-all peer-checked:after:translate-x-4"></span>
-<span class="font-label-caps text-label-caps text-slate-500" data-i18n="dash.deep_label">DEEP VERSION PROBE</span>
-<span class="relative group inline-flex items-center">
-<span class="material-symbols-outlined text-[16px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
-<span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl" data-i18n="dash.deep_tooltip">Active deeper probe.</span>
-</span>
-</label>
-</div>
-<button id="run" class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 group disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
-<span class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-180 transition-transform duration-500">memory</span>
-<span data-i18n="dash.query_btn">AI ANALYSIS</span>
-                            </button>
-</div>
-</div>
-<!-- Identification Workflow -->
-<div class="neural-panel rounded-2xl p-6 flex flex-col relative overflow-hidden">
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.pipeline_title">IDENTIFICATION PIPELINE</h3>
-<div class="flex-1 flex flex-col justify-between gap-4 relative">
-<div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-400 via-blue-200 to-slate-100 z-0"></div>
-<div id="pipe-parse" class="flex items-center gap-4 relative z-10">
-<div class="w-8 h-8 rounded-full bg-white border-2 border-cyan-400 flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-cyan-600 text-sm">data_object</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-900 font-semibold" data-i18n="dash.pipe_parse">Parsing Input</span>
-</div>
-<div id="pipe-osint" class="flex items-center gap-4 relative z-10">
-<div class="w-8 h-8 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-blue-500 text-sm">travel_explore</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-600 font-medium" data-i18n="dash.pipe_osint">OSINT Correlation</span>
-</div>
-<div id="pipe-detect" class="flex items-center gap-4 relative z-10 opacity-60">
-<div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
-<span class="material-symbols-outlined text-slate-400 text-sm">troubleshoot</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_detect">Active Detection</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Console & Assets Row -->
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-<!-- Scan Engine Console (Cyber Purple Contrast) -->
-<div class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden h-80 relative shadow-2xl">
-<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.08),_transparent)] pointer-events-none"></div>
-<div class="bg-[#1a1a2e] border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="flex gap-1.5">
-<span class="w-3 h-3 rounded-full bg-rose-500/60"></span>
-<span class="w-3 h-3 rounded-full bg-amber-500/60"></span>
-<span class="w-3 h-3 rounded-full bg-emerald-500/60"></span>
-</div>
-<span class="ml-3 text-slate-400 font-label-caps text-label-caps tracking-widest">SCAN_ENGINE_TTY1</span>
-</div>
-<span class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
-</div>
-<div id="console" class="p-5 font-code-sm text-code-sm space-y-3 overflow-y-auto flex-1 text-slate-300">
-<p class="opacity-70"><span class="text-indigo-400">[SYS]</span> <span data-i18n="dash.console_init">Initializing core diagnostic protocol...</span></p>
-<p class="opacity-70"><span class="text-indigo-400">[SYS]</span> <span data-i18n="dash.console_await">Awaiting threat intelligence query.</span></p>
-<p id="console-prompt" class="text-cyan-400 mt-4 flex items-center">
-    root@soc-cmd:~# <span class="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
-</p>
-</div>
-</div>
-<!-- Asset Inventory List -->
-<div class="neural-panel rounded-2xl p-6 flex flex-col h-80 relative overflow-hidden">
-<div class="flex justify-between items-center mb-6">
-<h3 class="font-label-caps text-label-caps text-slate-500" data-i18n="dash.inventory_title">ASSET INVENTORY (LOCAL)</h3>
-<a href="/assets" class="text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full font-label-caps text-label-caps hover:bg-cyan-100 transition-colors" data-i18n="dash.inventory_viewall">VIEW ALL</a>
-</div>
-<div id="assetList" class="flex-1 overflow-y-auto pr-2 space-y-3">
-<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm" data-i18n="dash.inventory_loading">Loading inventory…</div>
-</div>
-</div>
-</section>
-<!-- Alerts Row -->
-<section>
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.alerts_title">CRITICAL INTELLIGENCE ALERTS</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="neural-panel p-5 rounded-2xl flex items-start gap-4 relative overflow-hidden opacity-50 grayscale pointer-events-none select-none" aria-disabled="true">
-<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-rose-400 to-red-500"></div>
-<div class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 shadow-sm z-10">
-<span class="material-symbols-outlined text-rose-500">gavel</span>
-</div>
-<div class="flex-1 z-10">
-<div class="flex justify-between items-start mb-2">
-<h4 class="font-code-lg text-code-lg text-slate-900 font-semibold" data-i18n="alert.cve_title">CVE-2023-4567 Detected</h4>
-<span class="font-label-caps text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full" data-i18n="common.disabled">DISABLED</span>
-</div>
-<p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed" data-i18n="alert.cve_body">Unauthorized access vector identified on SRV-PROD-01 via Python library vulnerability.</p>
-<button disabled class="font-label-caps text-label-caps text-slate-400 border border-slate-200 bg-slate-50 px-4 py-1.5 rounded-lg shadow-sm cursor-not-allowed" data-i18n="alert.cve_btn">INITIATE ISOLATION</button>
-</div>
-</div>
-<div class="neural-panel p-5 rounded-2xl flex items-start gap-4 relative overflow-hidden opacity-50 grayscale pointer-events-none select-none" aria-disabled="true">
-<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan-400 to-blue-500"></div>
-<div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 shadow-sm z-10">
-<span class="material-symbols-outlined text-cyan-600">policy</span>
-</div>
-<div class="flex-1 z-10">
-<div class="flex justify-between items-start mb-2">
-<h4 class="font-code-lg text-code-lg text-slate-900 font-semibold" data-i18n="alert.drift_title">Configuration Drift</h4>
-<span class="font-label-caps text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full" data-i18n="common.disabled">DISABLED</span>
-</div>
-<p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed" data-i18n="alert.drift_body">GATEWAY-MAIN configuration checksum mismatch detected against baseline.</p>
-<button disabled class="font-label-caps text-label-caps text-slate-400 border border-slate-200 bg-slate-50 px-4 py-1.5 rounded-lg shadow-sm cursor-not-allowed" data-i18n="alert.drift_btn">REVIEW DIFF</button>
-</div>
-</div>
-</div>
-</section>
-</div>
-</main>
-</div>
-<!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">notifications_active</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">terminal</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white" href="/audit">
-<span class="material-symbols-outlined">fact_check</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-</a>
-</nav>
-<!-- Backend wiring: collega il design al motore di scansione (/api/scan, /api/assets) -->
-<script>
-  const $ = (id) => document.getElementById(id);
-  const input = $('vuln-input');
-  const runBtn = $('run');
-  const consoleEl = $('console');
-  const promptEl = $('console-prompt');
-  const assetList = $('assetList');
-  const graphCanvas = $('graph-canvas');
-  const graphLegend = $('graph-legend');
+  </div>
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
+    <div class="flex items-center gap-4">
+      <img src="/static/logo-icon.svg" class="w-11 h-11" alt="VULN.SCAN.IO" />
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tight"><span
+          class="text-orange-500">VULN</span><span class="text-slate-400">.</span><span
+          class="text-orange-500">SCAN</span><span class="text-slate-400">.</span><span class="text-cyan-500">IO</span>
+      </h1>
+      <span
+        class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50"
+        data-i18n="top.status_active">SYSTEM_ACTIVE</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+        <button data-lang-btn="en"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
+        <button data-lang-btn="it"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
+      </div>
+      <div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">sensors</span>
+      </div>
+    </div>
+  </header>
+  <div class="flex pt-16 h-screen w-full overflow-hidden">
+    <!-- NavigationDrawer (Web) -->
+    <nav
+      class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
+      <div class="px-6 mb-4">
+        <span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
+      </div>
+      <ul class="flex flex-col w-full px-4 gap-2">
+        <!-- Active: DASHBOARD -->
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]"
+            href="#">
+            <span class="material-symbols-outlined text-cyan-400">dashboard</span>
+            <span class="">DASHBOARD</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/assets">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="">ASSETS</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/intel">
+            <span class="material-symbols-outlined">psychology</span>
+            <span class="">INTEL</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/audit">
+            <span class="material-symbols-outlined">fact_check</span>
+            <span class="">AUDIT</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/settings">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="">SETTINGS</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- Main Content Canvas -->
+    <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
+      <div class="mx-auto space-y-8">
+        <!-- Executive Summary KPIs (Bento Grid) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- KPI 1 -->
+          <div
+            class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5">
+            <div
+              class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+            <h2 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="dash.posture_title">SECURITY
+              POSTURE SCORE</h2>
+            <div class="flex items-baseline gap-2">
+              <span id="postureScore"
+                class="font-display-lg text-display-lg text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700">—</span>
+              <span class="font-code-sm text-code-sm text-cyan-600">%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 mt-4 rounded-full overflow-hidden">
+              <div id="postureBar"
+                class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full relative transition-all duration-700"
+                style="width:0%">
+                <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+              </div>
+            </div>
+            <p id="postureNote" class="font-code-sm text-[11px] text-slate-400 mt-2">—</p>
+            <!-- Posture scan progress (hidden until scan runs) -->
+            <div id="psProgressWrap" class="hidden mt-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span id="psProgressLabel" class="font-code-sm text-[11px] text-slate-500">Scanning assets…</span>
+                <span id="psProgressCount" class="font-code-sm text-[11px] text-cyan-600 font-semibold">0/0</span>
+              </div>
+              <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div id="psProgressBar"
+                  class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300"
+                  style="width:0%"></div>
+              </div>
+            </div>
+            <button id="psRunBtn"
+              class="mt-4 w-full flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 rounded-lg font-label-caps text-label-caps text-[10px] transition-all shadow-sm shadow-slate-900/10 group disabled:opacity-40 disabled:cursor-not-allowed">
+              <span
+                class="material-symbols-outlined text-[14px] text-cyan-400 group-hover:rotate-180 transition-transform duration-500">radar</span>
+              <span>RUN POSTURE SCAN</span>
+            </button>
+          </div>
+          <!-- KPI 2 -->
+          <div
+            class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
+            <div
+              class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+            <h2 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="dash.verified_title">VERIFIED
+              ASSETS</h2>
+            <div class="flex items-baseline gap-2">
+              <span id="kpiAssets" class="font-display-lg text-display-lg text-slate-900">0</span>
+              <span
+                class="material-symbols-outlined text-blue-500 text-sm bg-blue-50 p-1 rounded-full">trending_up</span>
+            </div>
+            <p class="font-code-sm text-code-sm text-blue-600 mt-2 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> <span id="kpiAssetsDelta">awaiting scan</span>
+            </p>
+          </div>
+          <!-- KPI 3 -->
+          <div
+            class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-500/5">
+            <div
+              class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+            <h2 class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
+              <span data-i18n="dash.vulns_title">ACTIVE VULNERABILITIES</span>
+            </h2>
+            <div class="flex items-baseline gap-2">
+              <span id="kpiVulns" class="font-display-lg text-display-lg text-error">0</span>
+            </div>
+            <p class="font-code-sm text-code-sm text-error/80 mt-2 bg-error/5 py-1 px-2 rounded inline-block"
+              data-i18n="dash.vulns_triage">Requires immediate triage</p>
+          </div>
+        </section>
+        <!-- Input & Intelligence Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Vulnerability Input -->
+          <div
+            class="lg:col-span-2 neural-panel rounded-2xl p-6 flex flex-col focus-within:shadow-xl transition-all duration-300 relative">
+            <label class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2" for="vuln-input">
+              <span class="material-symbols-outlined text-sm text-cyan-500">manage_search</span>
+              <span data-i18n="dash.query_title">THREAT INTELLIGENCE QUERY</span>
+            </label>
+            <div class="gemini-field flex-1 flex items-center gap-4 bg-white rounded-full px-6 py-4">
+              <span class="font-code-lg text-code-lg text-cyan-600 animate-pulse">&gt;</span>
+              <input
+                class="bg-transparent border-none outline-none w-full font-code-lg text-code-lg text-slate-900 placeholder:text-slate-300 focus:ring-0 p-0"
+                id="vuln-input" data-i18n-ph="dash.query_placeholder"
+                placeholder="Describe Vulnerability or input CVE..." type="text" />
+            </div>
+            <div class="flex justify-between items-end mt-6 gap-4">
+              <div class="flex flex-col gap-3">
+                <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.query_hint">Press ENTER to
+                  initiate scan sequence</span>
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" id="deepProbe" class="peer sr-only" />
+                  <span
+                    class="w-9 h-5 rounded-full bg-slate-200 peer-checked:bg-cyan-500 relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow after:transition-all peer-checked:after:translate-x-4"></span>
+                  <span class="font-label-caps text-label-caps text-slate-500" data-i18n="dash.deep_label">DEEP VERSION
+                    PROBE</span>
+                  <span class="relative group inline-flex items-center">
+                    <span
+                      class="material-symbols-outlined text-[16px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
+                    <span
+                      class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl"
+                      data-i18n="dash.deep_tooltip">Active deeper probe.</span>
+                  </span>
+                </label>
+              </div>
+              <button id="run"
+                class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 group disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
+                <span
+                  class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-180 transition-transform duration-500">memory</span>
+                <span data-i18n="dash.query_btn">AI ANALYSIS</span>
+              </button>
+            </div>
+          </div>
+          <!-- Scan Engine Console -->
+          <div class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden relative shadow-2xl">
+            <div
+              class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.08),_transparent)] pointer-events-none">
+            </div>
+            <div class="bg-[#1a1a2e] border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-rose-500/60"></span>
+                  <span class="w-3 h-3 rounded-full bg-amber-500/60"></span>
+                  <span class="w-3 h-3 rounded-full bg-emerald-500/60"></span>
+                </div>
+                <span
+                  class="ml-3 text-slate-400 font-label-caps text-label-caps tracking-widest">SCAN_ENGINE_TTY1</span>
+              </div>
+              <span
+                class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
+            </div>
+            <div id="console" class="p-5 font-code-sm text-code-sm space-y-3 overflow-y-auto flex-1 text-slate-300">
+              <p class="opacity-70"><span class="text-indigo-400">[SYS]</span> <span
+                  data-i18n="dash.console_init">Initializing core diagnostic protocol...</span></p>
+              <p class="opacity-70"><span class="text-indigo-400">[SYS]</span> <span
+                  data-i18n="dash.console_await">Awaiting threat intelligence query.</span></p>
+              <p id="console-prompt" class="text-cyan-400 mt-4 flex items-center">
+                root@soc-cmd:~# <span class="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
+              </p>
+            </div>
+          </div>
+        </section>
+        <!-- Network + Asset Auth affiancati in due colonne -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <!-- Colonna A: Detected Products Network -->
+          <div class="lg:col-span-2 neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
+            <h2 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.network_title">DETECTED
+              PRODUCTS NETWORK</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              <div class="flex items-center justify-center w-full">
+                <div id="graph-canvas"
+                  class="relative w-full max-w-md aspect-square flex items-center justify-center transition-opacity duration-500 ease-in-out">
+                </div>
+              </div>
+              <div id="graph-legend" class="w-full space-y-4 transition-opacity duration-500 ease-in-out">
+                <div
+                  class="flex items-center justify-center h-full min-h-[12rem] text-slate-300 font-code-sm text-code-sm text-center px-4"
+                  data-i18n="dash.network_hint">Run a scan to map the product dependency graph.</div>
+              </div>
+            </div>
+          </div>
+          <!-- Colonna B: Asset Authentication -->
+          <div class="lg:col-span-1 neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
+            <h2 class="font-label-caps text-label-caps text-slate-500 mb-5" data-i18n="dash.authn_title">ASSET
+              AUTHENTICATION</h2>
+            <div class="space-y-4">
+              <!-- NOT AVAILABLE -->
+              <div>
+                <div class="flex justify-between mb-1.5">
+                  <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>NOT AVAILABLE</span>
+                  <span id="stat-not-available" class="font-code-sm text-code-sm text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div id="bar-not-available" class="bg-gradient-to-r from-rose-400 to-red-500 h-full transition-all duration-700" style="width:0%"></div>
+                </div>
+              </div>
+              <!-- AVAILABLE -->
+              <div>
+                <div class="flex justify-between mb-1.5">
+                  <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>AVAILABLE</span>
+                  <span id="stat-available" class="font-code-sm text-code-sm text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div id="bar-available" class="bg-gradient-to-r from-emerald-400 to-green-500 h-full transition-all duration-700" style="width:0%"></div>
+                </div>
+              </div>
+              <!-- SSH OK -->
+              <div>
+                <div class="flex justify-between mb-1.5">
+                  <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[12px] text-cyan-500">lock</span>SSH OK</span>
+                  <span id="stat-ssh-ok" class="font-code-sm text-code-sm text-cyan-700 font-semibold bg-cyan-50 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div id="bar-ssh-ok" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-700" style="width:0%"></div>
+                </div>
+              </div>
+              <!-- SSH FAIL -->
+              <div>
+                <div class="flex justify-between mb-1.5">
+                  <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[12px] text-orange-400">lock_open</span>SSH FAIL</span>
+                  <span id="stat-ssh-fail" class="font-code-sm text-code-sm text-orange-700 font-semibold bg-orange-50 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div id="bar-ssh-fail" class="bg-gradient-to-r from-orange-400 to-amber-500 h-full transition-all duration-700" style="width:0%"></div>
+                </div>
+              </div>
+              <!-- footer -->
+              <div class="pt-2 border-t border-slate-100/50 flex items-center justify-between">
+                <p class="font-code-sm text-[11px] text-slate-400 flex items-center gap-1.5">
+                  <span id="stat-done-icon" class="material-symbols-outlined text-[14px] text-cyan-500">dns</span>
+                  <span id="stat-checking-icon" class="material-symbols-outlined text-[14px] text-cyan-400 animate-spin hidden">progress_activity</span>
+                  <span id="authTotal">0</span>&nbsp;<span data-i18n="dash.authn_total">total assets</span>
+                </p>
+                <span id="stat-checking-label" class="font-label-caps text-[9px] text-slate-300 hidden">CHECKING…</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-  // --- Detected products network (graph) ---------------------------------
-  let lastTarget = null;
-  let lastAssets = [];   // ultimo inventario caricato (per ri-render al cambio lingua)
+        <!-- AI Scan progress bar (same style as intel page) -->
+        <div id="aiScanProgressWrap" class="hidden neural-panel rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span id="aiScanProgressLabel" class="font-code-sm text-code-sm text-slate-600">Identifying target…</span>
+            <span id="aiScanProgressCount" class="font-code-sm text-code-sm text-cyan-600 font-semibold"></span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div id="aiScanProgressBar"
+              class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300" style="width:0%">
+            </div>
+          </div>
+        </div>
 
-  // Palette ciclica per i nodi dipendenza.
-  const NODE_COLORS = [
-    { dot: 'bg-blue-400',    ring: 'border-blue-400',    bg: 'bg-blue-50',    text: 'text-blue-700',    chip: 'bg-blue-50' },
-    { dot: 'bg-purple-400',  ring: 'border-purple-400',  bg: 'bg-purple-50',  text: 'text-purple-700',  chip: 'bg-purple-50' },
-    { dot: 'bg-emerald-400', ring: 'border-emerald-400', bg: 'bg-emerald-50', text: 'text-emerald-700', chip: 'bg-emerald-50' },
-    { dot: 'bg-amber-400',   ring: 'border-amber-400',   bg: 'bg-amber-50',   text: 'text-amber-700',   chip: 'bg-amber-50' },
-    { dot: 'bg-rose-400',    ring: 'border-rose-400',    bg: 'bg-rose-50',    text: 'text-rose-700',    chip: 'bg-rose-50' },
-  ];
+        <!-- Console & Assets Row -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Identification Workflow -->
+          <div class="neural-panel rounded-2xl p-6 flex flex-col h-80 relative overflow-hidden">
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.pipeline_title">
+              IDENTIFICATION PIPELINE</h3>
+            <div class="flex-1 flex flex-col justify-between gap-4 relative">
+              <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-100 z-0" id="pipe-line"></div>
+              <div id="pipe-parse" class="flex items-center gap-4 relative z-10 opacity-40">
+                <div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-slate-400 text-sm">data_object</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_parse">Parsing Input</span>
+                  <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
+                </div>
+              </div>
+              <div id="pipe-osint" class="flex items-center gap-4 relative z-10 opacity-40">
+                <div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-slate-400 text-sm">travel_explore</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_osint">OSINT Correlation</span>
+                  <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
+                </div>
+              </div>
+              <div id="pipe-detect" class="flex items-center gap-4 relative z-10 opacity-40">
+                <div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-slate-400 text-sm">troubleshoot</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_detect">Active Detection</span>
+                  <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Asset Inventory List -->
+          <div class="neural-panel rounded-2xl p-6 flex flex-col h-80 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="font-label-caps text-label-caps text-slate-500" data-i18n="dash.inventory_title">ASSET
+                INVENTORY (LOCAL)</h3>
+              <a href="/assets"
+                class="text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full font-label-caps text-label-caps hover:bg-cyan-100 transition-colors"
+                data-i18n="dash.inventory_viewall">VIEW ALL</a>
+            </div>
+            <div id="assetList" class="flex-1 overflow-y-auto pr-2 space-y-3">
+              <div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm"
+                data-i18n="dash.inventory_loading">Loading inventory…</div>
+            </div>
+          </div>
+        </section>
+        <!-- Alerts Row -->
+        <section>
+          <h3 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.alerts_title">CRITICAL
+            INTELLIGENCE ALERTS</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              class="neural-panel p-5 rounded-2xl flex items-start gap-4 relative overflow-hidden opacity-50 grayscale pointer-events-none select-none"
+              aria-disabled="true">
+              <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-rose-400 to-red-500"></div>
+              <div
+                class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 shadow-sm z-10">
+                <span class="material-symbols-outlined text-rose-500">gavel</span>
+              </div>
+              <div class="flex-1 z-10">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-code-lg text-code-lg text-slate-900 font-semibold" data-i18n="alert.cve_title">
+                    CVE-2023-4567 Detected</h4>
+                  <span
+                    class="font-label-caps text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full"
+                    data-i18n="common.disabled">DISABLED</span>
+                </div>
+                <p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed"
+                  data-i18n="alert.cve_body">Unauthorized access vector identified on SRV-PROD-01 via Python library
+                  vulnerability.</p>
+                <button disabled
+                  class="font-label-caps text-label-caps text-slate-400 border border-slate-200 bg-slate-50 px-4 py-1.5 rounded-lg shadow-sm cursor-not-allowed"
+                  data-i18n="alert.cve_btn">INITIATE ISOLATION</button>
+              </div>
+            </div>
+            <div
+              class="neural-panel p-5 rounded-2xl flex items-start gap-4 relative overflow-hidden opacity-50 grayscale pointer-events-none select-none"
+              aria-disabled="true">
+              <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan-400 to-blue-500"></div>
+              <div
+                class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 shadow-sm z-10">
+                <span class="material-symbols-outlined text-cyan-600">policy</span>
+              </div>
+              <div class="flex-1 z-10">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-code-lg text-code-lg text-slate-900 font-semibold" data-i18n="alert.drift_title">
+                    Configuration Drift</h4>
+                  <span
+                    class="font-label-caps text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full"
+                    data-i18n="common.disabled">DISABLED</span>
+                </div>
+                <p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed"
+                  data-i18n="alert.drift_body">GATEWAY-MAIN configuration checksum mismatch detected against baseline.
+                </p>
+                <button disabled
+                  class="font-label-caps text-label-caps text-slate-400 border border-slate-200 bg-slate-50 px-4 py-1.5 rounded-lg shadow-sm cursor-not-allowed"
+                  data-i18n="alert.drift_btn">REVIEW DIFF</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <!-- BottomNavBar (Mobile) -->
+  <nav
+    class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
+      <span class="material-symbols-outlined">notifications_active</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
+      <span class="material-symbols-outlined">terminal</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white"
+      href="/audit">
+      <span class="material-symbols-outlined">fact_check</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
+      <span class="material-symbols-outlined">settings</span>
+    </a>
+  </nav>
+  <!-- Backend wiring: collega il design al motore di scansione (/api/scan, /api/assets) -->
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const input = $('vuln-input');
+    const runBtn = $('run');
+    const consoleEl = $('console');
+    const promptEl = $('console-prompt');
+    const assetList = $('assetList');
+    const graphCanvas = $('graph-canvas');
+    const graphLegend = $('graph-legend');
 
-  function resetGraph() {
-    if (graphFadeTimer) { clearTimeout(graphFadeTimer); graphFadeTimer = null; }
-    graphCanvas.style.opacity = '1';
-    graphLegend.style.opacity = '1';
-    graphCanvas.innerHTML = '';
-    graphLegend.innerHTML =
-      `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm text-center px-4">${t('dash.graph_mapping')}</div>`;
-  }
+    // --- Detected products network (graph) ---------------------------------
+    let lastTarget = null;
+    let lastAssets = [];   // ultimo inventario caricato (per ri-render al cambio lingua)
 
-  // Relazioni note fra librerie: archi extra fra dipendenze per arricchire il grafo.
-  const DEP_RELATIONS = [
-    ['openssl', 'zlib'], ['openssl', 'pcre'], ['openssl', 'pam'],
-    ['openssl', 'libxml2'], ['pcre', 'zlib'], ['zlib', 'libffi'],
-    ['zlib', 'sqlite'], ['libffi', 'sqlite'], ['v8', 'libuv'],
-    ['libuv', 'zlib'], ['apr', 'pcre'], ['jemalloc', 'lua'],
-    ['readline', 'zlib'], ['pam', 'openssl'],
-  ];
+    // Palette ciclica per i nodi dipendenza.
+    const NODE_COLORS = [
+      { dot: 'bg-blue-400', ring: 'border-blue-400', bg: 'bg-blue-50', text: 'text-blue-700', chip: 'bg-blue-50' },
+      { dot: 'bg-purple-400', ring: 'border-purple-400', bg: 'bg-purple-50', text: 'text-purple-700', chip: 'bg-purple-50' },
+      { dot: 'bg-emerald-400', ring: 'border-emerald-400', bg: 'bg-emerald-50', text: 'text-emerald-700', chip: 'bg-emerald-50' },
+      { dot: 'bg-amber-400', ring: 'border-amber-400', bg: 'bg-amber-50', text: 'text-amber-700', chip: 'bg-amber-50' },
+      { dot: 'bg-rose-400', ring: 'border-rose-400', bg: 'bg-rose-50', text: 'text-rose-700', chip: 'bg-rose-50' },
+    ];
 
-  // Wrapper con fade-out -> swap -> fade-in.
-  let graphFadeTimer = null;
-  function buildGraph(t) {
-    graphCanvas.style.opacity = '0';
-    graphLegend.style.opacity = '0';
-    if (graphFadeTimer) clearTimeout(graphFadeTimer);
-    graphFadeTimer = setTimeout(() => {
-      renderGraph(t);
+    function resetGraph() {
+      if (graphFadeTimer) { clearTimeout(graphFadeTimer); graphFadeTimer = null; }
       graphCanvas.style.opacity = '1';
       graphLegend.style.opacity = '1';
-    }, 320); // ~ durata fade-out (duration-500 -> taglio a 320ms per ritmo a 3s)
-  }
-
-  function renderGraph(t) {
-    graphCanvas.innerHTML = '';
-    if (!t || !t.product) {
+      graphCanvas.innerHTML = '';
       graphLegend.innerHTML =
-        `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm text-center px-4">${i18n.t('dash.graph_empty')}</div>`;
-      return;
-    }
-    const deps = t.deps || t.dependencies || [];
-    const cx = 50, cy = 50, R = 40; // percentuali nel box quadrato
-
-    // Posizioni dei nodi dipendenza su un cerchio.
-    const pos = deps.map((_, i) => {
-      const ang = (2 * Math.PI * i) / deps.length - Math.PI / 2;
-      return { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang) };
-    });
-
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(svgNS, 'svg');
-    svg.setAttribute('class', 'absolute inset-0 w-full h-full z-0');
-    function line(x1, y1, x2, y2, attrs) {
-      const ln = document.createElementNS(svgNS, 'line');
-      ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
-      ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
-      for (const k in attrs) ln.setAttribute(k, attrs[k]);
-      svg.appendChild(ln);
+        `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm text-center px-4">${t('dash.graph_mapping')}</div>`;
     }
 
-    // 1. Archi radiali: centro -> dipendenza.
-    pos.forEach((p) => line('50%', '50%', p.x + '%', p.y + '%',
-      { stroke: '#cbd5e1', 'stroke-width': '2', class: 'opacity-70' }));
+    // Relazioni note fra librerie: archi extra fra dipendenze per arricchire il grafo.
+    const DEP_RELATIONS = [
+      ['openssl', 'zlib'], ['openssl', 'pcre'], ['openssl', 'pam'],
+      ['openssl', 'libxml2'], ['pcre', 'zlib'], ['zlib', 'libffi'],
+      ['zlib', 'sqlite'], ['libffi', 'sqlite'], ['v8', 'libuv'],
+      ['libuv', 'zlib'], ['apr', 'pcre'], ['jemalloc', 'lua'],
+      ['readline', 'zlib'], ['pam', 'openssl'],
+    ];
 
-    // 2. Archi inter-dipendenza: relazioni note fra le librerie presenti.
-    let relCount = 0;
-    for (let i = 0; i < deps.length; i++) {
-      for (let j = i + 1; j < deps.length; j++) {
-        const related = DEP_RELATIONS.some(([a, b]) =>
-          (a === deps[i] && b === deps[j]) || (a === deps[j] && b === deps[i]));
-        if (related) {
-          relCount++;
-          line(pos[i].x + '%', pos[i].y + '%', pos[j].x + '%', pos[j].y + '%',
-            { stroke: '#a5b4fc', 'stroke-width': '1.5', 'stroke-dasharray': '4 3', class: 'opacity-60' });
+    // Wrapper con fade-out -> swap -> fade-in.
+    let graphFadeTimer = null;
+    function buildGraph(t) {
+      graphCanvas.style.opacity = '0';
+      graphLegend.style.opacity = '0';
+      if (graphFadeTimer) clearTimeout(graphFadeTimer);
+      graphFadeTimer = setTimeout(() => {
+        renderGraph(t);
+        graphCanvas.style.opacity = '1';
+        graphLegend.style.opacity = '1';
+      }, 320); // ~ durata fade-out (duration-500 -> taglio a 320ms per ritmo a 3s)
+    }
+
+    function renderGraph(t) {
+      graphCanvas.innerHTML = '';
+      if (!t || !t.product) {
+        graphLegend.innerHTML =
+          `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm text-center px-4">${i18n.t('dash.graph_empty')}</div>`;
+        return;
+      }
+      const deps = t.deps || t.dependencies || [];
+      const cx = 50, cy = 50, R = 40; // percentuali nel box quadrato
+
+      // Posizioni dei nodi dipendenza su un cerchio.
+      const pos = deps.map((_, i) => {
+        const ang = (2 * Math.PI * i) / deps.length - Math.PI / 2;
+        return { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang) };
+      });
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'absolute inset-0 w-full h-full z-0');
+      function line(x1, y1, x2, y2, attrs) {
+        const ln = document.createElementNS(svgNS, 'line');
+        ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+        ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+        for (const k in attrs) ln.setAttribute(k, attrs[k]);
+        svg.appendChild(ln);
+      }
+
+      // 1. Archi radiali: centro -> dipendenza.
+      pos.forEach((p) => line('50%', '50%', p.x + '%', p.y + '%',
+        { stroke: '#cbd5e1', 'stroke-width': '2', class: 'opacity-70' }));
+
+      // 2. Archi inter-dipendenza: relazioni note fra le librerie presenti.
+      let relCount = 0;
+      for (let i = 0; i < deps.length; i++) {
+        for (let j = i + 1; j < deps.length; j++) {
+          const related = DEP_RELATIONS.some(([a, b]) =>
+            (a === deps[i] && b === deps[j]) || (a === deps[j] && b === deps[i]));
+          if (related) {
+            relCount++;
+            line(pos[i].x + '%', pos[i].y + '%', pos[j].x + '%', pos[j].y + '%',
+              { stroke: '#a5b4fc', 'stroke-width': '1.5', 'stroke-dasharray': '4 3', class: 'opacity-60' });
+          }
         }
       }
-    }
-    graphCanvas.appendChild(svg);
+      graphCanvas.appendChild(svg);
 
-    // Nodi dipendenza.
-    deps.forEach((d, i) => {
-      const c = NODE_COLORS[i % NODE_COLORS.length];
-      const node = document.createElement('div');
-      const live = t.demo ? ' animate-pulse' : '';
-      node.className = `absolute w-8 h-8 ${c.bg} rounded-full border-2 ${c.ring} z-10 flex items-center justify-center shadow-sm transition-all duration-700${live}`;
-      node.style.left = `calc(${pos[i].x}% - 16px)`;
-      node.style.top = `calc(${pos[i].y}% - 16px)`;
-      node.style.animationDelay = (i * 0.2) + 's';
-      node.title = d;
-      graphCanvas.appendChild(node);
-    });
+      // Nodi dipendenza.
+      deps.forEach((d, i) => {
+        const c = NODE_COLORS[i % NODE_COLORS.length];
+        const node = document.createElement('div');
+        const live = t.demo ? ' animate-pulse' : '';
+        node.className = `absolute w-8 h-8 ${c.bg} rounded-full border-2 ${c.ring} z-10 flex items-center justify-center shadow-sm transition-all duration-700${live}`;
+        node.style.left = `calc(${pos[i].x}% - 16px)`;
+        node.style.top = `calc(${pos[i].y}% - 16px)`;
+        node.style.animationDelay = (i * 0.2) + 's';
+        node.title = d;
+        graphCanvas.appendChild(node);
+      });
 
-    // Nodo centrale = prodotto identificato.
-    const center = document.createElement('div');
-    center.className = 'absolute w-14 h-14 bg-white rounded-full border-2 border-cyan-400 z-20 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.2)]';
-    center.style.left = 'calc(50% - 28px)';
-    center.style.top = 'calc(50% - 28px)';
-    center.innerHTML = `<span class="font-code-sm text-[10px] font-bold text-cyan-700 text-center leading-tight px-1">${t.product}</span>`;
-    center.title = t.product + (t.version ? ' ' + t.version : '');
-    graphCanvas.appendChild(center);
+      // Nodo centrale = prodotto identificato.
+      const center = document.createElement('div');
+      center.className = 'absolute w-14 h-14 bg-white rounded-full border-2 border-cyan-400 z-20 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.2)]';
+      center.style.left = 'calc(50% - 28px)';
+      center.style.top = 'calc(50% - 28px)';
+      center.innerHTML = `<span class="font-code-sm text-[10px] font-bold text-cyan-700 text-center leading-tight px-1">${t.product}</span>`;
+      center.title = t.product + (t.version ? ' ' + t.version : '');
+      graphCanvas.appendChild(center);
 
-    // Badge "LIVE DEMO" finche' non parte una scansione reale.
-    if (t.demo) {
-      const badge = document.createElement('div');
-      badge.className = 'absolute top-0 right-0 z-30 flex items-center gap-1.5 font-label-caps text-[9px] text-cyan-600 bg-cyan-50 border border-cyan-100 px-2 py-0.5 rounded-full';
-      badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>LIVE DEMO';
-      graphCanvas.appendChild(badge);
-    }
+      // Badge "LIVE DEMO" finche' non parte una scansione reale.
+      if (t.demo) {
+        const badge = document.createElement('div');
+        badge.className = 'absolute top-0 right-0 z-30 flex items-center gap-1.5 font-label-caps text-[9px] text-cyan-600 bg-cyan-50 border border-cyan-100 px-2 py-0.5 rounded-full';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>LIVE DEMO';
+        graphCanvas.appendChild(badge);
+      }
 
-    // Legenda.
-    let rows = `
+      // Legenda.
+      let rows = `
       <div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
         <div class="flex items-center gap-3">
           <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
@@ -727,9 +899,9 @@
         </div>
         <span class="font-code-sm text-code-sm font-semibold bg-cyan-50 px-2 py-0.5 rounded text-cyan-700">${t.demo ? i18n.t('dash.legend_sample') : (t.version ? 'v' + t.version : i18n.t('dash.legend_product'))}</span>
       </div>`;
-    rows += deps.map((d, i) => {
-      const c = NODE_COLORS[i % NODE_COLORS.length];
-      return `
+      rows += deps.map((d, i) => {
+        const c = NODE_COLORS[i % NODE_COLORS.length];
+        return `
       <div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
         <div class="flex items-center gap-3">
           <div class="w-3 h-3 rounded-full ${c.dot}"></div>
@@ -737,82 +909,82 @@
         </div>
         <span class="font-code-sm text-code-sm font-semibold ${c.chip} px-2 py-0.5 rounded ${c.text}">${i18n.t('dash.legend_dependency')}</span>
       </div>`;
-    }).join('');
-    if (!deps.length) {
-      rows += `<p class="font-code-sm text-[11px] text-slate-400 px-2">${i18n.t('dash.legend_no_deps')}</p>`;
-    } else {
-      rows += `
+      }).join('');
+      if (!deps.length) {
+        rows += `<p class="font-code-sm text-[11px] text-slate-400 px-2">${i18n.t('dash.legend_no_deps')}</p>`;
+      } else {
+        rows += `
       <div class="pt-3 mt-1 border-t border-slate-100/70 flex items-center justify-between px-2">
         <span class="font-code-sm text-[11px] text-slate-400 flex items-center gap-2">
           <span class="inline-block w-4 border-t border-dashed border-indigo-300"></span> ${i18n.t('dash.legend_links')}
         </span>
         <span class="font-code-sm text-[11px] font-semibold text-indigo-500">${relCount}</span>
       </div>`;
+      }
+      graphLegend.innerHTML = rows;
     }
-    graphLegend.innerHTML = rows;
-  }
 
-  // --- Demo graph (idle): valori che cambiano ogni 3s --------------------
-  const DEMO_PRODUCTS = [
-    { product: 'python',     deps: ['openssl', 'libffi', 'zlib', 'sqlite'] },
-    { product: 'openssh',    deps: ['openssl', 'zlib', 'pam'] },
-    { product: 'nginx',      deps: ['openssl', 'pcre', 'zlib'] },
-    { product: 'apache',     deps: ['openssl', 'pcre', 'apr'] },
-    { product: 'php',        deps: ['openssl', 'pcre', 'zlib', 'libxml2'] },
-    { product: 'nodejs',     deps: ['openssl', 'v8', 'libuv', 'zlib'] },
-    { product: 'postgresql', deps: ['openssl', 'zlib', 'readline'] },
-    { product: 'redis',      deps: ['jemalloc', 'lua'] },
-  ];
-  let demoTimer = null;
+    // --- Demo graph (idle): valori che cambiano ogni 3s --------------------
+    const DEMO_PRODUCTS = [
+      { product: 'python', deps: ['openssl', 'libffi', 'zlib', 'sqlite'] },
+      { product: 'openssh', deps: ['openssl', 'zlib', 'pam'] },
+      { product: 'nginx', deps: ['openssl', 'pcre', 'zlib'] },
+      { product: 'apache', deps: ['openssl', 'pcre', 'apr'] },
+      { product: 'php', deps: ['openssl', 'pcre', 'zlib', 'libxml2'] },
+      { product: 'nodejs', deps: ['openssl', 'v8', 'libuv', 'zlib'] },
+      { product: 'postgresql', deps: ['openssl', 'zlib', 'readline'] },
+      { product: 'redis', deps: ['jemalloc', 'lua'] },
+    ];
+    let demoTimer = null;
 
-  function randVersion() {
-    return `${1 + Math.floor(Math.random() * 9)}.${Math.floor(Math.random() * 20)}.${Math.floor(Math.random() * 10)}`;
-  }
-  function demoTick() {
-    const base = DEMO_PRODUCTS[Math.floor(Math.random() * DEMO_PRODUCTS.length)];
-    // Sottoinsieme casuale di dipendenze (>=1) per far "cambiare" il grafo.
-    const shuffled = base.deps.slice().sort(() => Math.random() - 0.5);
-    const n = 1 + Math.floor(Math.random() * shuffled.length);
-    buildGraph({ product: base.product, version: randVersion(), deps: shuffled.slice(0, n), demo: true });
-  }
-  function startDemo() {
-    stopDemo();
-    demoTick();
-    demoTimer = setInterval(demoTick, 3000);
-  }
-  function stopDemo() {
-    if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
-  }
+    function randVersion() {
+      return `${1 + Math.floor(Math.random() * 9)}.${Math.floor(Math.random() * 20)}.${Math.floor(Math.random() * 10)}`;
+    }
+    function demoTick() {
+      const base = DEMO_PRODUCTS[Math.floor(Math.random() * DEMO_PRODUCTS.length)];
+      // Sottoinsieme casuale di dipendenze (>=1) per far "cambiare" il grafo.
+      const shuffled = base.deps.slice().sort(() => Math.random() - 0.5);
+      const n = 1 + Math.floor(Math.random() * shuffled.length);
+      buildGraph({ product: base.product, version: randVersion(), deps: shuffled.slice(0, n), demo: true });
+    }
+    function startDemo() {
+      stopDemo();
+      demoTick();
+      demoTimer = setInterval(demoTick, 3000);
+    }
+    function stopDemo() {
+      if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+    }
 
-  // --- Console helpers ---------------------------------------------------
-  function log(html, cls = '') {
-    const p = document.createElement('p');
-    p.className = cls;
-    p.innerHTML = html;
-    consoleEl.insertBefore(p, promptEl);
-    consoleEl.scrollTop = consoleEl.scrollHeight;
-  }
-  function clearConsole() {
-    consoleEl.querySelectorAll('p').forEach((p) => { if (p !== promptEl) p.remove(); });
-  }
+    // --- Console helpers ---------------------------------------------------
+    function log(html, cls = '') {
+      const p = document.createElement('p');
+      p.className = cls;
+      p.innerHTML = html;
+      consoleEl.insertBefore(p, promptEl);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    function clearConsole() {
+      consoleEl.querySelectorAll('p').forEach((p) => { if (p !== promptEl) p.remove(); });
+    }
 
-  const MATCH_STYLE = {
-    'VULNERABILE':     ['[MATCH]', 'text-rose-400', 'bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg', 'text-rose-200'],
-    'NON VULNERABILE': ['[OK]',    'text-emerald-400', '', 'text-slate-300'],
-    'INCERTO':         ['[WARN]',  'text-amber-400', 'bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg', 'text-amber-200'],
-  };
+    const MATCH_STYLE = {
+      'VULNERABILE': ['[MATCH]', 'text-rose-400', 'bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg', 'text-rose-200'],
+      'NON VULNERABILE': ['[OK]', 'text-emerald-400', '', 'text-slate-300'],
+      'INCERTO': ['[WARN]', 'text-amber-400', 'bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg', 'text-amber-200'],
+    };
 
-  // --- Asset inventory ---------------------------------------------------
-  function authBadge(req) {
-    return req
-      ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.authenticated')}</span>`
-      : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.not_required')}</span>`;
-  }
-  function assetRow(a) {
-    const icon = a.auth_required ? 'dns' : 'router';
-    const hover = a.auth_required ? 'hover:border-cyan-200' : 'hover:border-blue-200';
-    const iconHover = a.auth_required ? 'group-hover:bg-cyan-50 group-hover:text-cyan-600' : 'group-hover:bg-blue-50 group-hover:text-blue-600';
-    return `
+    // --- Asset inventory ---------------------------------------------------
+    function authBadge(req) {
+      return req
+        ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.authenticated')}</span>`
+        : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.not_required')}</span>`;
+    }
+    function assetRow(a) {
+      const icon = a.auth_required ? 'dns' : 'router';
+      const hover = a.auth_required ? 'hover:border-cyan-200' : 'hover:border-blue-200';
+      const iconHover = a.auth_required ? 'group-hover:bg-cyan-50 group-hover:text-cyan-600' : 'group-hover:bg-blue-50 group-hover:text-blue-600';
+      return `
       <div class="flex items-center justify-between p-3 border border-slate-100 bg-white/60 hover:bg-white ${hover} transition-all group rounded-xl">
         <div class="flex items-center gap-4">
           <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center transition-colors ${iconHover}">
@@ -825,233 +997,430 @@
         </div>
         ${authBadge(a.auth_required)}
       </div>`;
-  }
-  function updateAuthStats(list) {
-    const total = list.length;
-    const auth = list.filter((a) => a.auth_required).length;
-    const unauth = total - auth;
-    $('authCount').textContent = auth;
-    $('unauthCount').textContent = unauth;
-    $('authTotal').textContent = total;
-    $('authBar').style.width = (total ? (auth / total) * 100 : 0) + '%';
-    $('unauthBar').style.width = (total ? (unauth / total) * 100 : 0) + '%';
-  }
-
-  async function loadAssets() {
-    try {
-      const r = await fetch('/api/assets');
-      const d = await r.json();
-      const list = d.assets || [];
-      lastAssets = list;
-      assetList.innerHTML = list.length
-        ? list.map(assetRow).join('')
-        : `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm">${t('dash.inventory_none')}</div>`;
-      updateAuthStats(list);
-    } catch (e) {
-      assetList.innerHTML = `<div class="flex items-center justify-center h-full text-rose-300 font-code-sm text-code-sm">${t('dash.inventory_failed')}</div>`;
     }
-  }
-  loadAssets();
+    function updateAuthStats(list) {
+      $('authTotal').textContent = list.length;
+    }
 
-  // --- Security posture score --------------------------------------------
-  // Posture = media pesata sull'esito di matching di tutti gli asset scansionati.
-  //   NON VULNERABILE = 1.0  (asset sano)
-  //   INCERTO         = 0.5  (presente ma versione non confrontabile)
-  //   VULNERABILE     = 0.0  (esposto)
-  // score% = round( 100 * somma(pesi) / numero_asset ).  Parte da 0.
-  const POSTURE_WEIGHT = { 'NON VULNERABILE': 1.0, 'INCERTO': 0.5, 'VULNERABILE': 0.0 };
-  let scanResults = [];
+    const _dashStats = { not_available: 0, available: 0, ssh_ok: 0, ssh_fail: 0, pending: 0 };
+    function _renderDashStats() {
+      const total = _dashStats.not_available + _dashStats.available + _dashStats.ssh_ok + _dashStats.ssh_fail + _dashStats.pending;
+      const pct = (n) => (total ? (n / total) * 100 : 0) + '%';
+      $('stat-not-available').textContent = _dashStats.not_available;
+      $('stat-available').textContent     = _dashStats.available;
+      $('stat-ssh-ok').textContent        = _dashStats.ssh_ok;
+      $('stat-ssh-fail').textContent      = _dashStats.ssh_fail;
+      $('bar-not-available').style.width  = pct(_dashStats.not_available);
+      $('bar-available').style.width      = pct(_dashStats.available);
+      $('bar-ssh-ok').style.width         = pct(_dashStats.ssh_ok);
+      $('bar-ssh-fail').style.width       = pct(_dashStats.ssh_fail);
+      const busy = _dashStats.pending > 0;
+      $('stat-checking-icon').classList.toggle('hidden', !busy);
+      $('stat-done-icon').classList.toggle('hidden', busy);
+      $('stat-checking-label').classList.toggle('hidden', !busy);
+    }
 
-  // VERIFIED ASSETS: contatore asset verificati. Parte da 0 a ogni scansione,
-  // +1 per ogni asset man mano che arriva il suo risultato.
-  let verifiedCount = 0;
-
-  // ACTIVE VULNERABILITIES: somma delle CVE (OSV) su tutti gli asset positivi.
-  // Parte da 0 e si aggiorna a ogni asset scansionato.
-  let cveTotal = 0;
-
-  // SECURITY POSTURE SCORE: numero di asset in cui il prodotto NON e' stato trovato.
-  let notFoundCount = 0;
-
-  function setPosture(score) {
-    $('postureScore').textContent = score;
-    $('postureBar').style.width = score + '%';
-  }
-  function computePosture() {
-    if (!scanResults.length) { setPosture(0); return; }
-    const sum = scanResults.reduce((s, m) => s + (POSTURE_WEIGHT[m] ?? 0.5), 0);
-    setPosture(Math.round((sum / scanResults.length) * 100));
-  }
-
-  function resetPipelineDetect() {
-    const step = $('pipe-detect');
-    if (!step) return;
-    step.className = 'flex items-center gap-4 relative z-10 opacity-60';
-    step.querySelector('div').className = 'w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center';
-    step.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-slate-400 text-sm';
-    step.querySelector('span:last-child').className = 'font-code-sm text-code-sm text-slate-400';
-  }
-
-  // --- Scan sequence -----------------------------------------------------
-  let es = null;
-  function runScan() {
-    const desc = input.value.trim();
-    if (!desc) { input.focus(); return; }
-    if (es) es.close();
-
-    stopDemo();
-    clearConsole();
-    resetGraph();
-    lastTarget = null;
-    scanResults = [];
-    setPosture(0);           // parte sempre da zero
-    cveTotal = 0;            // ACTIVE VULNERABILITIES riparte da 0
-    $('kpiVulns').textContent = '0';
-    notFoundCount = 0;       // asset senza il prodotto, mostrato nel box posture
-    $('postureNote').textContent = t('dash.posture_note', { n: 0 });
-    verifiedCount = 0;       // VERIFIED ASSETS riparte da 0 a ogni scansione
-    $('kpiAssets').textContent = '0';
-    $('kpiAssetsDelta').textContent = t('dash.verified_scanning');
-    resetPipelineDetect();   // step "Active Detection" torna in attesa
-    runBtn.disabled = true;
-    log(`<span class="text-indigo-400">[SYS]</span> ${t('dash.console_init')}`, 'opacity-70');
-    log(`<span class="text-indigo-400">[SYS]</span> ${t('log.query')} <span class="text-white bg-white/10 px-1 rounded">${desc.replace(/</g,'&lt;')}</span>`, 'opacity-70');
-
-    const deep = $('deepProbe') && $('deepProbe').checked;
-    const url = `/api/scan?description=${encodeURIComponent(desc)}&use_osint=true&lang=${i18n.lang}`
-      + (deep ? '&deep=true' : '');
-    es = new EventSource(url);
-
-    es.addEventListener('target', (e) => {
-      const t = JSON.parse(e.data);
-      lastTarget = t;
-      if (t.product) {
-        const ver = t.version ? ' ' + t.version : '';
-        log(`<span class="text-cyan-400">[INFO]</span> ${i18n.t('log.product_identified')} <span class="text-white">${t.product}${ver}</span> <span class="text-slate-500">(${i18n.t('log.source')}: ${t.source})</span>`);
-      } else {
-        log(`<span class="text-amber-400">[WARN]</span> ${i18n.t('log.no_product')}`);
+    async function runDashHealthChecks(assets) {
+      _dashStats.not_available = 0; _dashStats.available = 0;
+      _dashStats.ssh_ok = 0; _dashStats.ssh_fail = 0;
+      _dashStats.pending = assets.length;
+      _renderDashStats();
+      for (const a of assets) {
+        try {
+          const r = await fetch('/api/asset/health?host=' + encodeURIComponent(a.ip) + '&index=' + a.index);
+          const d = await r.json();
+          if (!d.reachable)        _dashStats.not_available++;
+          else if (d.ssh_ok === null) _dashStats.available++;
+          else if (d.ssh_ok)       _dashStats.ssh_ok++;
+          else                     _dashStats.ssh_fail++;
+        } catch (_) {
+          _dashStats.not_available++;
+        }
+        _dashStats.pending--;
+        _renderDashStats();
       }
-    });
+    }
 
-    es.addEventListener('result', (e) => {
-      const r = JSON.parse(e.data);
-      scanResults.push(r.vuln_match);
-      verifiedCount += 1;      // +1 per ogni asset verificato
-      $('kpiAssets').textContent = verifiedCount.toLocaleString();
-      $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
-      // ACTIVE VULNERABILITIES: somma CVE degli asset positivi, aggiornata live.
-      if (r.product_found && typeof r.cve_count === 'number') {
-        cveTotal += r.cve_count;
-        $('kpiVulns').textContent = cveTotal.toLocaleString();
+    // --- Posture scan widget (dashboard mirror of intel.html progress bar) ---
+    let postureEs = null;
+    function runPostureScan() {
+      if (postureEs) postureEs.close();
+      const btn = $('psRunBtn');
+      const wrap = $('psProgressWrap');
+      const label = $('psProgressLabel');
+      const count = $('psProgressCount');
+      const bar = $('psProgressBar');
+      btn.disabled = true;
+      wrap.classList.remove('hidden');
+      bar.style.width = '0%';
+      label.textContent = 'Scanning assets…';
+      count.textContent = '0/0';
+      let total = 0, done = 0, scoreSum = 0, cves = 0;
+      postureEs = new EventSource('/api/posture/scan');
+      postureEs.addEventListener('run', e => {
+        total = JSON.parse(e.data).total_assets;
+        count.textContent = `0/${total}`;
+      });
+      postureEs.addEventListener('asset', e => {
+        const a = JSON.parse(e.data);
+        done++;
+        scoreSum += a.score || 0;
+        cves += a.total_vulns || 0;
+        const avg = Math.round(scoreSum / done);
+        count.textContent = `${done}/${total}`;
+        bar.style.width = (total ? (done / total * 100) : 0) + '%';
+        label.textContent = `Scanning assets… (${a.ip})`;
+        $('postureScore').textContent = avg;
+        $('postureBar').style.width = avg + '%';
+        $('kpiVulns').textContent = cves.toLocaleString();
+      });
+      postureEs.addEventListener('done', e => {
+        const d = JSON.parse(e.data);
+        label.textContent = 'Scan complete';
+        bar.style.width = '100%';
+        count.textContent = `${d.assets_scanned}/${d.assets_scanned}`;
+        $('postureScore').textContent = d.avg_score ?? '—';
+        $('postureBar').style.width = (d.avg_score ?? 0) + '%';
+        $('postureNote').textContent = `${d.total_vulns} CVEs · ${d.assets_scanned} asset${d.assets_scanned !== 1 ? 's' : ''} scanned`;
+        $('kpiVulns').textContent = (d.total_vulns || 0).toLocaleString();
+        setTimeout(() => { wrap.classList.add('hidden'); bar.style.width = '0%'; }, 2500);
+        btn.disabled = false;
+        postureEs.close();
+      });
+      postureEs.addEventListener('error', () => {
+        label.textContent = 'Scan error';
+        btn.disabled = false;
+        if (postureEs) postureEs.close();
+      });
+    }
+    $('psRunBtn').addEventListener('click', runPostureScan);
+
+    // Load latest posture run on page load
+    (async function loadLatestPosture() {
+      try {
+        const r = await fetch('/api/posture');
+        const d = await r.json();
+        const run = d.run || {};
+        const assets = run.posture_assets || [];
+        if (!assets.length) return;
+        const avg = Math.round(assets.reduce((s, a) => s + (a.score || 0), 0) / assets.length);
+        const cves = assets.reduce((s, a) => s + (a.total_vulns || 0), 0);
+        $('postureScore').textContent = avg;
+        $('postureBar').style.width = avg + '%';
+        $('postureNote').textContent = `${cves} CVEs · ${assets.length} asset${assets.length !== 1 ? 's' : ''} scanned`;
+        $('kpiVulns').textContent = cves.toLocaleString();
+      } catch (_) { /* Supabase offline — leave defaults */ }
+    })();
+
+    async function loadAssets() {
+      try {
+        const r = await fetch('/api/assets/all');
+        const d = await r.json();
+        const list = d.assets || [];
+        lastAssets = list;
+        assetList.innerHTML = list.length
+          ? list.map(assetRow).join('')
+          : `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm">${t('dash.inventory_none')}</div>`;
+        updateAuthStats(list);
+        runDashHealthChecks(list);
+      } catch (e) {
+        assetList.innerHTML = `<div class="flex items-center justify-center h-full text-rose-300 font-code-sm text-code-sm">${t('dash.inventory_failed')}</div>`;
       }
-      // SECURITY POSTURE SCORE: conteggio asset senza il prodotto, live.
-      if (!r.product_found) {
-        notFoundCount += 1;
-        $('postureNote').textContent = t('dash.posture_note', { n: notFoundCount });
-      }
-      const [tag, tagCls, boxCls, txtCls] = MATCH_STYLE[r.vuln_match] || ['[INFO]', 'text-cyan-400', '', 'text-slate-300'];
-      const ver = r.detected_version ? ' ' + r.detected_version : '';
-      let cveNote = '';
-      if (r.cve_count !== null && r.cve_count !== undefined) {
-        cveNote = r.cve_count > 0
-          ? ` <span class="text-rose-300">· ${t('log.cve_n', { n: r.cve_count })}</span>`
-          : ` <span class="text-emerald-300">· ${t('log.cve_0')}</span>`;
-      }
-      const detail = r.product_found ? ' — ' + t('log.detected') + ver : ' — ' + t('log.product_not_found');
-      const advNote = (r.match_basis === 'ai-advisory')
-        ? ` <span class="text-amber-300">· ${t('log.ai_basis')} (${t('log.ai_affected')}: ${r.affected_version})</span>`
-        : '';
-      const body = `<span class="font-bold ${tagCls}">${tag}</span> <span class="${txtCls}">${t('vuln.' + r.vuln_match)}</span> ${t('log.on_host')} <span class="text-white bg-white/10 px-1 rounded">${r.ip}</span> <span class="text-slate-500">[${r.method}]</span>${detail}${advNote}${cveNote}`;
-      if (boxCls) {
+    }
+    loadAssets();
+
+    // --- Security posture score --------------------------------------------
+    // Posture = media pesata sull'esito di matching di tutti gli asset scansionati.
+    //   NON VULNERABILE = 1.0  (asset sano)
+    //   INCERTO         = 0.5  (presente ma versione non confrontabile)
+    //   VULNERABILE     = 0.0  (esposto)
+    // score% = round( 100 * somma(pesi) / numero_asset ).  Parte da 0.
+    const POSTURE_WEIGHT = { 'NON VULNERABILE': 1.0, 'INCERTO': 0.5, 'VULNERABILE': 0.0 };
+    let scanResults = [];
+
+    // VERIFIED ASSETS: contatore asset verificati. Parte da 0 a ogni scansione,
+    // +1 per ogni asset man mano che arriva il suo risultato.
+    let verifiedCount = 0;
+
+    // ACTIVE VULNERABILITIES: somma delle CVE (OSV) su tutti gli asset positivi.
+    // Parte da 0 e si aggiorna a ogni asset scansionato.
+    let cveTotal = 0;
+
+    // SECURITY POSTURE SCORE: numero di asset in cui il prodotto NON e' stato trovato.
+    let notFoundCount = 0;
+
+    function setPosture(score) {
+      $('postureScore').textContent = score;
+      $('postureBar').style.width = score + '%';
+    }
+    function computePosture() {
+      if (!scanResults.length) { setPosture(0); return; }
+      const sum = scanResults.reduce((s, m) => s + (POSTURE_WEIGHT[m] ?? 0.5), 0);
+      setPosture(Math.round((sum / scanResults.length) * 100));
+    }
+
+    const _PIPE_ICONS = { 'pipe-parse': 'data_object', 'pipe-osint': 'travel_explore', 'pipe-detect': 'troubleshoot' };
+    const _PIPE_CFG = {
+      idle:    { wrap: 'flex items-center gap-4 relative z-10 opacity-40', circle: 'w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center', iconCls: 'material-symbols-outlined text-slate-400 text-sm', labelCls: 'font-code-sm text-code-sm text-slate-400', status: '' },
+      running: { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-white border-2 border-cyan-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-cyan-500 text-sm animate-pulse', labelCls: 'font-code-sm text-code-sm text-cyan-700 font-semibold', status: 'RUNNING…' },
+      done:    { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-emerald-500 text-sm', labelCls: 'font-code-sm text-code-sm text-emerald-700 font-semibold', status: 'DONE', icon: 'check_circle' },
+      error:   { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-rose-50 border-2 border-rose-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-rose-500 text-sm', labelCls: 'font-code-sm text-code-sm text-rose-700 font-semibold', status: 'ERROR', icon: 'error' },
+    };
+    function setPipeStep(id, state) {
+      const el = $(id); if (!el) return;
+      const cfg = _PIPE_CFG[state] || _PIPE_CFG.idle;
+      el.className = cfg.wrap;
+      el.querySelector('div').className = cfg.circle;
+      const icon = el.querySelector('span.material-symbols-outlined');
+      icon.className = cfg.iconCls;
+      icon.textContent = cfg.icon || _PIPE_ICONS[id];
+      el.querySelector('.pipe-status').textContent = cfg.status;
+    }
+    function resetPipeline() {
+      ['pipe-parse', 'pipe-osint', 'pipe-detect'].forEach(id => setPipeStep(id, 'idle'));
+    }
+    function resetPipelineDetect() { resetPipeline(); }
+
+    // --- Scan sequence -----------------------------------------------------
+    let es = null;
+    function runScan() {
+      const desc = input.value.trim();
+      if (!desc) { input.focus(); return; }
+      if (es) es.close();
+
+      stopDemo();
+      clearConsole();
+      resetGraph();
+      lastTarget = null;
+      scanResults = [];
+      setPosture(0);
+      cveTotal = 0;
+      $('kpiVulns').textContent = '0';
+      notFoundCount = 0;
+      $('postureNote').textContent = t('dash.posture_note', { n: 0 });
+      verifiedCount = 0;
+      $('kpiAssets').textContent = '0';
+      $('kpiAssetsDelta').textContent = t('dash.verified_scanning');
+      resetPipeline();
+      setPipeStep('pipe-parse', 'running');
+      runBtn.disabled = true;
+      const _aiTotal = lastAssets.length || 0;
+      $('aiScanProgressWrap').classList.remove('hidden');
+      $('aiScanProgressLabel').textContent = 'Identifying target…';
+      $('aiScanProgressCount').textContent = _aiTotal ? `0/${_aiTotal}` : '';
+      $('aiScanProgressBar').style.width = '0%';
+      log(`<span class="text-indigo-400">[SYS]</span> ${t('dash.console_init')}`, 'opacity-70');
+      log(`<span class="text-indigo-400">[SYS]</span> ${t('log.query')} <span class="text-white bg-white/10 px-1 rounded">${desc.replace(/</g, '&lt;')}</span>`, 'opacity-70');
+
+      const deep = $('deepProbe') && $('deepProbe').checked;
+      const url = `/api/scan?description=${encodeURIComponent(desc)}&use_osint=true&lang=${i18n.lang}`
+        + (deep ? '&deep=true' : '');
+      es = new EventSource(url);
+
+      es.addEventListener('target', (e) => {
+        const t = JSON.parse(e.data);
+        lastTarget = t;
+        setPipeStep('pipe-parse', 'done');
+        setPipeStep('pipe-osint', 'running');
+        if (t.product) {
+          const ver = t.version ? ' ' + t.version : '';
+          $('aiScanProgressLabel').textContent = `Scanning ${t.product}${ver} across assets…`;
+          log(`<span class="text-cyan-400">[INFO]</span> ${i18n.t('log.product_identified')} <span class="text-white">${t.product}${ver}</span> <span class="text-slate-500">(${i18n.t('log.source')}: ${t.source})</span>`);
+        } else {
+          $('aiScanProgressLabel').textContent = 'No product identified — scanning all assets…';
+          log(`<span class="text-amber-400">[WARN]</span> ${i18n.t('log.no_product')}`);
+        }
+      });
+
+      let _pipeDetectStarted = false;
+      es.addEventListener('result', (e) => {
+        const r = JSON.parse(e.data);
+        if (!_pipeDetectStarted) {
+          _pipeDetectStarted = true;
+          setPipeStep('pipe-osint', 'done');
+          setPipeStep('pipe-detect', 'running');
+        }
+        scanResults.push(r.vuln_match);
+        verifiedCount += 1;
+        $('kpiAssets').textContent = verifiedCount.toLocaleString();
+        $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
+        $('aiScanProgressLabel').textContent = `Scanning ${r.ip}…`;
+        if (_aiTotal > 0) {
+          $('aiScanProgressCount').textContent = `${verifiedCount}/${_aiTotal}`;
+          $('aiScanProgressBar').style.width = (verifiedCount / _aiTotal * 100) + '%';
+        } else {
+          $('aiScanProgressBar').style.width = '60%';
+        }
+        // ACTIVE VULNERABILITIES: somma CVE degli asset positivi, aggiornata live.
+        if (r.product_found && typeof r.cve_count === 'number') {
+          cveTotal += r.cve_count;
+          $('kpiVulns').textContent = cveTotal.toLocaleString();
+        }
+        // SECURITY POSTURE SCORE: conteggio asset senza il prodotto, live.
+        if (!r.product_found) {
+          notFoundCount += 1;
+          $('postureNote').textContent = t('dash.posture_note', { n: notFoundCount });
+        }
+        const [tag, tagCls, boxCls, txtCls] = MATCH_STYLE[r.vuln_match] || ['[INFO]', 'text-cyan-400', '', 'text-slate-300'];
+        const ver = r.detected_version ? ' ' + r.detected_version : '';
+        let cveNote = '';
+        if (r.cve_count !== null && r.cve_count !== undefined) {
+          cveNote = r.cve_count > 0
+            ? ` <span class="text-rose-300">· ${t('log.cve_n', { n: r.cve_count })}</span>`
+            : ` <span class="text-emerald-300">· ${t('log.cve_0')}</span>`;
+        }
+        const detail = r.product_found ? ' — ' + t('log.detected') + ver : ' — ' + t('log.product_not_found');
+        const advNote = (r.match_basis === 'ai-advisory')
+          ? ` <span class="text-amber-300">· ${t('log.ai_basis')} (${t('log.ai_affected')}: ${r.affected_version})</span>`
+          : '';
+        const remNote = r.remediation
+          ? ` <span class="text-cyan-200">· ${r.remediation.replace(/</g, '&lt;')}</span>`
+          : '';
+        const body = `<span class="font-bold ${tagCls}">${tag}</span> <span class="${txtCls}">${t('vuln.' + r.vuln_match)}</span> ${t('log.on_host')} <span class="text-white bg-white/10 px-1 rounded">${r.ip}</span> <span class="text-slate-500">[${r.method}]</span>${detail}${advNote}${cveNote}${remNote}`;
+        if (boxCls) {
+          const div = document.createElement('div');
+          div.className = boxCls;
+          div.innerHTML = `<p class="${txtCls}">${body}</p>`;
+          consoleEl.insertBefore(div, promptEl);
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        } else {
+          log(body);
+        }
+      });
+
+      es.addEventListener('ai_call', (e) => {
+        const a = JSON.parse(e.data);
+        const providerTag = a.provider === 'claude'
+          ? `<span class="text-violet-400">claude</span>`
+          : `<span class="text-cyan-400">ollama</span>`;
+        const modelTag = `<span class="text-white bg-white/10 px-1 rounded font-code-sm">${a.model}</span>`;
+        const purposeLabel = a.purpose === 'advisory' ? 'advisory extraction'
+                           : a.purpose === 'extract' ? 'product identification'
+                           : a.purpose === 'triage' ? 'triage analysis'
+                           : 'CVE summary';
+        log(`<span class="text-amber-400">[AI]</span> invoking ${providerTag} · ${modelTag} → ${purposeLabel}`);
+      });
+
+      es.addEventListener('advisory', (e) => {
+        const a = JSON.parse(e.data);
+        log(`<span class="text-amber-400">[AI]</span> ${t('log.ai_affected')}: <span class="text-white">${a.affected_version}</span> <span class="text-slate-500">(${a.product})</span>`);
+      });
+
+      es.addEventListener('error', (e) => {
+        if (e.data) { try { log('<span class="text-rose-400">[ERR]</span> ' + JSON.parse(e.data).message); } catch (_) { } }
+        else { log('<span class="text-rose-400">[ERR]</span> stream interrupted'); }
+        ['pipe-parse','pipe-osint','pipe-detect'].forEach(id => {
+          const el = $(id);
+          if (el && el.className.includes('cyan')) setPipeStep(id, 'error');
+        });
+        $('aiScanProgressWrap').classList.add('hidden');
+        es.close(); runBtn.disabled = false;
+      });
+
+      es.addEventListener('cve', (e) => {
+        const c = JSON.parse(e.data);
+        // Pipeline: accende lo step "Active Detection".
+        const step = $('pipe-detect');
+        if (step) {
+          step.classList.remove('opacity-60');
+          step.querySelector('div').className = 'w-8 h-8 rounded-full bg-white border-2 border-rose-300 flex items-center justify-center shadow-sm';
+          step.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-rose-500 text-sm';
+          step.querySelector('span:last-child').className = 'font-code-sm text-code-sm text-slate-900 font-semibold';
+        }
+        const verTxt = c.version ? ' ' + c.version : '';
+        if (c.error) {
+          log(`<span class="text-amber-400">[CVE]</span> ${t('cve.osv_unreachable', { err: c.error })}`);
+        } else if (c.count > 0) {
+          const countSpan = `<span class="text-rose-300 font-bold">${c.count}</span>`;
+          log(`<span class="text-rose-400 font-bold">[CVE]</span> <span class="text-white">${c.product}${verTxt}</span>: ${t('cve.known', { n: countSpan })}`);
+          const div = document.createElement('div');
+          div.className = 'bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-lg space-y-2';
+          const idsHtml = (c.ids || []).map((id) =>
+            `<span class="inline-block font-code-sm text-[10px] text-indigo-200 bg-indigo-500/10 border border-indigo-400/20 px-1.5 py-0.5 rounded">${id}</span>`).join(' ');
+          div.innerHTML =
+            `<p class="text-indigo-200 text-[11px] font-label-caps tracking-wider">RAG · CVE INTELLIGENCE</p>` +
+            (idsHtml ? `<div class="flex flex-wrap gap-1">${idsHtml}${c.count > c.ids.length ? `<span class="text-indigo-300 text-[10px] px-1">${t('cve.more', { n: c.count - c.ids.length })}</span>` : ''}</div>` : '') +
+            (c.summary
+              ? `<p class="text-slate-200 leading-relaxed">${c.summary.replace(/</g, '&lt;')}</p>`
+              : `<p class="text-slate-400 text-[11px]">${t('cve.no_summary')}</p>`);
+          consoleEl.insertBefore(div, promptEl);
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        } else {
+          log(`<span class="text-emerald-400">[CVE]</span> <span class="text-white">${c.product}${verTxt}</span>: ${t('cve.none')}`);
+        }
+      });
+
+      es.addEventListener('triage', (e) => {
+        const tr = JSON.parse(e.data);
+        if (!tr.report) return;
         const div = document.createElement('div');
-        div.className = boxCls;
-        div.innerHTML = `<p class="${txtCls}">${body}</p>`;
-        consoleEl.insertBefore(div, promptEl);
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-      } else {
-        log(body);
-      }
-    });
-
-    es.addEventListener('advisory', (e) => {
-      const a = JSON.parse(e.data);
-      log(`<span class="text-amber-400">[AI]</span> ${t('log.ai_affected')}: <span class="text-white">${a.affected_version}</span> <span class="text-slate-500">(${a.product})</span>`);
-    });
-
-    es.addEventListener('error', (e) => {
-      // Custom server 'error' event carries data; native errors do not.
-      if (e.data) { try { log('<span class="text-rose-400">[ERR]</span> '+JSON.parse(e.data).message); } catch (_) {} }
-      else { log('<span class="text-rose-400">[ERR]</span> stream interrupted'); }
-      es.close(); runBtn.disabled = false;
-    });
-
-    es.addEventListener('cve', (e) => {
-      const c = JSON.parse(e.data);
-      // Pipeline: accende lo step "Active Detection".
-      const step = $('pipe-detect');
-      if (step) {
-        step.classList.remove('opacity-60');
-        step.querySelector('div').className = 'w-8 h-8 rounded-full bg-white border-2 border-rose-300 flex items-center justify-center shadow-sm';
-        step.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-rose-500 text-sm';
-        step.querySelector('span:last-child').className = 'font-code-sm text-code-sm text-slate-900 font-semibold';
-      }
-      const verTxt = c.version ? ' ' + c.version : '';
-      if (c.error) {
-        log(`<span class="text-amber-400">[CVE]</span> ${t('cve.osv_unreachable', { err: c.error })}`);
-      } else if (c.count > 0) {
-        const countSpan = `<span class="text-rose-300 font-bold">${c.count}</span>`;
-        log(`<span class="text-rose-400 font-bold">[CVE]</span> <span class="text-white">${c.product}${verTxt}</span>: ${t('cve.known', { n: countSpan })}`);
-        const div = document.createElement('div');
-        div.className = 'bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-lg space-y-2';
-        const idsHtml = (c.ids || []).map((id) =>
-          `<span class="inline-block font-code-sm text-[10px] text-indigo-200 bg-indigo-500/10 border border-indigo-400/20 px-1.5 py-0.5 rounded">${id}</span>`).join(' ');
+        div.className = 'bg-violet-500/10 border border-violet-500/20 p-3 rounded-lg space-y-1.5';
+        const lines = tr.report.split('\n').filter(l => l.trim());
+        const rowsHtml = lines.map(l => {
+          const parts = l.split('|').map(s => s.trim());
+          if (parts.length === 3) {
+            return `<div class="flex gap-2 text-[11px]">
+              <span class="font-code-sm text-violet-300 font-semibold shrink-0">${parts[0].replace(/</g, '&lt;')}</span>
+              <span class="text-slate-300">·</span>
+              <span class="text-slate-300">${parts[1].replace(/</g, '&lt;')}</span>
+              <span class="text-slate-400">→</span>
+              <span class="text-cyan-200">${parts[2].replace(/</g, '&lt;')}</span>
+            </div>`;
+          }
+          return `<p class="text-violet-200 text-[11px]">${l.replace(/</g, '&lt;')}</p>`;
+        }).join('');
         div.innerHTML =
-          `<p class="text-indigo-200 text-[11px] font-label-caps tracking-wider">RAG · CVE INTELLIGENCE</p>` +
-          (idsHtml ? `<div class="flex flex-wrap gap-1">${idsHtml}${c.count > c.ids.length ? `<span class="text-indigo-300 text-[10px] px-1">${t('cve.more', { n: c.count - c.ids.length })}</span>` : ''}</div>` : '') +
-          (c.summary
-            ? `<p class="text-slate-200 leading-relaxed">${c.summary.replace(/</g,'&lt;')}</p>`
-            : `<p class="text-slate-400 text-[11px]">${t('cve.no_summary')}</p>`);
+          `<p class="text-violet-300 text-[11px] font-label-caps tracking-wider mb-2">` +
+          `<span class="material-symbols-outlined text-[13px] align-middle mr-1">priority_high</span>` +
+          `AI · TRIAGE REPORT · ${(tr.product || '').toUpperCase()}</p>` +
+          rowsHtml;
         consoleEl.insertBefore(div, promptEl);
         consoleEl.scrollTop = consoleEl.scrollHeight;
-      } else {
-        log(`<span class="text-emerald-400">[CVE]</span> <span class="text-white">${c.product}${verTxt}</span>: ${t('cve.none')}`);
-      }
-    });
+      });
 
-    es.addEventListener('done', (e) => {
-      const d = JSON.parse(e.data);
-      const note = d.note === 'No product identified.' ? t('note.no_product') : d.note;
-      log(`<span class="text-indigo-400">[SYS]</span> ${t('scan.complete', { n: d.scanned })}${note ? ' · ' + note : ''}`, 'opacity-70');
-      buildGraph(lastTarget);
-      computePosture();        // aggiorna lo score a fine scansione
-      $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
-      es.close(); runBtn.disabled = false;
-    });
-  }
-
-  runBtn.addEventListener('click', runScan);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') runScan(); });
-
-  // Imposta i testi idle dipendenti da {n} (non gestibili da data-i18n statico).
-  function applyIdleI18n() {
-    if (runBtn.disabled) return;  // scansione in corso: non sovrascrivere
-    $('postureNote').textContent = t('dash.posture_note', { n: notFoundCount });
-    $('kpiAssetsDelta').textContent = (verifiedCount > 0)
-      ? t('dash.verified_count', { n: verifiedCount })
-      : t('dash.verified_waiting');
-  }
-
-  // Cambio lingua: ri-applica testi dinamici e ridisegna ciò che è già a schermo.
-  window.addEventListener('langchange', () => {
-    applyIdleI18n();
-    if (lastAssets.length) {
-      assetList.innerHTML = lastAssets.map(assetRow).join('');
+      es.addEventListener('done', (e) => {
+        const d = JSON.parse(e.data);
+        const note = d.note === 'No product identified.' ? t('note.no_product') : d.note;
+        log(`<span class="text-indigo-400">[SYS]</span> ${t('scan.complete', { n: d.scanned })}${note ? ' · ' + note : ''}`, 'opacity-70');
+        setPipeStep('pipe-parse', 'done');
+        setPipeStep('pipe-osint', 'done');
+        setPipeStep('pipe-detect', 'done');
+        buildGraph(lastTarget);
+        computePosture();
+        $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
+        $('aiScanProgressLabel').textContent = `Scan complete — ${d.scanned} asset${d.scanned !== 1 ? 's' : ''} checked`;
+        $('aiScanProgressBar').style.width = '100%';
+        $('aiScanProgressCount').textContent = `${d.scanned}/${d.scanned}`;
+        setTimeout(() => $('aiScanProgressWrap').classList.add('hidden'), 1800);
+        es.close(); runBtn.disabled = false;
+      });
     }
-    if (lastTarget) renderGraph(lastTarget);
-  });
-  applyIdleI18n();
 
-  // Avvia il grafo demo finche' l'utente non lancia una scansione reale.
-  startDemo();
-</script>
-</body></html>
+    runBtn.addEventListener('click', runScan);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') runScan(); });
+
+    // Imposta i testi idle dipendenti da {n} (non gestibili da data-i18n statico).
+    function applyIdleI18n() {
+      if (runBtn.disabled) return;  // scansione in corso: non sovrascrivere
+      $('postureNote').textContent = t('dash.posture_note', { n: notFoundCount });
+      $('kpiAssetsDelta').textContent = (verifiedCount > 0)
+        ? t('dash.verified_count', { n: verifiedCount })
+        : t('dash.verified_waiting');
+    }
+
+    // Cambio lingua: ri-applica testi dinamici e ridisegna ciò che è già a schermo.
+    window.addEventListener('langchange', () => {
+      applyIdleI18n();
+      if (lastAssets.length) {
+        assetList.innerHTML = lastAssets.map(assetRow).join('');
+      }
+      if (lastTarget) renderGraph(lastTarget);
+    });
+    applyIdleI18n();
+
+    // Avvia il grafo demo finche' l'utente non lancia una scansione reale.
+    startDemo();
+  </script>
+</body>
+
+</html>

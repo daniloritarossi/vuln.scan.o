@@ -27,10 +27,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from assets import load_assets, save_assets, Asset
-from osint import identify_product
-from scanner import scan_asset, SIMULATE_AUTH, version_affected
+from crypto import encrypt_password, is_encrypted, decrypt_password
+from config import load_config, save_config
+from osint import identify_product, extract_local
+from scanner import scan_asset, _get_simulate_auth as _simulate_auth, version_affected
 from cve import (query_osv, summarize_cves, query_osv_ids, extract_affected_version,
-                 query_osv_ecosystem)
+                 query_osv_ecosystem, generate_remediation, generate_triage_report)
 from db import (persist_scan, persist_result, update_scan_summary, fetch_audit,
                 create_posture_run, persist_posture_asset, finalize_posture_run,
                 fetch_posture, fetch_posture_runs)
@@ -49,7 +51,7 @@ def index(request: Request):
     """Serve la singola pagina dell'applicazione."""
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "simulate_auth": SIMULATE_AUTH},
+        {"request": request, "simulate_auth": _simulate_auth()},
     )
 
 
@@ -69,6 +71,71 @@ def audit_page(request: Request):
 def intel_page(request: Request):
     """Pagina INTEL: dashboard Full Posture (ASPM-style)."""
     return templates.TemplateResponse("intel.html", {"request": request})
+
+
+@app.get("/settings", response_class=HTMLResponse)
+def settings_page(request: Request):
+    """Pagina di configurazione dell'applicativo."""
+    return templates.TemplateResponse("settings.html", {"request": request})
+
+
+@app.get("/api/settings")
+def api_settings_get():
+    """Legge la configurazione corrente."""
+    cfg = load_config()
+    # Non esporre mai la chiave API in chiaro: maschera se presente.
+    masked = json.loads(json.dumps(cfg))
+    if masked.get("ai", {}).get("claude_api_key"):
+        masked["ai"]["claude_api_key"] = "••••••••"
+    if masked.get("search_engine", {}).get("serper_api_key"):
+        masked["search_engine"]["serper_api_key"] = "••••••••"
+    return masked
+
+
+@app.post("/api/settings")
+async def api_settings_post(request: Request):
+    """Aggiorna la configurazione. Merge parziale per sezione."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+
+    cfg = load_config()
+
+    # Aggiorna solo le sezioni/chiavi ricevute; non sovrascrivere le chiavi
+    # API se il client invia il placeholder "••••••••".
+    for section, values in body.items():
+        if section not in cfg:
+            continue
+        if not isinstance(values, dict):
+            continue
+        for key, val in values.items():
+            if key not in cfg[section]:
+                continue
+            # Preserva il valore originale se il frontend invia placeholder.
+            if isinstance(val, str) and "••••" in val:
+                continue
+            cfg[section][key] = val
+
+    save_config(cfg)
+    return {"ok": True}
+
+
+@app.get("/api/ollama/models")
+def api_ollama_models():
+    """Lista modelli disponibili su Ollama (GET /api/tags). [] se offline."""
+    import requests as _req
+    from urllib.parse import urlparse
+    cfg = load_config()["ai"]
+    base = urlparse(cfg.get("ollama_url", "http://localhost:11434/api/generate"))
+    tags_url = f"{base.scheme}://{base.netloc}/api/tags"
+    try:
+        r = _req.get(tags_url, timeout=4)
+        r.raise_for_status()
+        models = [m["name"] for m in r.json().get("models", [])]
+        return {"models": sorted(models)}
+    except Exception:
+        return {"models": []}
 
 
 @app.get("/api/posture/scan")
@@ -100,6 +167,8 @@ def api_posture_scan(ips: str | None = None):
         n = pkgs = vuln = vulns = score_sum = 0
         for asset in assets:
             report = scan_asset_posture(asset)
+            report["os_type"] = asset.os_type or None
+            report["os_major_version"] = asset.os_major_version or None
             persist_posture_asset(run_id, report)
             n += 1
             pkgs += report["total_packages"]
@@ -180,16 +249,58 @@ def _reachable(host: str, ports=(80, 443, 22, 8080), timeout: float = 1.5) -> bo
     return False
 
 
+def _check_ssh(asset: Asset, timeout: float = 3.0) -> bool:
+    """Tenta login SSH reale con le credenziali dell'asset. True se ha successo."""
+    import paramiko
+    try:
+        password = decrypt_password(asset.password)
+    except RuntimeError:
+        return False
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(
+            asset.ip,
+            username=asset.username,
+            password=password,
+            timeout=timeout,
+            allow_agent=False,
+            look_for_keys=False,
+        )
+        return True
+    except Exception:
+        return False
+    finally:
+        client.close()
+
+
 @app.get("/api/asset/health")
-def api_asset_health(host: str):
+def api_asset_health(host: str, index: int | None = None):
     """
-    Test di raggiungibilita' runtime di un asset (connessione TCP su porte note).
-    Usato dalla colonna ACTIVE della pagina Asset Inventory.
+    Raggiungibilita' TCP + (se index fornito e asset ha credenziali) login SSH.
+    Risposta: {reachable, ssh_ok}  — ssh_ok=null se nessuna credenziale.
     """
     h = _normalize_host(host)
     if not h:
-        return {"host": host, "reachable": False}
-    return {"host": host, "reachable": _reachable(h)}
+        return {"host": host, "reachable": False, "ssh_ok": None}
+
+    reachable = _reachable(h)
+    ssh_ok = None
+
+    if reachable and index is not None:
+        try:
+            assets = load_assets(ASSETS_FILE)
+        except FileNotFoundError:
+            assets = []
+        if 0 <= index < len(assets):
+            asset = assets[index]
+            if asset.auth_required:
+                if is_encrypted(asset.password):
+                    ssh_ok = _check_ssh(asset)
+                else:
+                    ssh_ok = False  # password in chiaro: login rifiutato
+
+    return {"host": host, "reachable": reachable, "ssh_ok": ssh_ok}
 
 
 @app.get("/api/cve")
@@ -212,13 +323,16 @@ def api_assets():
 
 
 def _asset_full(index: int, a: Asset) -> dict:
-    """Serializzazione completa per la pagina di gestione (password inclusa)."""
+    """Serializzazione per la pagina CRUD. La password non viene mai esposta."""
     return {
         "index": index,
         "ip": a.ip,
         "username": a.username,
-        "password": a.password,
+        "has_password": bool(a.password),
+        "password_encrypted": is_encrypted(a.password) if a.password else True,
         "auth_required": a.auth_required,
+        "os_type": a.os_type,
+        "os_major_version": a.os_major_version,
     }
 
 
@@ -243,10 +357,17 @@ async def api_assets_create(request: Request):
         assets = load_assets(ASSETS_FILE)
     except FileNotFoundError:
         assets = []
+    plain_pw = (body.get("password") or "").strip()
+    try:
+        stored_pw = encrypt_password(plain_pw) if plain_pw else ""
+    except RuntimeError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
     assets.append(Asset(
         ip=ip,
         username=(body.get("username") or "").strip(),
-        password=(body.get("password") or "").strip(),
+        password=stored_pw,
+        os_type=(body.get("os_type") or "").strip().lower(),
+        os_major_version=(body.get("os_major_version") or "").strip(),
     ))
     save_assets(assets, ASSETS_FILE)
     return {"ok": True, "index": len(assets) - 1}
@@ -265,10 +386,20 @@ async def api_assets_update(index: int, request: Request):
         assets = []
     if index < 0 or index >= len(assets):
         return JSONResponse({"error": "Invalid index"}, status_code=404)
+    plain_pw = (body.get("password") or "").strip()
+    if plain_pw:
+        try:
+            stored_pw = encrypt_password(plain_pw)
+        except RuntimeError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=500)
+    else:
+        stored_pw = assets[index].password  # mantiene password cifrata esistente
     assets[index] = Asset(
         ip=ip,
         username=(body.get("username") or "").strip(),
-        password=(body.get("password") or "").strip(),
+        password=stored_pw,
+        os_type=(body.get("os_type") or "").strip().lower(),
+        os_major_version=(body.get("os_major_version") or "").strip(),
     )
     save_assets(assets, ASSETS_FILE)
     return {"ok": True}
@@ -316,6 +447,10 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
     """
     def event_stream():
         # 1. Identificazione prodotto.
+        # Punto 1: se il dizionario locale non trova nulla, l'LLM sarà invocato.
+        _local_peek = extract_local(description)
+        if not _local_peek.product and use_osint:
+            yield _sse("ai_call", {**_ai_tag(), "purpose": "extract"})
         target = identify_product(description, use_osint=use_osint)
         yield _sse("target", target.to_dict())
 
@@ -335,6 +470,7 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         #     dedurre il RANGE di versione affetto, da confrontare con quella
         #     installata su ciascun asset. Best-effort ('' se Ollama offline).
         if not target.version:
+            yield _sse("ai_call", {**_ai_tag(), "purpose": "advisory"})
             advisory_expr = extract_affected_version(target.product, description)
             affected_source = "ai" if advisory_expr else None
         else:
@@ -356,6 +492,8 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
 
         # 3. Scansione asset per asset (risultati in tempo reale), con
         #    arricchimento CVE (OSV) sulla versione realmente rilevata.
+        ai_remediation = bool(load_config()["ai"].get("ai_remediation", False))
+        all_results: list[dict] = []
         summary_version = None
         for asset in assets:
             result = scan_asset(asset, target, deep=deep)
@@ -384,6 +522,17 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
                 rd["cve_count"] = None
                 rd["cve_ids"] = []
                 rd["cve_error"] = None
+            # Arricchimento con OS info dall'inventario asset.
+            rd["os_type"] = asset.os_type or None
+            rd["os_major_version"] = asset.os_major_version or None
+            # Punto 4: remediation AI (solo se abilitato in config e asset vulnerabile).
+            rd["remediation"] = ""
+            if ai_remediation and rd["vuln_match"] == "VULNERABILE" and rd.get("cve_count"):
+                rd["remediation"] = generate_remediation(
+                    target.product, rd.get("detected_version"),
+                    rd.get("cve_ids", []), rd.get("cve_count", 0), lang=lang,
+                )
+            all_results.append(rd)
             # Persistenza del singolo esito (best-effort).
             persist_result(scan_id, rd)
             yield _sse("result", rd)
@@ -391,6 +540,8 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         # 4. Sintesi CVE (OSV per il conteggio ufficiale + LLM locale per il testo).
         ver = summary_version or target.version
         osv = query_osv(target.product, ver)
+        if osv["ids"]:
+            yield _sse("ai_call", {**_ai_tag(), "purpose": "summary"})
         summary = summarize_cves(target.product, ver, osv["ids"], count=osv["count"], lang=lang)
         cve_payload = {
             "product": target.product,
@@ -404,6 +555,13 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         update_scan_summary(scan_id, cve_payload)
         yield _sse("cve", cve_payload)
 
+        # Punto 2: triage AI post-scan — top-3 asset critici con motivazione e azione.
+        if all_results:
+            yield _sse("ai_call", {**_ai_tag(), "purpose": "triage"})
+            triage_text = generate_triage_report(all_results, target.product, lang=lang)
+            if triage_text:
+                yield _sse("triage", {"report": triage_text, "product": target.product})
+
         yield _sse("done", {"scanned": len(assets)})
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
@@ -412,6 +570,15 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
 def _sse(event: str, payload: dict) -> str:
     """Formatta un messaggio Server-Sent Event."""
     return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
+
+
+def _ai_tag() -> dict:
+    """Provider e modello LLM correnti per i log SSE."""
+    ai = load_config()["ai"]
+    provider = ai.get("provider", "ollama")
+    model = (ai.get("claude_model") if provider == "claude"
+             else ai.get("ollama_model", "qwen2.5:7b"))
+    return {"provider": provider, "model": model}
 
 
 if __name__ == "__main__":

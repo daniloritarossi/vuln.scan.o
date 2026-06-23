@@ -3,24 +3,23 @@ osint.py
 --------
 Estrazione del "Software Target" da una descrizione testuale di vulnerabilita'.
 
-L'input dell'utente puo' essere libero e privo di CVE, es:
-    "Remote Code Execution in Python 3.10 via HTTP component"
-    "Buffer overflow affecting OpenSSH 8.4"
-
 Strategia:
 1) Estrazione LOCALE (primaria, sempre attiva): matching su un dizionario di
    prodotti noti + regex per la versione. Veloce e offline.
-2) Arricchimento OSINT (opzionale): query a DuckDuckGo (HTML endpoint) con
-   BeautifulSoup per confermare/identificare il prodotto quando l'estrazione
-   locale fallisce. Disattivabile (e attivo solo se 'requests' e' disponibile).
+2) Arricchimento OSINT (opzionale): query al motore di ricerca configurato
+   (DuckDuckGo o Serper) per confermare/identificare il prodotto quando
+   l'estrazione locale fallisce. Disattivabile via config.
 
-L'OSINT online e' best-effort: se la rete non e' disponibile o DDG cambia
-markup, il sistema ricade sull'estrazione locale senza errori.
+L'OSINT online e' best-effort: se la rete non e' disponibile il sistema
+ricade sull'estrazione locale senza errori.
 """
 
 import re
 from dataclasses import dataclass, field
 from typing import List, Optional
+
+from config import load_config
+from cve import extract_product_llm
 
 try:
     import requests
@@ -114,7 +113,6 @@ def extract_local(text: str) -> TargetInfo:
 
     for product, aliases in KNOWN_PRODUCTS.items():
         for alias in aliases:
-            # \b per evitare falsi positivi (es. "ssh" dentro altre parole).
             if re.search(rf"\b{re.escape(alias)}\b", lowered):
                 candidates.append(product)
                 if len(alias) > best_len:
@@ -133,10 +131,7 @@ def extract_local(text: str) -> TargetInfo:
 
 
 def _ddg_search(query: str, timeout: int = 6) -> str:
-    """
-    Interroga l'endpoint HTML di DuckDuckGo e ritorna il testo dei risultati.
-    Best-effort: in caso di errore ritorna stringa vuota.
-    """
+    """DuckDuckGo HTML endpoint. Best-effort."""
     if not _NET_AVAILABLE:
         return ""
     try:
@@ -154,11 +149,44 @@ def _ddg_search(query: str, timeout: int = 6) -> str:
         return ""
 
 
-# Quante volte il prodotto dedotto deve comparire nei risultati DDG per
-# essere considerato attendibile. Evita falsi positivi su citazioni isolate
-# senza pretendere (come prima) che il nome sia gia' presente nell'input:
-# cosi' query come "PyPI ..." possono correttamente risolvere a "python".
-_MIN_OSINT_HITS = 2
+def _serper_search(query: str, api_key: str, timeout: int = 6) -> str:
+    """Serper.dev Google SERP API. Best-effort."""
+    if not _NET_AVAILABLE or not api_key:
+        return ""
+    try:
+        resp = requests.post(
+            "https://google.serper.dev/search",
+            json={"q": query},
+            headers={
+                "X-API-KEY": api_key,
+                "Content-Type": "application/json",
+            },
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        parts = []
+        for item in data.get("organic", []):
+            if item.get("title"):
+                parts.append(item["title"])
+            if item.get("snippet"):
+                parts.append(item["snippet"])
+        return " ".join(parts)
+    except Exception:
+        return ""
+
+
+def _web_search(query: str, timeout: int = 6) -> str:
+    """Dispatch search al provider configurato (duckduckgo o serper)."""
+    cfg = load_config()["search_engine"]
+    provider = cfg.get("provider", "duckduckgo")
+    if provider == "serper":
+        result = _serper_search(query, cfg.get("serper_api_key", ""), timeout)
+        if result:
+            return result
+        # fallback DDG se serper fallisce (chiave vuota / quota esaurita)
+        return _ddg_search(query, timeout)
+    return _ddg_search(query, timeout)
 
 
 def _count_product_hits(product: str, text: str) -> int:
@@ -172,54 +200,74 @@ def _count_product_hits(product: str, text: str) -> int:
 
 def extract_osint(text: str) -> TargetInfo:
     """
-    Arricchimento online: se l'estrazione locale non trova il prodotto,
-    interroga DuckDuckGo e ri-applica il matching locale sul testo dei risultati.
+    Arricchimento online: interroga il motore di ricerca configurato,
+    poi usa prima l'LLM e poi (fallback) il matching regex locale sul testo.
 
-    Si fida del prodotto dedotto solo se compare almeno _MIN_OSINT_HITS volte
-    nei risultati (soglia anti-falsi-positivi).
+    Si fida del prodotto dedotto via regex solo se compare almeno min_osint_hits
+    volte nei risultati (soglia anti-falsi-positivi configurabile).
     """
-    results_text = _ddg_search(text)
+    cfg = load_config()["search_engine"]
+    min_hits = int(cfg.get("min_osint_hits", 2))
+
+    results_text = _web_search(text)
     if not results_text:
         return TargetInfo(None, extract_version(text), None, "none")
 
-    # Ri-usa il matching locale sul corpus restituito dalla ricerca.
+    # Punto 3: LLM processa il testo web per estrarre prodotto + versione.
+    combined = f"Original query: {text}\n\nSearch results: {results_text[:1500]}"
+    llm = extract_product_llm(combined)
+    if llm["product"]:
+        return TargetInfo(
+            product=llm["product"],
+            version=llm["version"] or extract_version(text),
+            matched_alias=llm["product"],
+            source="osint",
+            candidates=[llm["product"]],
+        )
+
+    # Fallback: regex locale sul testo web (comportamento precedente).
     info = extract_local(results_text)
     if not info.product:
         return TargetInfo(None, extract_version(text), None, "none")
 
-    if _count_product_hits(info.product, results_text) < _MIN_OSINT_HITS:
+    if _count_product_hits(info.product, results_text) < min_hits:
         return TargetInfo(None, extract_version(text), None, "none")
 
     info.source = "osint"
-    # Versione SOLO dall'input originale: i numeri nei risultati web sono
-    # spesso spuri (citazioni, anni, ecc.).
     info.version = extract_version(text)
     return info
-
-
-# Lunghezza minima della query (solo alfanumerici) per fidarsi dell'OSINT.
-# Sotto questa soglia un input e' troppo ambiguo (es. typo "pyp") e l'OSINT
-# tenderebbe a "indovinare" un prodotto non pertinente.
-_MIN_OSINT_QUERY = 4
 
 
 def identify_product(text: str, use_osint: bool = True) -> TargetInfo:
     """
     Punto di ingresso unico per il backend.
 
-    1. Prova l'estrazione locale.
-    2. Se fallisce e use_osint=True, tenta l'arricchimento via DuckDuckGo, ma
-       solo se la query e' abbastanza specifica. L'attendibilita' del prodotto
-       dedotto e' gestita da extract_osint (soglia di occorrenze nei risultati).
+    1. Estrazione locale (dizionario + regex) — offline, prioritaria.
+    2. (Punto 1) Fallback LLM diretto — deduce prodotto senza web search.
+    3. (Punto 3) OSINT web search + LLM sui risultati — solo se LLM offline o fallisce.
     """
+    cfg = load_config()["search_engine"]
+    min_query = int(cfg.get("min_osint_query", 4))
+
     local = extract_local(text)
     if local.product or not use_osint:
         return local
 
-    # Query troppo corta/ambigua: non fidarsi dell'OSINT.
-    if len(re.sub(r"[^a-z0-9]", "", text.lower())) < _MIN_OSINT_QUERY:
+    if len(re.sub(r"[^a-z0-9]", "", text.lower())) < min_query:
         return local
 
+    # Punto 1: LLM diretto — più veloce del web search, nessuna rete esterna.
+    llm = extract_product_llm(text)
+    if llm["product"]:
+        return TargetInfo(
+            product=llm["product"],
+            version=llm["version"] or extract_version(text),
+            matched_alias=llm["product"],
+            source="llm",
+            candidates=[llm["product"]],
+        )
+
+    # Punto 3: fallback web search + LLM sui risultati.
     return extract_osint(text)
 
 

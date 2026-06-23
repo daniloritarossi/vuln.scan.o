@@ -1,232 +1,250 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Vulnerability Intelligence &amp; Asset Verification Center</title>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Theme Config -->
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-                "surface-tint": "#00daf3",
-                "on-tertiary-fixed": "#23005c",
-                "on-secondary-fixed-variant": "#004395",
-                "on-secondary": "#002e6a",
-                "surface-dim": "#f8fafc",
-                "tertiary-fixed": "#e9ddff",
-                "on-error": "#690005",
-                "primary-fixed": "#9cf0ff",
-                "on-tertiary-container": "#6834d1",
-                "on-error-container": "#ffdad6",
-                "inverse-on-surface": "#f1f5f9",
-                "on-primary-container": "#00626e",
-                "error": "#ef4444",
-                "surface-container-lowest": "#ffffff",
-                "on-background": "#0f172a",
-                "inverse-primary": "#00daf3",
-                "secondary": "#adc6ff",
-                "secondary-container": "#0566d9",
-                "primary-fixed-dim": "#06b6d4",
-                "tertiary-container": "#d9c8ff",
-                "surface-variant": "#f1f5f9",
-                "outline": "#94a3b8",
-                "on-primary-fixed-variant": "#004f58",
-                "surface-container-high": "#e2e8f0",
-                "surface": "#ffffff",
-                "outline-variant": "#cbd5e1",
-                "primary": "#c3f5ff",
-                "secondary-fixed-dim": "#3b82f6",
-                "on-secondary-fixed": "#001a42",
-                "tertiary": "#f2e9ff",
-                "primary-container": "#00e5ff",
-                "secondary-fixed": "#d8e2ff",
-                "tertiary-fixed-dim": "#8b5cf6",
-                "on-tertiary": "#3c0091",
-                "on-primary": "#00363d",
-                "on-surface-variant": "#64748b",
-                "error-container": "#93000a",
-                "on-surface": "#1e293b",
-                "on-tertiary-fixed-variant": "#5516be",
-                "surface-container-low": "#f8fafc",
-                "on-primary-fixed": "#001f24",
-                "on-secondary-container": "#e6ecff",
-                "surface-container": "#f1f5f9",
-                "surface-bright": "#ffffff",
-                "background": "#ffffff",
-                "surface-container-highest": "#cbd5e1",
-                "inverse-surface": "#0f172a"
-        },
-        "borderRadius": {
-                "DEFAULT": "0.25rem",
-                "lg": "0.5rem",
-                "xl": "1rem",
-                "full": "9999px"
-        },
-        "spacing": {
-                "base-unit": "4px",
-                "gutter": "16px",
-                "margin-desktop": "32px",
-                "margin-mobile": "16px",
-                "panel-padding": "24px"
-        },
-        "fontFamily": {
-                "code-sm": [
-                        "JetBrains Mono"
-                ],
-                "headline-md": [
-                        "Inter"
-                ],
-                "display-lg": [
-                        "Inter"
-                ],
-                "code-lg": [
-                        "JetBrains Mono"
-                ],
-                "label-caps": [
-                        "Inter"
-                ],
-                "body-md": [
-                        "Inter"
-                ]
-        },
-        "fontSize": {
-                "code-sm": [
-                        "13px",
-                        {
-                                "lineHeight": "18px",
-                                "fontWeight": "400"
-                        }
-                ],
-                "headline-md": [
-                        "20px",
-                        {
-                                "lineHeight": "28px",
-                                "fontWeight": "600"
-                        }
-                ],
-                "display-lg": [
-                        "48px",
-                        {
-                                "lineHeight": "56px",
-                                "letterSpacing": "-0.02em",
-                                "fontWeight": "700"
-                        }
-                ],
-                "code-lg": [
-                        "16px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "500"
-                        }
-                ],
-                "label-caps": [
-                        "11px",
-                        {
-                                "lineHeight": "16px",
-                                "letterSpacing": "0.1em",
-                                "fontWeight": "700"
-                        }
-                ],
-                "body-md": [
-                        "15px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "400"
-                        }
-                ]
-        }
-},
-    },
-  }
-</script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .glow-sm {
-            filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-        .neural-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-        }
-        
-        .shader-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-        }
+<html class="light" lang="en">
 
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+<head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>VULN.SCAN.IO · Code Intel</title>
+        <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+                rel="stylesheet" />
+        <!-- Material Symbols -->
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+                rel="stylesheet" />
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <!-- Tailwind Theme Config -->
+        <script id="tailwind-config">
+                tailwind.config = {
+                        darkMode: "class",
+                        theme: {
+                                extend: {
+                                        "colors": {
+                                                "surface-tint": "#00daf3",
+                                                "on-tertiary-fixed": "#23005c",
+                                                "on-secondary-fixed-variant": "#004395",
+                                                "on-secondary": "#002e6a",
+                                                "surface-dim": "#f8fafc",
+                                                "tertiary-fixed": "#e9ddff",
+                                                "on-error": "#690005",
+                                                "primary-fixed": "#9cf0ff",
+                                                "on-tertiary-container": "#6834d1",
+                                                "on-error-container": "#ffdad6",
+                                                "inverse-on-surface": "#f1f5f9",
+                                                "on-primary-container": "#00626e",
+                                                "error": "#ef4444",
+                                                "surface-container-lowest": "#ffffff",
+                                                "on-background": "#0f172a",
+                                                "inverse-primary": "#00daf3",
+                                                "secondary": "#adc6ff",
+                                                "secondary-container": "#0566d9",
+                                                "primary-fixed-dim": "#06b6d4",
+                                                "tertiary-container": "#d9c8ff",
+                                                "surface-variant": "#f1f5f9",
+                                                "outline": "#94a3b8",
+                                                "on-primary-fixed-variant": "#004f58",
+                                                "surface-container-high": "#e2e8f0",
+                                                "surface": "#ffffff",
+                                                "outline-variant": "#cbd5e1",
+                                                "primary": "#c3f5ff",
+                                                "secondary-fixed-dim": "#3b82f6",
+                                                "on-secondary-fixed": "#001a42",
+                                                "tertiary": "#f2e9ff",
+                                                "primary-container": "#00e5ff",
+                                                "secondary-fixed": "#d8e2ff",
+                                                "tertiary-fixed-dim": "#8b5cf6",
+                                                "on-tertiary": "#3c0091",
+                                                "on-primary": "#00363d",
+                                                "on-surface-variant": "#64748b",
+                                                "error-container": "#93000a",
+                                                "on-surface": "#1e293b",
+                                                "on-tertiary-fixed-variant": "#5516be",
+                                                "surface-container-low": "#f8fafc",
+                                                "on-primary-fixed": "#001f24",
+                                                "on-secondary-container": "#e6ecff",
+                                                "surface-container": "#f1f5f9",
+                                                "surface-bright": "#ffffff",
+                                                "background": "#ffffff",
+                                                "surface-container-highest": "#cbd5e1",
+                                                "inverse-surface": "#0f172a"
+                                        },
+                                        "borderRadius": {
+                                                "DEFAULT": "0.25rem",
+                                                "lg": "0.5rem",
+                                                "xl": "1rem",
+                                                "full": "9999px"
+                                        },
+                                        "spacing": {
+                                                "base-unit": "4px",
+                                                "gutter": "16px",
+                                                "margin-desktop": "32px",
+                                                "margin-mobile": "16px",
+                                                "panel-padding": "24px"
+                                        },
+                                        "fontFamily": {
+                                                "code-sm": [
+                                                        "JetBrains Mono"
+                                                ],
+                                                "headline-md": [
+                                                        "Inter"
+                                                ],
+                                                "display-lg": [
+                                                        "Inter"
+                                                ],
+                                                "code-lg": [
+                                                        "JetBrains Mono"
+                                                ],
+                                                "label-caps": [
+                                                        "Inter"
+                                                ],
+                                                "body-md": [
+                                                        "Inter"
+                                                ]
+                                        },
+                                        "fontSize": {
+                                                "code-sm": [
+                                                        "13px",
+                                                        {
+                                                                "lineHeight": "18px",
+                                                                "fontWeight": "400"
+                                                        }
+                                                ],
+                                                "headline-md": [
+                                                        "20px",
+                                                        {
+                                                                "lineHeight": "28px",
+                                                                "fontWeight": "600"
+                                                        }
+                                                ],
+                                                "display-lg": [
+                                                        "48px",
+                                                        {
+                                                                "lineHeight": "56px",
+                                                                "letterSpacing": "-0.02em",
+                                                                "fontWeight": "700"
+                                                        }
+                                                ],
+                                                "code-lg": [
+                                                        "16px",
+                                                        {
+                                                                "lineHeight": "24px",
+                                                                "fontWeight": "500"
+                                                        }
+                                                ],
+                                                "label-caps": [
+                                                        "11px",
+                                                        {
+                                                                "lineHeight": "16px",
+                                                                "letterSpacing": "0.1em",
+                                                                "fontWeight": "700"
+                                                        }
+                                                ],
+                                                "body-md": [
+                                                        "15px",
+                                                        {
+                                                                "lineHeight": "24px",
+                                                                "fontWeight": "400"
+                                                        }
+                                                ]
+                                        }
+                                },
+                        },
+                }
+        </script>
+        <style>
+                .material-symbols-outlined {
+                        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+
+                .glow-sm {
+                        filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
+                }
+
+                ::-webkit-scrollbar {
+                        width: 6px;
+                        height: 6px;
+                }
+
+                ::-webkit-scrollbar-track {
+                        background: transparent;
+                }
+
+                ::-webkit-scrollbar-thumb {
+                        background: #cbd5e1;
+                        border-radius: 4px;
+                }
+
+                ::-webkit-scrollbar-thumb:hover {
+                        background: #94a3b8;
+                }
+
+                .neural-panel {
+                        background: rgba(255, 255, 255, 0.7);
+                        backdrop-filter: blur(20px);
+                        -webkit-backdrop-filter: blur(20px);
+                        border: 1px solid rgba(255, 255, 255, 0.5);
+                        box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+                }
+
+                .shader-bg {
+                        position: fixed;
+                        inset: 0;
+                        z-index: -1;
+                        width: 100%;
+                        height: 100%;
+                        background: #ffffff;
+                }
+
+                @keyframes shimmer {
+                        0% {
+                                background-position: -200% 0;
+                        }
+
+                        100% {
+                                background-position: 200% 0;
+                        }
+                }
+        </style>
+        <style>
+                body {
+                        min-height: max(884px, 100dvh);
+                }
+        </style>
 </head>
-<body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
-<!-- White Cyber Background Shader -->
-<div class="shader-bg">
-<canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
-<script>
-    (function() {
-      const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
-      function syncSize() {
-        const w = canvas.clientWidth  || window.innerWidth;
-        const h = canvas.clientHeight || window.innerHeight;
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width  = w;
-          canvas.height = h;
-        }
-      }
-      if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(syncSize).observe(canvas);
-      }
-      syncSize();
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) return;
-      const vs = `attribute vec2 a_position;
+
+<body
+        class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
+        <!-- White Cyber Background Shader -->
+        <div class="shader-bg">
+                <canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
+                <script>
+                                (function () {
+                                        const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
+                                        function syncSize() {
+                                                const w = canvas.clientWidth || window.innerWidth;
+                                                const h = canvas.clientHeight || window.innerHeight;
+                                                if (canvas.width !== w || canvas.height !== h) {
+                                                        canvas.width = w;
+                                                        canvas.height = h;
+                                                }
+                                        }
+                                        if (typeof ResizeObserver !== 'undefined') {
+                                                new ResizeObserver(syncSize).observe(canvas);
+                                        }
+                                        syncSize();
+                                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                                        if (!gl) return;
+                                        const vs = `attribute vec2 a_position;
     varying vec2 v_texCoord;
     void main() {
       v_texCoord = a_position * 0.5 + 0.5;
       gl_Position = vec4(a_position, 0.0, 1.0);
     }`;
-      const fs = `precision highp float;
+                                        const fs = `precision highp float;
     uniform float u_time;
     uniform vec2 u_resolution;
     float grid(vec2 uv, float res) {
@@ -247,362 +265,549 @@
         color += scanline * cyberBlue * 0.05;
         gl_FragColor = vec4(color, 1.0);
     }`;
-      function cs(type, src) {
-        const s = gl.createShader(type);
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        return s;
-      }
-      const prog = gl.createProgram();
-      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
-      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
-      gl.linkProgram(prog);
-      gl.useProgram(prog);
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const pos = gl.getAttribLocation(prog, 'a_position');
-      gl.enableVertexAttribArray(pos);
-      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-      const uTime = gl.getUniformLocation(prog, 'u_time');
-      const uRes = gl.getUniformLocation(prog, 'u_resolution');
-      function render(t) {
-        if (typeof ResizeObserver === 'undefined') syncSize();
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        if (uTime) gl.uniform1f(uTime, t * 0.001);
-        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      render(0);
-    })();
-    </script>
-</div>
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_4px_12px_rgba(6,182,212,0.3)]">
-<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">security</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-slate-900">VULN_INTEL_CMD</h1>
-<span class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50">SYSTEM_ACTIVE</span>
-</div>
-<div class="flex items-center gap-4 text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
-<span class="material-symbols-outlined">sensors</span>
-</div>
-</header>
-<div class="flex pt-16 h-screen w-full overflow-hidden">
-<!-- NavigationDrawer (Web) -->
-<nav class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
-<div class="px-6 mb-4">
-<span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
-</div>
-<ul class="flex flex-col w-full px-4 gap-2">
-<!-- Active: DASHBOARD -->
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]" href="#">
-<span class="material-symbols-outlined text-cyan-400">dashboard</span>
-<span class="">DASHBOARD</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="#">
-<span class="material-symbols-outlined">inventory_2</span>
-<span class="">ASSETS</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="#">
-<span class="material-symbols-outlined">psychology</span>
-<span class="">INTEL</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="#">
-<span class="material-symbols-outlined">fact_check</span>
-<span class="">AUDIT</span>
-</a>
-</li>
-</ul>
-</nav>
-<!-- Main Content Canvas -->
-<main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
-<div class="max-w-7xl mx-auto space-y-8">
-<!-- Executive Summary KPIs (Bento Grid) -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- KPI 1 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-2">SECURITY POSTURE SCORE</h2>
-<div class="flex items-baseline gap-2">
-<span class="font-display-lg text-display-lg text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700">84</span>
-<span class="font-code-sm text-code-sm text-cyan-600">%</span>
-</div>
-<div class="w-full bg-slate-100 h-1.5 mt-4 rounded-full overflow-hidden">
-<div class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[84%] relative">
-<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-</div>
-</div>
-</div>
-<!-- KPI 2 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-2">VERIFIED ASSETS</h2>
-<div class="flex items-baseline gap-2">
-<span class="font-display-lg text-display-lg text-slate-900">1,240</span>
-<span class="material-symbols-outlined text-blue-500 text-sm bg-blue-50 p-1 rounded-full">trending_up</span>
-</div>
-<p class="font-code-sm text-code-sm text-blue-600 mt-2 flex items-center gap-1">
-<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> +12 since last scan
-</p>
-</div>
-<!-- KPI 3 -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-500/5">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<h2 class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
-                            ACTIVE VULNERABILITIES
-                        </h2>
-<div class="flex items-baseline gap-2">
-<span class="font-display-lg text-display-lg text-error">12</span>
-</div>
-<p class="font-code-sm text-code-sm text-error/80 mt-2 bg-error/5 py-1 px-2 rounded inline-block">Requires immediate triage</p>
-</div>
-</section>
-<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<!-- Product Distribution Card (Neural Vis) -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-6">DETECTED PRODUCTS NETWORK</h2>
-<div class="flex flex-col sm:flex-row items-center justify-between gap-8 h-48 relative">
-<div class="relative w-48 h-48 flex-shrink-0 flex items-center justify-center">
-<div class="absolute w-12 h-12 bg-white rounded-full border-2 border-slate-200 z-10 flex items-center justify-center shadow-sm">
-<span class="font-code-sm text-code-sm font-bold text-slate-700">3</span>
-</div>
-<svg class="absolute inset-0 w-full h-full z-0" pointer-events="none">
-<line class="opacity-70" stroke="#e2e8f0" stroke-width="2" x1="50%" x2="20%" y1="50%" y2="20%"></line>
-<line class="opacity-70" stroke="#e2e8f0" stroke-width="2" x1="50%" x2="80%" y1="50%" y2="30%"></line>
-<line class="opacity-70" stroke="#e2e8f0" stroke-width="2" x1="50%" x2="50%" y1="50%" y2="85%"></line>
-</svg>
-<div class="absolute top-[10%] left-[10%] w-8 h-8 bg-cyan-50 rounded-full border-2 border-cyan-400 z-10 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.1)] animate-pulse"></div>
-<div class="absolute top-[20%] right-[10%] w-6 h-6 bg-blue-50 rounded-full border-2 border-blue-400 z-10 flex items-center justify-center animate-pulse" style="animation-delay: 1s;"></div>
-<div class="absolute bottom-[5%] left-[45%] w-5 h-5 bg-purple-50 rounded-full border-2 border-purple-400 z-10 flex items-center justify-center animate-pulse" style="animation-delay: 0.5s;"></div>
-</div>
-<div class="flex-1 w-full space-y-4">
-<div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
-<div class="flex items-center gap-3">
-<div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-<span class="font-code-sm text-code-sm text-slate-600 font-medium">Python</span>
-</div>
-<span class="font-code-sm text-code-sm font-semibold bg-cyan-50 px-2 py-0.5 rounded text-cyan-700">45%</span>
-</div>
-<div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
-<div class="flex items-center gap-3">
-<div class="w-3 h-3 rounded-full bg-blue-400"></div>
-<span class="font-code-sm text-code-sm text-slate-600 font-medium">OpenSSH</span>
-</div>
-<span class="font-code-sm text-code-sm font-semibold bg-blue-50 px-2 py-0.5 rounded text-blue-700">30%</span>
-</div>
-<div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
-<div class="flex items-center gap-3">
-<div class="w-3 h-3 rounded-full bg-purple-400"></div>
-<span class="font-code-sm text-code-sm text-slate-600 font-medium">Apache</span>
-</div>
-<span class="font-code-sm text-code-sm font-semibold bg-purple-50 px-2 py-0.5 rounded text-purple-700">25%</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Asset Authentication Card -->
-<div class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
-<h2 class="font-label-caps text-label-caps text-slate-500 mb-6">ASSET AUTHENTICATION</h2>
-<div class="space-y-6">
-<div>
-<div class="flex justify-between mb-2">
-<span class="font-code-sm text-code-sm text-slate-600">Authenticated Nodes</span>
-<span class="font-code-sm text-code-sm text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">942</span>
-</div>
-<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-<div class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[76%] relative">
-<div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_2s_linear_infinite]"></div>
-</div>
-</div>
-</div>
-<div>
-<div class="flex justify-between mb-2">
-<span class="font-code-sm text-code-sm text-slate-600">Unauthenticated Nodes</span>
-<span class="font-code-sm text-code-sm text-error font-semibold bg-error/5 px-2 py-0.5 rounded-full">298</span>
-</div>
-<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-<div class="bg-gradient-to-r from-red-400 to-rose-500 h-full w-[24%]"></div>
-</div>
-</div>
-<div class="pt-4 border-t border-slate-100/50">
-<p class="font-code-sm text-[11px] text-slate-400 flex items-center gap-2">
-<span class="material-symbols-outlined text-[14px] text-amber-500">pending</span>
-    12 assets pending deep neural scan
-</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Input & Intelligence Section -->
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Vulnerability Input -->
-<div class="lg:col-span-2 neural-panel rounded-2xl p-6 flex flex-col focus-within:shadow-xl transition-all duration-300 relative overflow-hidden">
-<label class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2" for="vuln-input">
-<span class="material-symbols-outlined text-sm text-cyan-500">manage_search</span>
-                            THREAT INTELLIGENCE QUERY
-                        </label>
-<div class="flex-1 flex items-center gap-4 bg-white/60 border border-slate-200/50 rounded-xl p-4 shadow-sm hover:border-cyan-200 transition-colors">
-<span class="font-code-lg text-code-lg text-cyan-600 animate-pulse">&gt;</span>
-<input class="bg-transparent border-none outline-none w-full font-code-lg text-code-lg text-slate-900 placeholder:text-slate-300 focus:ring-0 p-0" id="vuln-input" placeholder="Describe Vulnerability or input CVE..." type="text"/>
-</div>
-<div class="flex justify-between items-center mt-6">
-<span class="font-code-sm text-code-sm text-slate-400">Press ENTER to initiate scan sequence</span>
-<button class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 group">
-<span class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-180 transition-transform duration-500">memory</span>
-                                AI ANALYSIS
-                            </button>
-</div>
-</div>
-<!-- Identification Workflow -->
-<div class="neural-panel rounded-2xl p-6 flex flex-col relative overflow-hidden">
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-6">IDENTIFICATION PIPELINE</h3>
-<div class="flex-1 flex flex-col justify-between gap-4 relative">
-<div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-400 via-blue-200 to-slate-100 z-0"></div>
-<div class="flex items-center gap-4 relative z-10">
-<div class="w-8 h-8 rounded-full bg-white border-2 border-cyan-400 flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-cyan-600 text-sm">data_object</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-900 font-semibold">Parsing Input</span>
-</div>
-<div class="flex items-center gap-4 relative z-10">
-<div class="w-8 h-8 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-blue-500 text-sm">travel_explore</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-600 font-medium">OSINT Correlation</span>
-</div>
-<div class="flex items-center gap-4 relative z-10 opacity-60">
-<div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
-<span class="material-symbols-outlined text-slate-400 text-sm">troubleshoot</span>
-</div>
-<span class="font-code-sm text-code-sm text-slate-400">Active Detection</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Console & Assets Row -->
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-<!-- Scan Engine Console (Cyber Purple Contrast) -->
-<div class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden h-80 relative shadow-2xl">
-<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.08),_transparent)] pointer-events-none"></div>
-<div class="bg-[#1a1a2e] border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="flex gap-1.5">
-<span class="w-3 h-3 rounded-full bg-rose-500/60"></span>
-<span class="w-3 h-3 rounded-full bg-amber-500/60"></span>
-<span class="w-3 h-3 rounded-full bg-emerald-500/60"></span>
-</div>
-<span class="ml-3 text-slate-400 font-label-caps text-label-caps tracking-widest">SCAN_ENGINE_TTY1</span>
-</div>
-<span class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
-</div>
-<div class="p-5 font-code-sm text-code-sm space-y-3 overflow-y-auto flex-1 text-slate-300">
-<p class="opacity-70"><span class="text-indigo-400">[SYS]</span> Initializing core diagnostic protocol...</p>
-<p class="opacity-70"><span class="text-indigo-400">[SYS]</span> Connecting to remote subnet 10.0.x.x</p>
-<p><span class="text-cyan-400">[INFO]</span> Product identified: Python 3.9.2 on host <span class="text-white bg-white/10 px-1 rounded">45.33.32.156</span></p>
-<div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">
-<p class="text-rose-200"><span class="font-bold text-rose-400">[MATCH]</span> Potential vulnerability found: CVE-2023-4567 on 45.33.32.156</p>
-</div>
-<p class="text-cyan-400 mt-4 flex items-center">
-    root@soc-cmd:~# <span class="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
-</p>
-</div>
-</div>
-<!-- Asset Inventory List -->
-<div class="neural-panel rounded-2xl p-6 flex flex-col h-80 relative overflow-hidden">
-<div class="flex justify-between items-center mb-6">
-<h3 class="font-label-caps text-label-caps text-slate-500">ASSET INVENTORY (LOCAL)</h3>
-<button class="text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full font-label-caps text-label-caps hover:bg-cyan-100 transition-colors">VIEW ALL</button>
-</div>
-<div class="flex-1 overflow-y-auto pr-2 space-y-3">
-<div class="flex items-center justify-between p-3 border border-slate-100 bg-white/60 hover:bg-white hover:border-cyan-200 transition-all group rounded-xl">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-cyan-50 transition-colors">
-<span class="material-symbols-outlined text-slate-400 group-hover:text-cyan-600">dns</span>
-</div>
-<div>
-<div class="font-code-sm text-code-sm text-slate-900 font-semibold">45.33.32.156</div>
-<div class="font-label-caps text-[10px] text-slate-400 mt-0.5">SRV-PROD-01</div>
-</div>
-</div>
-<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">AUTHENTICATED</span>
-</div>
-<div class="flex items-center justify-between p-3 border border-slate-100 bg-white/60 hover:bg-white hover:border-blue-200 transition-all group rounded-xl">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-<span class="material-symbols-outlined text-slate-400 group-hover:text-blue-600">router</span>
-</div>
-<div>
-<div class="font-code-sm text-code-sm text-slate-900 font-semibold">192.168.1.1</div>
-<div class="font-label-caps text-[10px] text-slate-400 mt-0.5">GATEWAY-MAIN</div>
-</div>
-</div>
-<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">NOT REQUIRED</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Alerts Row -->
-<section>
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-6">CRITICAL INTELLIGENCE ALERTS</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="neural-panel p-5 rounded-2xl flex items-start gap-4 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden group">
-<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-rose-400 to-red-500"></div>
-<div class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 shadow-sm z-10">
-<span class="material-symbols-outlined text-rose-500">gavel</span>
-</div>
-<div class="flex-1 z-10">
-<div class="flex justify-between items-start mb-2">
-<h4 class="font-code-lg text-code-lg text-slate-900 font-semibold">CVE-2023-4567 Detected</h4>
-<span class="font-label-caps text-[10px] text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full animate-pulse">T-MINUS 2m</span>
-</div>
-<p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed">Unauthorized access vector identified on SRV-PROD-01 via Python library vulnerability.</p>
-<button class="font-label-caps text-label-caps text-rose-600 border border-rose-200 bg-white px-4 py-1.5 rounded-lg hover:bg-rose-50 transition-colors shadow-sm">INITIATE ISOLATION</button>
-</div>
-</div>
-<div class="neural-panel p-5 rounded-2xl flex items-start gap-4 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden group">
-<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan-400 to-blue-500"></div>
-<div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 shadow-sm z-10">
-<span class="material-symbols-outlined text-cyan-600">policy</span>
-</div>
-<div class="flex-1 z-10">
-<div class="flex justify-between items-start mb-2">
-<h4 class="font-code-lg text-code-lg text-slate-900 font-semibold">Configuration Drift</h4>
-<span class="font-label-caps text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">T-MINUS 15m</span>
-</div>
-<p class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed">GATEWAY-MAIN configuration checksum mismatch detected against baseline.</p>
-<button class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">REVIEW DIFF</button>
-</div>
-</div>
-</div>
-</section>
-</div>
-</main>
-</div>
-<!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">notifications_active</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">terminal</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white" href="#">
-<span class="material-symbols-outlined">analytics</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-</a>
-</nav>
-</body></html>
+                                        function cs(type, src) {
+                                                const s = gl.createShader(type);
+                                                gl.shaderSource(s, src);
+                                                gl.compileShader(s);
+                                                return s;
+                                        }
+                                        const prog = gl.createProgram();
+                                        gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+                                        gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+                                        gl.linkProgram(prog);
+                                        gl.useProgram(prog);
+                                        const buf = gl.createBuffer();
+                                        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+                                        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+                                        const pos = gl.getAttribLocation(prog, 'a_position');
+                                        gl.enableVertexAttribArray(pos);
+                                        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+                                        const uTime = gl.getUniformLocation(prog, 'u_time');
+                                        const uRes = gl.getUniformLocation(prog, 'u_resolution');
+                                        function render(t) {
+                                                if (typeof ResizeObserver === 'undefined') syncSize();
+                                                gl.viewport(0, 0, canvas.width, canvas.height);
+                                                if (uTime) gl.uniform1f(uTime, t * 0.001);
+                                                if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+                                                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                                                requestAnimationFrame(render);
+                                        }
+                                        render(0);
+                                })();
+                </script>
+        </div>
+        <!-- TopAppBar -->
+        <header
+                class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
+                <div class="flex items-center gap-4">
+                        <img src="/static/logo-icon.svg" class="w-11 h-11" alt="VULN.SCAN.IO" />
+                        <h1 class="font-headline-md text-headline-md font-bold tracking-tight"><span
+                                        class="text-orange-500">VULN</span><span class="text-slate-400">.</span><span
+                                        class="text-orange-500">SCAN</span><span class="text-slate-400">.</span><span
+                                        class="text-cyan-500">IO</span></h1>
+                        <span
+                                class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50">SYSTEM_ACTIVE</span>
+                </div>
+                <div
+                        class="flex items-center gap-4 text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
+                        <span class="material-symbols-outlined">sensors</span>
+                </div>
+        </header>
+        <div class="flex pt-16 h-screen w-full overflow-hidden">
+                <!-- NavigationDrawer (Web) -->
+                <nav
+                        class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
+                        <div class="px-6 mb-4">
+                                <span
+                                        class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
+                        </div>
+                        <ul class="flex flex-col w-full px-4 gap-2">
+                                <!-- Active: DASHBOARD -->
+                                <li class="">
+                                        <a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]"
+                                                href="#">
+                                                <span class="material-symbols-outlined text-cyan-400">dashboard</span>
+                                                <span class="">DASHBOARD</span>
+                                        </a>
+                                </li>
+                                <li class="">
+                                        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+                                                href="#">
+                                                <span class="material-symbols-outlined">inventory_2</span>
+                                                <span class="">ASSETS</span>
+                                        </a>
+                                </li>
+                                <li class="">
+                                        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+                                                href="#">
+                                                <span class="material-symbols-outlined">psychology</span>
+                                                <span class="">INTEL</span>
+                                        </a>
+                                </li>
+                                <li class="">
+                                        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+                                                href="#">
+                                                <span class="material-symbols-outlined">fact_check</span>
+                                                <span class="">AUDIT</span>
+                                        </a>
+                                </li>
+                        </ul>
+                </nav>
+                <!-- Main Content Canvas -->
+                <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
+                        <div class="max-w-7xl mx-auto space-y-8">
+                                <!-- Executive Summary KPIs (Bento Grid) -->
+                                <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <!-- KPI 1 -->
+                                        <div
+                                                class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5">
+                                                <div
+                                                        class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                </div>
+                                                <h2 class="font-label-caps text-label-caps text-slate-500 mb-2">SECURITY
+                                                        POSTURE SCORE</h2>
+                                                <div class="flex items-baseline gap-2">
+                                                        <span
+                                                                class="font-display-lg text-display-lg text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700">84</span>
+                                                        <span class="font-code-sm text-code-sm text-cyan-600">%</span>
+                                                </div>
+                                                <div
+                                                        class="w-full bg-slate-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                                        <div
+                                                                class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[84%] relative">
+                                                                <div class="absolute inset-0 bg-white/20 animate-pulse">
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                        <!-- KPI 2 -->
+                                        <div
+                                                class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
+                                                <div
+                                                        class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                </div>
+                                                <h2 class="font-label-caps text-label-caps text-slate-500 mb-2">VERIFIED
+                                                        ASSETS</h2>
+                                                <div class="flex items-baseline gap-2">
+                                                        <span
+                                                                class="font-display-lg text-display-lg text-slate-900">1,240</span>
+                                                        <span
+                                                                class="material-symbols-outlined text-blue-500 text-sm bg-blue-50 p-1 rounded-full">trending_up</span>
+                                                </div>
+                                                <p
+                                                        class="font-code-sm text-code-sm text-blue-600 mt-2 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> +12
+                                                        since last scan
+                                                </p>
+                                        </div>
+                                        <!-- KPI 3 -->
+                                        <div
+                                                class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-500/5">
+                                                <div
+                                                        class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                </div>
+                                                <h2
+                                                        class="font-label-caps text-label-caps text-error mb-2 flex items-center gap-2">
+                                                        <span
+                                                                class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
+                                                        ACTIVE VULNERABILITIES
+                                                </h2>
+                                                <div class="flex items-baseline gap-2">
+                                                        <span
+                                                                class="font-display-lg text-display-lg text-error">12</span>
+                                                </div>
+                                                <p
+                                                        class="font-code-sm text-code-sm text-error/80 mt-2 bg-error/5 py-1 px-2 rounded inline-block">
+                                                        Requires immediate triage</p>
+                                        </div>
+                                </section>
+                                <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Product Distribution Card (Neural Vis) -->
+                                        <div
+                                                class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
+                                                <h2 class="font-label-caps text-label-caps text-slate-500 mb-6">DETECTED
+                                                        PRODUCTS NETWORK</h2>
+                                                <div
+                                                        class="flex flex-col sm:flex-row items-center justify-between gap-8 h-48 relative">
+                                                        <div
+                                                                class="relative w-48 h-48 flex-shrink-0 flex items-center justify-center">
+                                                                <div
+                                                                        class="absolute w-12 h-12 bg-white rounded-full border-2 border-slate-200 z-10 flex items-center justify-center shadow-sm">
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm font-bold text-slate-700">3</span>
+                                                                </div>
+                                                                <svg class="absolute inset-0 w-full h-full z-0"
+                                                                        pointer-events="none">
+                                                                        <line class="opacity-70" stroke="#e2e8f0"
+                                                                                stroke-width="2" x1="50%" x2="20%"
+                                                                                y1="50%" y2="20%"></line>
+                                                                        <line class="opacity-70" stroke="#e2e8f0"
+                                                                                stroke-width="2" x1="50%" x2="80%"
+                                                                                y1="50%" y2="30%"></line>
+                                                                        <line class="opacity-70" stroke="#e2e8f0"
+                                                                                stroke-width="2" x1="50%" x2="50%"
+                                                                                y1="50%" y2="85%"></line>
+                                                                </svg>
+                                                                <div
+                                                                        class="absolute top-[10%] left-[10%] w-8 h-8 bg-cyan-50 rounded-full border-2 border-cyan-400 z-10 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.1)] animate-pulse">
+                                                                </div>
+                                                                <div class="absolute top-[20%] right-[10%] w-6 h-6 bg-blue-50 rounded-full border-2 border-blue-400 z-10 flex items-center justify-center animate-pulse"
+                                                                        style="animation-delay: 1s;"></div>
+                                                                <div class="absolute bottom-[5%] left-[45%] w-5 h-5 bg-purple-50 rounded-full border-2 border-purple-400 z-10 flex items-center justify-center animate-pulse"
+                                                                        style="animation-delay: 0.5s;"></div>
+                                                        </div>
+                                                        <div class="flex-1 w-full space-y-4">
+                                                                <div
+                                                                        class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
+                                                                        <div class="flex items-center gap-3">
+                                                                                <div
+                                                                                        class="w-3 h-3 rounded-full bg-cyan-400">
+                                                                                </div>
+                                                                                <span
+                                                                                        class="font-code-sm text-code-sm text-slate-600 font-medium">Python</span>
+                                                                        </div>
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm font-semibold bg-cyan-50 px-2 py-0.5 rounded text-cyan-700">45%</span>
+                                                                </div>
+                                                                <div
+                                                                        class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
+                                                                        <div class="flex items-center gap-3">
+                                                                                <div
+                                                                                        class="w-3 h-3 rounded-full bg-blue-400">
+                                                                                </div>
+                                                                                <span
+                                                                                        class="font-code-sm text-code-sm text-slate-600 font-medium">OpenSSH</span>
+                                                                        </div>
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm font-semibold bg-blue-50 px-2 py-0.5 rounded text-blue-700">30%</span>
+                                                                </div>
+                                                                <div
+                                                                        class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
+                                                                        <div class="flex items-center gap-3">
+                                                                                <div
+                                                                                        class="w-3 h-3 rounded-full bg-purple-400">
+                                                                                </div>
+                                                                                <span
+                                                                                        class="font-code-sm text-code-sm text-slate-600 font-medium">Apache</span>
+                                                                        </div>
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm font-semibold bg-purple-50 px-2 py-0.5 rounded text-purple-700">25%</span>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                        <!-- Asset Authentication Card -->
+                                        <div
+                                                class="neural-panel p-6 rounded-2xl relative overflow-hidden group transition-all">
+                                                <h2 class="font-label-caps text-label-caps text-slate-500 mb-6">ASSET
+                                                        AUTHENTICATION</h2>
+                                                <div class="space-y-6">
+                                                        <div>
+                                                                <div class="flex justify-between mb-2">
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm text-slate-600">Authenticated
+                                                                                Nodes</span>
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">942</span>
+                                                                </div>
+                                                                <div
+                                                                        class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                                        <div
+                                                                                class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[76%] relative">
+                                                                                <div
+                                                                                        class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_2s_linear_infinite]">
+                                                                                </div>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+                                                        <div>
+                                                                <div class="flex justify-between mb-2">
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm text-slate-600">Unauthenticated
+                                                                                Nodes</span>
+                                                                        <span
+                                                                                class="font-code-sm text-code-sm text-error font-semibold bg-error/5 px-2 py-0.5 rounded-full">298</span>
+                                                                </div>
+                                                                <div
+                                                                        class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                                        <div
+                                                                                class="bg-gradient-to-r from-red-400 to-rose-500 h-full w-[24%]">
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+                                                        <div class="pt-4 border-t border-slate-100/50">
+                                                                <p
+                                                                        class="font-code-sm text-[11px] text-slate-400 flex items-center gap-2">
+                                                                        <span
+                                                                                class="material-symbols-outlined text-[14px] text-amber-500">pending</span>
+                                                                        12 assets pending deep neural scan
+                                                                </p>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </section>
+                                <!-- Input & Intelligence Section -->
+                                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        <!-- Vulnerability Input -->
+                                        <div
+                                                class="lg:col-span-2 neural-panel rounded-2xl p-6 flex flex-col focus-within:shadow-xl transition-all duration-300 relative overflow-hidden">
+                                                <label class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2"
+                                                        for="vuln-input">
+                                                        <span
+                                                                class="material-symbols-outlined text-sm text-cyan-500">manage_search</span>
+                                                        THREAT INTELLIGENCE QUERY
+                                                </label>
+                                                <div
+                                                        class="flex-1 flex items-center gap-4 bg-white/60 border border-slate-200/50 rounded-xl p-4 shadow-sm hover:border-cyan-200 transition-colors">
+                                                        <span
+                                                                class="font-code-lg text-code-lg text-cyan-600 animate-pulse">&gt;</span>
+                                                        <input class="bg-transparent border-none outline-none w-full font-code-lg text-code-lg text-slate-900 placeholder:text-slate-300 focus:ring-0 p-0"
+                                                                id="vuln-input"
+                                                                placeholder="Describe Vulnerability or input CVE..."
+                                                                type="text" />
+                                                </div>
+                                                <div class="flex justify-between items-center mt-6">
+                                                        <span class="font-code-sm text-code-sm text-slate-400">Press
+                                                                ENTER to initiate scan sequence</span>
+                                                        <button
+                                                                class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 group">
+                                                                <span
+                                                                        class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-180 transition-transform duration-500">memory</span>
+                                                                AI ANALYSIS
+                                                        </button>
+                                                </div>
+                                        </div>
+                                        <!-- Identification Workflow -->
+                                        <div
+                                                class="neural-panel rounded-2xl p-6 flex flex-col relative overflow-hidden">
+                                                <h3 class="font-label-caps text-label-caps text-slate-500 mb-6">
+                                                        IDENTIFICATION PIPELINE</h3>
+                                                <div class="flex-1 flex flex-col justify-between gap-4 relative">
+                                                        <div
+                                                                class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-400 via-blue-200 to-slate-100 z-0">
+                                                        </div>
+                                                        <div class="flex items-center gap-4 relative z-10">
+                                                                <div
+                                                                        class="w-8 h-8 rounded-full bg-white border-2 border-cyan-400 flex items-center justify-center shadow-sm">
+                                                                        <span
+                                                                                class="material-symbols-outlined text-cyan-600 text-sm">data_object</span>
+                                                                </div>
+                                                                <span
+                                                                        class="font-code-sm text-code-sm text-slate-900 font-semibold">Parsing
+                                                                        Input</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-4 relative z-10">
+                                                                <div
+                                                                        class="w-8 h-8 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center shadow-sm">
+                                                                        <span
+                                                                                class="material-symbols-outlined text-blue-500 text-sm">travel_explore</span>
+                                                                </div>
+                                                                <span
+                                                                        class="font-code-sm text-code-sm text-slate-600 font-medium">OSINT
+                                                                        Correlation</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-4 relative z-10 opacity-60">
+                                                                <div
+                                                                        class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
+                                                                        <span
+                                                                                class="material-symbols-outlined text-slate-400 text-sm">troubleshoot</span>
+                                                                </div>
+                                                                <span class="font-code-sm text-code-sm text-slate-400">Active
+                                                                        Detection</span>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </section>
+                                <!-- Console & Assets Row -->
+                                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        <!-- Scan Engine Console (Cyber Purple Contrast) -->
+                                        <div
+                                                class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden h-80 relative shadow-2xl">
+                                                <div
+                                                        class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.08),_transparent)] pointer-events-none">
+                                                </div>
+                                                <div
+                                                        class="bg-[#1a1a2e] border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+                                                        <div class="flex items-center gap-2">
+                                                                <div class="flex gap-1.5">
+                                                                        <span
+                                                                                class="w-3 h-3 rounded-full bg-rose-500/60"></span>
+                                                                        <span
+                                                                                class="w-3 h-3 rounded-full bg-amber-500/60"></span>
+                                                                        <span
+                                                                                class="w-3 h-3 rounded-full bg-emerald-500/60"></span>
+                                                                </div>
+                                                                <span
+                                                                        class="ml-3 text-slate-400 font-label-caps text-label-caps tracking-widest">SCAN_ENGINE_TTY1</span>
+                                                        </div>
+                                                        <span
+                                                                class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
+                                                </div>
+                                                <div
+                                                        class="p-5 font-code-sm text-code-sm space-y-3 overflow-y-auto flex-1 text-slate-300">
+                                                        <p class="opacity-70"><span class="text-indigo-400">[SYS]</span>
+                                                                Initializing core diagnostic protocol...</p>
+                                                        <p class="opacity-70"><span class="text-indigo-400">[SYS]</span>
+                                                                Connecting to remote subnet 10.0.x.x</p>
+                                                        <p><span class="text-cyan-400">[INFO]</span> Product identified:
+                                                                Python 3.9.2 on host <span
+                                                                        class="text-white bg-white/10 px-1 rounded">45.33.32.156</span>
+                                                        </p>
+                                                        <div
+                                                                class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">
+                                                                <p class="text-rose-200"><span
+                                                                                class="font-bold text-rose-400">[MATCH]</span>
+                                                                        Potential vulnerability found: CVE-2023-4567 on
+                                                                        45.33.32.156</p>
+                                                        </div>
+                                                        <p class="text-cyan-400 mt-4 flex items-center">
+                                                                root@soc-cmd:~# <span
+                                                                        class="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
+                                                        </p>
+                                                </div>
+                                        </div>
+                                        <!-- Asset Inventory List -->
+                                        <div
+                                                class="neural-panel rounded-2xl p-6 flex flex-col h-80 relative overflow-hidden">
+                                                <div class="flex justify-between items-center mb-6">
+                                                        <h3 class="font-label-caps text-label-caps text-slate-500">ASSET
+                                                                INVENTORY (LOCAL)</h3>
+                                                        <button
+                                                                class="text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full font-label-caps text-label-caps hover:bg-cyan-100 transition-colors">VIEW
+                                                                ALL</button>
+                                                </div>
+                                                <div class="flex-1 overflow-y-auto pr-2 space-y-3">
+                                                        <div
+                                                                class="flex items-center justify-between p-3 border border-slate-100 bg-white/60 hover:bg-white hover:border-cyan-200 transition-all group rounded-xl">
+                                                                <div class="flex items-center gap-4">
+                                                                        <div
+                                                                                class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-cyan-50 transition-colors">
+                                                                                <span
+                                                                                        class="material-symbols-outlined text-slate-400 group-hover:text-cyan-600">dns</span>
+                                                                        </div>
+                                                                        <div>
+                                                                                <div
+                                                                                        class="font-code-sm text-code-sm text-slate-900 font-semibold">
+                                                                                        45.33.32.156</div>
+                                                                                <div
+                                                                                        class="font-label-caps text-[10px] text-slate-400 mt-0.5">
+                                                                                        SRV-PROD-01</div>
+                                                                        </div>
+                                                                </div>
+                                                                <span
+                                                                        class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">AUTHENTICATED</span>
+                                                        </div>
+                                                        <div
+                                                                class="flex items-center justify-between p-3 border border-slate-100 bg-white/60 hover:bg-white hover:border-blue-200 transition-all group rounded-xl">
+                                                                <div class="flex items-center gap-4">
+                                                                        <div
+                                                                                class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                                                                                <span
+                                                                                        class="material-symbols-outlined text-slate-400 group-hover:text-blue-600">router</span>
+                                                                        </div>
+                                                                        <div>
+                                                                                <div
+                                                                                        class="font-code-sm text-code-sm text-slate-900 font-semibold">
+                                                                                        192.168.1.1</div>
+                                                                                <div
+                                                                                        class="font-label-caps text-[10px] text-slate-400 mt-0.5">
+                                                                                        GATEWAY-MAIN</div>
+                                                                        </div>
+                                                                </div>
+                                                                <span
+                                                                        class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">NOT
+                                                                        REQUIRED</span>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </section>
+                                <!-- Alerts Row -->
+                                <section>
+                                        <h3 class="font-label-caps text-label-caps text-slate-500 mb-6">CRITICAL
+                                                INTELLIGENCE ALERTS</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div
+                                                        class="neural-panel p-5 rounded-2xl flex items-start gap-4 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden group">
+                                                        <div
+                                                                class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-rose-400 to-red-500">
+                                                        </div>
+                                                        <div
+                                                                class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 shadow-sm z-10">
+                                                                <span
+                                                                        class="material-symbols-outlined text-rose-500">gavel</span>
+                                                        </div>
+                                                        <div class="flex-1 z-10">
+                                                                <div class="flex justify-between items-start mb-2">
+                                                                        <h4
+                                                                                class="font-code-lg text-code-lg text-slate-900 font-semibold">
+                                                                                CVE-2023-4567 Detected</h4>
+                                                                        <span
+                                                                                class="font-label-caps text-[10px] text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full animate-pulse">T-MINUS
+                                                                                2m</span>
+                                                                </div>
+                                                                <p
+                                                                        class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed">
+                                                                        Unauthorized access vector identified on
+                                                                        SRV-PROD-01 via Python library vulnerability.
+                                                                </p>
+                                                                <button
+                                                                        class="font-label-caps text-label-caps text-rose-600 border border-rose-200 bg-white px-4 py-1.5 rounded-lg hover:bg-rose-50 transition-colors shadow-sm">INITIATE
+                                                                        ISOLATION</button>
+                                                        </div>
+                                                </div>
+                                                <div
+                                                        class="neural-panel p-5 rounded-2xl flex items-start gap-4 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden group">
+                                                        <div
+                                                                class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan-400 to-blue-500">
+                                                        </div>
+                                                        <div
+                                                                class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 shadow-sm z-10">
+                                                                <span
+                                                                        class="material-symbols-outlined text-cyan-600">policy</span>
+                                                        </div>
+                                                        <div class="flex-1 z-10">
+                                                                <div class="flex justify-between items-start mb-2">
+                                                                        <h4
+                                                                                class="font-code-lg text-code-lg text-slate-900 font-semibold">
+                                                                                Configuration Drift</h4>
+                                                                        <span
+                                                                                class="font-label-caps text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">T-MINUS
+                                                                                15m</span>
+                                                                </div>
+                                                                <p
+                                                                        class="font-body-md text-body-md text-slate-600 text-sm mb-4 leading-relaxed">
+                                                                        GATEWAY-MAIN configuration checksum mismatch
+                                                                        detected against baseline.</p>
+                                                                <button
+                                                                        class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">REVIEW
+                                                                        DIFF</button>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </section>
+                        </div>
+                </main>
+        </div>
+        <!-- BottomNavBar (Mobile) -->
+        <nav
+                class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
+                <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined">notifications_active</span>
+                </a>
+                <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined">terminal</span>
+                </a>
+                <a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white"
+                        href="#">
+                        <span class="material-symbols-outlined">analytics</span>
+                </a>
+                <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined">settings</span>
+                </a>
+        </nav>
+</body>
+
+</html>

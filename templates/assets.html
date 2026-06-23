@@ -1,92 +1,131 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Asset Inventory · CRUD</title>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Theme Config -->
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-                "surface-tint": "#00daf3",
-                "error": "#ef4444",
-                "on-background": "#0f172a",
-                "primary-fixed-dim": "#06b6d4",
-                "on-surface-variant": "#64748b",
-                "on-surface": "#1e293b",
-                "background": "#ffffff"
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VULN.SCAN.IO · Asset Inventory</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Material Symbols -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Tailwind Theme Config -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#00daf3",
+            "error": "#ef4444",
+            "on-background": "#0f172a",
+            "primary-fixed-dim": "#06b6d4",
+            "on-surface-variant": "#64748b",
+            "on-surface": "#1e293b",
+            "background": "#ffffff"
+          },
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px" },
+          "spacing": { "base-unit": "4px", "gutter": "16px", "margin-desktop": "32px", "margin-mobile": "16px", "panel-padding": "24px" },
+          "fontFamily": {
+            "code-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "display-lg": ["Inter"],
+            "code-lg": ["JetBrains Mono"], "label-caps": ["Inter"], "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "code-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+            "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
         },
-        "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px" },
-        "spacing": { "base-unit": "4px", "gutter": "16px", "margin-desktop": "32px", "margin-mobile": "16px", "panel-padding": "24px" },
-        "fontFamily": {
-                "code-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "display-lg": ["Inter"],
-                "code-lg": ["JetBrains Mono"], "label-caps": ["Inter"], "body-md": ["Inter"]
-        },
-        "fontSize": {
-                "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
-                "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
-                "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-                "code-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
-                "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
-                "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }]
-        }
-},
-    },
-  }
-</script>
-<style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glow-sm { filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4)); }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .neural-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-        }
-        .shader-bg { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; background: #ffffff; }
-    </style>
-<style>
-    body { min-height: max(884px, 100dvh); }
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .glow-sm {
+      filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .neural-panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .shader-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
   </style>
-<script src="/static/i18n.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="/static/tableutils.js"></script>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  <script src="/static/i18n.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="/static/tableutils.js"></script>
 </head>
-<body class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
-<!-- White Cyber Background Shader -->
-<div class="shader-bg">
-<canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
-<script>
-    (function() {
-      const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
-      function syncSize() {
-        const w = canvas.clientWidth  || window.innerWidth;
-        const h = canvas.clientHeight || window.innerHeight;
-        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-      }
-      if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(syncSize).observe(canvas); }
-      syncSize();
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) return;
-      const vs = `attribute vec2 a_position; varying vec2 v_texCoord;
+
+<body
+  class="bg-white text-on-background font-body-md text-body-md relative antialiased selection:bg-primary-fixed-dim/20 selection:text-primary-fixed-dim overflow-x-hidden">
+  <!-- White Cyber Background Shader -->
+  <div class="shader-bg">
+    <canvas id="shader-canvas-ANIMATION_WHITE_CYBER" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+        (function () {
+          const canvas = document.getElementById('shader-canvas-ANIMATION_WHITE_CYBER');
+          function syncSize() {
+            const w = canvas.clientWidth || window.innerWidth;
+            const h = canvas.clientHeight || window.innerHeight;
+            if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+          }
+          if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(syncSize).observe(canvas); }
+          syncSize();
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return;
+          const vs = `attribute vec2 a_position; varying vec2 v_texCoord;
     void main() { v_texCoord = a_position * 0.5 + 0.5; gl_Position = vec4(a_position, 0.0, 1.0); }`;
-      const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution;
+          const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution;
     float grid(vec2 uv, float res) {
         vec2 grid = fract(uv * res);
         return 1.0 - (smoothstep(0.0, 0.03, abs(grid.x - 0.5)) * smoothstep(0.0, 0.03, abs(grid.y - 0.5)));
@@ -105,219 +144,305 @@
         color += scanline * cyberBlue * 0.05;
         gl_FragColor = vec4(color, 1.0);
     }`;
-      function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
-      const prog = gl.createProgram();
-      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
-      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
-      gl.linkProgram(prog); gl.useProgram(prog);
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const pos = gl.getAttribLocation(prog, 'a_position');
-      gl.enableVertexAttribArray(pos);
-      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-      const uTime = gl.getUniformLocation(prog, 'u_time');
-      const uRes = gl.getUniformLocation(prog, 'u_resolution');
-      function render(t) {
-        if (typeof ResizeObserver === 'undefined') syncSize();
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        if (uTime) gl.uniform1f(uTime, t * 0.001);
-        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      render(0);
-    })();
+          function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+          const prog = gl.createProgram();
+          gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+          gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+          gl.linkProgram(prog); gl.useProgram(prog);
+          const buf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+          const pos = gl.getAttribLocation(prog, 'a_position');
+          gl.enableVertexAttribArray(pos);
+          gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+          const uTime = gl.getUniformLocation(prog, 'u_time');
+          const uRes = gl.getUniformLocation(prog, 'u_resolution');
+          function render(t) {
+            if (typeof ResizeObserver === 'undefined') syncSize();
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            if (uTime) gl.uniform1f(uTime, t * 0.001);
+            if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+          }
+          render(0);
+        })();
     </script>
-</div>
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_4px_12px_rgba(6,182,212,0.3)]">
-<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">security</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-slate-900">VULN_INTEL_CMD</h1>
-<span class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50" data-i18n="top.asset_registry">ASSET_REGISTRY</span>
-</div>
-<div class="flex items-center gap-3">
-<div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
-<button data-lang-btn="en" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
-<button data-lang-btn="it" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
-</div>
-<div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
-<span class="material-symbols-outlined">sensors</span>
-</div>
-</div>
-</header>
-<div class="flex pt-16 h-screen w-full overflow-hidden">
-<!-- NavigationDrawer (Web) -->
-<nav class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
-<div class="px-6 mb-4">
-<span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
-</div>
-<ul class="flex flex-col w-full px-4 gap-2">
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="">DASHBOARD</span>
-</a>
-</li>
-<!-- Active: ASSETS -->
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]" href="/assets">
-<span class="material-symbols-outlined text-cyan-400">inventory_2</span>
-<span class="">ASSETS</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/intel">
-<span class="material-symbols-outlined">psychology</span>
-<span class="">INTEL</span>
-</a>
-</li>
-<li class="">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps" href="/audit">
-<span class="material-symbols-outlined">fact_check</span>
-<span class="">AUDIT</span>
-</a>
-</li>
-</ul>
-</nav>
-<!-- Main Content Canvas -->
-<main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
-<div class="mx-auto space-y-8">
-<!-- Page header -->
-<div class="flex items-center justify-between flex-wrap gap-4">
-<div>
-<h2 class="font-display-lg text-3xl font-bold tracking-tight text-slate-900" data-i18n="assets.header">Asset Inventory</h2>
-<p class="font-code-sm text-code-sm text-slate-500 mt-1"><span data-i18n="assets.subtitle">CRUD management of the config file</span> <span class="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">assets.txt</span></p>
-</div>
-<div class="flex items-center gap-3">
-<span id="count" class="font-label-caps text-label-caps text-cyan-600 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-full">0</span>
-<button id="reload" class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">refresh</span> <span data-i18n="common.reload">RELOAD</span>
-</button>
-</div>
-</div>
+  </div>
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
+    <div class="flex items-center gap-4">
+      <img src="/static/logo-icon.svg" class="w-11 h-11" alt="VULN.SCAN.IO" />
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tight"><span
+          class="text-orange-500">VULN</span><span class="text-slate-400">.</span><span
+          class="text-orange-500">SCAN</span><span class="text-slate-400">.</span><span class="text-cyan-500">IO</span>
+      </h1>
+      <span
+        class="font-label-caps text-label-caps text-cyan-600 tracking-[0.2em] ml-4 hidden md:block px-2.5 py-1 bg-cyan-50 rounded-full border border-cyan-100/50"
+        data-i18n="top.asset_registry">ASSET_REGISTRY</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+        <button data-lang-btn="en"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
+        <button data-lang-btn="it"
+          class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
+      </div>
+      <div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">sensors</span>
+      </div>
+    </div>
+  </header>
+  <div class="flex pt-16 h-screen w-full overflow-hidden">
+    <!-- NavigationDrawer (Web) -->
+    <nav
+      class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
+      <div class="px-6 mb-4">
+        <span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
+      </div>
+      <ul class="flex flex-col w-full px-4 gap-2">
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="">DASHBOARD</span>
+          </a>
+        </li>
+        <!-- Active: ASSETS -->
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-white bg-slate-900 rounded-xl font-label-caps text-label-caps shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02]"
+            href="/assets">
+            <span class="material-symbols-outlined text-cyan-400">inventory_2</span>
+            <span class="">ASSETS</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/intel">
+            <span class="material-symbols-outlined">psychology</span>
+            <span class="">INTEL</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/audit">
+            <span class="material-symbols-outlined">fact_check</span>
+            <span class="">AUDIT</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/settings">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="">SETTINGS</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- Main Content Canvas -->
+    <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
+      <div class="mx-auto space-y-8">
+        <!-- Page header -->
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="font-display-lg text-3xl font-bold tracking-tight text-slate-900" data-i18n="assets.header">Asset
+              Inventory</h2>
+            <p class="font-code-sm text-code-sm text-slate-500 mt-1"><span data-i18n="assets.subtitle">CRUD management
+                of the config file</span> <span
+                class="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">assets.txt</span></p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="count"
+              class="font-label-caps text-label-caps text-cyan-600 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-full">0</span>
+            <button id="reload"
+              class="font-label-caps text-label-caps text-slate-600 border border-slate-200 bg-white px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">refresh</span> <span
+                data-i18n="common.reload">RELOAD</span>
+            </button>
+          </div>
+        </div>
 
-<!-- Create form -->
-<section class="neural-panel p-6 rounded-2xl">
-<h3 class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2">
-<span class="material-symbols-outlined text-sm text-cyan-500">add_circle</span> <span data-i18n="assets.new_title">NEW ASSET</span>
-</h3>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-<input id="new-ip" type="text" data-i18n-ph="assets.ph_ip" placeholder="IP / hostname"
-  class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
-<input id="new-user" type="text" data-i18n-ph="assets.ph_user" placeholder="username (optional)"
-  class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
-<input id="new-pass" type="text" data-i18n-ph="assets.ph_pass" placeholder="password (optional)"
-  class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
-<button id="create" class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 group disabled:opacity-40">
-<span class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-90 transition-transform duration-300">add</span> <span data-i18n="assets.add_btn">ADD ASSET</span>
-</button>
-</div>
-<p class="font-code-sm text-[11px] text-slate-400 mt-3" data-i18n="assets.help">Without username and password the asset is <span class="text-slate-600">NOT REQUIRED</span> (unauthenticated banner-grab).</p>
-</section>
+        <!-- Create form -->
+        <section class="neural-panel p-6 rounded-2xl">
+          <h3 class="font-label-caps text-label-caps text-slate-500 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm text-cyan-500">add_circle</span> <span
+              data-i18n="assets.new_title">NEW ASSET</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input id="new-ip" type="text" data-i18n-ph="assets.ph_ip" placeholder="IP / hostname"
+              class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
+            <input id="new-user" type="text" data-i18n-ph="assets.ph_user" placeholder="username (optional)"
+              class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
+            <input id="new-pass" type="text" data-i18n-ph="assets.ph_pass" placeholder="password (optional)"
+              class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
+            <button id="create"
+              class="bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 group disabled:opacity-40">
+              <span
+                class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-90 transition-transform duration-300">add</span>
+              <span data-i18n="assets.add_btn">ADD ASSET</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+            <select id="new-ostype"
+              class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition">
+              <option value="">— OS type (optional) —</option>
+              <option value="linux">Linux</option>
+              <option value="windows">Windows</option>
+            </select>
+            <input id="new-osver" type="text" placeholder="major version (e.g. 22.04, 10, 2019)"
+              class="bg-white/70 border border-slate-200 rounded-xl px-4 py-2.5 font-code-sm text-code-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-1 focus:ring-cyan-200 transition" />
+          </div>
+          <p class="font-code-sm text-[11px] text-slate-400 mt-3" data-i18n="assets.help">Without username and password
+            the asset is <span class="text-slate-600">NOT REQUIRED</span> (unauthenticated banner-grab).</p>
+        </section>
 
-<!-- Table -->
-<section class="neural-panel rounded-2xl overflow-hidden">
-<div class="p-4 border-b border-slate-100/70 flex items-center justify-end gap-2">
-<button id="exportAssetsCSV" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">download</span>CSV</button>
-<button id="exportAssetsXLS" class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
-</div>
-<div class="overflow-x-auto">
-<table id="assetsTable" class="w-full text-left border-collapse">
-<thead id="assetsThead">
-<tr class="border-b border-slate-200/70 bg-white/40">
-<th data-sort="index" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">#<span id="sicon-index"></span></th>
-<th data-sort="ip" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_host">IP / HOST<span id="sicon-ip"></span></th>
-<th data-sort="username" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_user">USERNAME<span id="sicon-username"></span></th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_pass">PASSWORD</th>
-<th data-sort="auth_required" class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap" data-i18n="assets.th_auth">AUTH<span id="sicon-auth_required"></span></th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4">
-<span class="inline-flex items-center gap-1">
-<span data-i18n="assets.th_active">ACTIVE</span>
-<span class="relative group inline-flex items-center">
-<span class="material-symbols-outlined text-[15px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
-<span class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl" data-i18n="assets.active_tooltip">Live reachability check.</span>
-</span>
-</span>
-</th>
-<th class="font-label-caps text-label-caps text-slate-500 px-5 py-4 text-right" data-i18n="assets.th_actions">ACTIONS</th>
-</tr>
-</thead>
-<tbody id="rows" class="divide-y divide-slate-100/70"></tbody>
-</table>
-</div>
-<div id="empty" class="hidden p-10 text-center font-code-sm text-code-sm text-slate-400" data-i18n="assets.empty">Inventory empty. Add the first asset.</div>
-<div id="assetsPager"></div>
-</section>
-<p id="toast" class="hidden font-code-sm text-code-sm px-4 py-2 rounded-lg"></p>
-</div>
-</main>
-</div>
-<!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white" href="/assets">
-<span class="material-symbols-outlined">inventory_2</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
-<span class="material-symbols-outlined">analytics</span>
-</a>
-</nav>
+        <!-- Table -->
+        <section class="neural-panel rounded-2xl overflow-hidden">
+          <div class="p-4 border-b border-slate-100/70 flex items-center justify-end gap-2">
+            <button id="exportAssetsCSV"
+              class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span
+                class="material-symbols-outlined text-[14px]">download</span>CSV</button>
+            <button id="exportAssetsXLS"
+              class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"><span
+                class="material-symbols-outlined text-[14px]">table_view</span>XLS</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table id="assetsTable" class="w-full text-left border-collapse">
+              <thead id="assetsThead">
+                <tr class="border-b border-slate-200/70 bg-white/40">
+                  <th data-sort="index"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">
+                    #<span id="sicon-index"></span></th>
+                  <th data-sort="ip"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    data-i18n="assets.th_host">IP / HOST<span id="sicon-ip"></span></th>
+                  <th data-sort="username"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    data-i18n="assets.th_user">USERNAME<span id="sicon-username"></span></th>
+                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_pass">
+                    PASSWORD</th>
+                  <th data-sort="auth_required"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    data-i18n="assets.th_auth">AUTH<span id="sicon-auth_required"></span></th>
+                  <th data-sort="os_type"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    data-i18n="assets.th_os">OS<span id="sicon-os_type"></span></th>
+                  <th data-sort="os_major_version"
+                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    data-i18n="assets.th_osver">VER<span id="sicon-os_major_version"></span></th>
+                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4">
+                    <span class="inline-flex items-center gap-1">
+                      <span data-i18n="assets.th_active">ACTIVE</span>
+                      <span class="relative group inline-flex items-center">
+                        <span
+                          class="material-symbols-outlined text-[15px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
+                        <span
+                          class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl"
+                          data-i18n="assets.active_tooltip">Live reachability check.</span>
+                      </span>
+                    </span>
+                  </th>
+                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4 text-right"
+                    data-i18n="assets.th_actions">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="rows" class="divide-y divide-slate-100/70"></tbody>
+            </table>
+          </div>
+          <div id="empty" class="hidden p-10 text-center font-code-sm text-code-sm text-slate-400"
+            data-i18n="assets.empty">Inventory empty. Add the first asset.</div>
+          <div id="assetsPager"></div>
+        </section>
+        <p id="toast" class="hidden font-code-sm text-code-sm px-4 py-2 rounded-lg"></p>
+      </div>
+    </main>
+  </div>
+  <!-- BottomNavBar (Mobile) -->
+  <nav
+    class="md:hidden fixed bottom-6 left-4 right-4 flex justify-around items-center px-2 py-2 bg-white/90 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl z-50">
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
+      <span class="material-symbols-outlined">dashboard</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-slate-900 text-cyan-400 shadow-xl rounded-xl p-3 -mt-6 border-4 border-white"
+      href="/assets">
+      <span class="material-symbols-outlined">inventory_2</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-cyan-600 transition-all" href="/">
+      <span class="material-symbols-outlined">analytics</span>
+    </a>
+  </nav>
 
-<script>
-  const $ = (id) => document.getElementById(id);
-  const rows = $('rows');
-  const empty = $('empty');
-  const countEl = $('count');
-  const toast = $('toast');
-  let assets = [];
-  let editingIndex = null;
-  let assetSort = {field:'index', dir:'asc'};
-  let assetPage = 0, assetPageSize = 50;
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const rows = $('rows');
+    const empty = $('empty');
+    const countEl = $('count');
+    const toast = $('toast');
+    let assets = [];
+    let editingIndex = null;
+    let assetSort = { field: 'index', dir: 'asc' };
+    let assetPage = 0, assetPageSize = 50;
 
-  function updateSortIcons(){
-    ['index','ip','username','auth_required'].forEach(f=>{
-      const el=document.getElementById('sicon-'+f);
-      if(el) el.innerHTML=sortIcon(f,assetSort);
-    });
-  }
+    function updateSortIcons() {
+      ['index', 'ip', 'username', 'auth_required', 'os_type', 'os_major_version'].forEach(f => {
+        const el = document.getElementById('sicon-' + f);
+        if (el) el.innerHTML = sortIcon(f, assetSort);
+      });
+    }
 
-  function showToast(msg, ok = true) {
-    toast.textContent = msg;
-    toast.className = 'font-code-sm text-code-sm px-4 py-2 rounded-lg ' +
-      (ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+    function showToast(msg, ok = true) {
+      toast.textContent = msg;
+      toast.className = 'font-code-sm text-code-sm px-4 py-2 rounded-lg ' +
+        (ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
           : 'bg-rose-50 text-rose-700 border border-rose-200');
-    toast.classList.remove('hidden');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toast.classList.add('hidden'), 2600);
-  }
+      toast.classList.remove('hidden');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.add('hidden'), 2600);
+    }
 
-  const esc = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-  function authBadge(req) {
-    return req
-      ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.authenticated')}</span>`
-      : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.not_required')}</span>`;
-  }
+    function authBadge(req) {
+      return req
+        ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.authenticated')}</span>`
+        : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.not_required')}</span>`;
+    }
 
-  function inputCell(val, cls) {
-    return `<input value="${esc(val)}" class="${cls} bg-white border border-cyan-200 rounded-lg px-3 py-1.5 font-code-sm text-code-sm text-slate-900 w-full focus:outline-none focus:ring-1 focus:ring-cyan-300" />`;
-  }
+    function inputCell(val, cls) {
+      return `<input value="${esc(val)}" class="${cls} bg-white border border-cyan-200 rounded-lg px-3 py-1.5 font-code-sm text-code-sm text-slate-900 w-full focus:outline-none focus:ring-1 focus:ring-cyan-300" />`;
+    }
 
-  function rowHtml(a) {
-    const editing = editingIndex === a.index;
-    if (editing) {
-      return `
+    function osBadge(os_type, os_major_version) {
+      const os = (os_type || '').toLowerCase();
+      const ver = os_major_version ? ' ' + esc(os_major_version) : '';
+      if (os === 'linux')
+        return `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">LNX${ver}</span>`;
+      if (os === 'windows')
+        return `<span class="px-2.5 py-1 border border-blue-100 bg-blue-50 text-blue-700 font-label-caps text-[10px] rounded-full">WIN${ver}</span>`;
+      return `<span class="text-slate-300">—</span>`;
+    }
+
+    function osSelectHtml(val) {
+      const v = (val || '').toLowerCase();
+      return `<select class="edit-ostype bg-white border border-cyan-200 rounded-lg px-2 py-1.5 font-code-sm text-[12px] text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-300">
+      <option value="" ${!v ? 'selected' : ''}>—</option>
+      <option value="linux" ${v === 'linux' ? 'selected' : ''}>Linux</option>
+      <option value="windows" ${v === 'windows' ? 'selected' : ''}>Windows</option>
+    </select>`;
+    }
+
+    function rowHtml(a) {
+      const editing = editingIndex === a.index;
+      if (editing) {
+        return `
         <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
         <td class="px-5 py-3">${inputCell(a.ip, 'edit-ip')}</td>
         <td class="px-5 py-3">${inputCell(a.username, 'edit-user')}</td>
-        <td class="px-5 py-3">${inputCell(a.password, 'edit-pass')}</td>
+        <td class="px-5 py-3"><input value="" placeholder="${a.has_password ? '••••••••' : ''}" class="edit-pass bg-white border border-cyan-200 rounded-lg px-3 py-1.5 font-code-sm text-code-sm text-slate-900 w-full focus:outline-none focus:ring-1 focus:ring-cyan-300 placeholder:text-slate-400" /></td>
         <td class="px-5 py-3 text-slate-300 font-code-sm text-[11px]">${t('assets.auto')}</td>
+        <td class="px-5 py-3">${osSelectHtml(a.os_type)}</td>
+        <td class="px-5 py-3">${inputCell(a.os_major_version, 'edit-osver')}</td>
         <td class="px-5 py-3 text-slate-300 font-code-sm text-[11px]">—</td>
         <td class="px-5 py-3">
           <div class="flex items-center justify-end gap-2">
@@ -325,149 +450,171 @@
             <button data-act="cancel" class="text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-slate-100 transition">${t('common.cancel')}</button>
           </div>
         </td>`;
-    }
-    const pass = a.password ? '••••••••' : '<span class="text-slate-300">—</span>';
-    const user = a.username ? esc(a.username) : '<span class="text-slate-300">—</span>';
-    return `
+      }
+      const passWarn = a.has_password && !a.password_encrypted;
+      const pass = a.has_password
+        ? (passWarn
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 border border-orange-200 bg-orange-50 text-orange-600 font-label-caps text-[10px] rounded-full"><span class="material-symbols-outlined text-[12px]">lock_open</span>NOT ENCRYPTED</span>'
+            : '••••••••')
+        : '<span class="text-slate-300">—</span>';
+      const user = a.username ? esc(a.username) : '<span class="text-slate-300">—</span>';
+      return `
       <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
       <td class="px-5 py-3 font-code-sm text-code-sm text-slate-900 font-semibold">${esc(a.ip)}</td>
       <td class="px-5 py-3 font-code-sm text-code-sm text-slate-600">${user}</td>
-      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400 tracking-widest" title="${a.password ? 'set' : 'empty'}">${pass}</td>
+      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400 tracking-widest" title="${a.has_password ? (a.password_encrypted ? 'encrypted' : 'plain text — NOT ENCRYPTED') : 'empty'}">${pass}</td>
       <td class="px-5 py-3">${authBadge(a.auth_required)}</td>
-      <td class="px-5 py-3" id="act-${a.index}">${statusCell(a.ip)}</td>
+      <td class="px-5 py-3">${osBadge(a.os_type, a.os_major_version)}</td>
+      <td class="px-5 py-3 font-code-sm text-[11px] text-slate-500">${a.os_major_version ? esc(a.os_major_version) : '<span class="text-slate-300">—</span>'}</td>
+      <td class="px-5 py-3" id="act-${a.index}">${statusCell(a)}</td>
       <td class="px-5 py-3">
         <div class="flex items-center justify-end gap-2">
           <button data-act="edit" data-i="${a.index}" class="text-cyan-600 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-cyan-100 transition flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>${t('common.edit')}</button>
           <button data-act="delete" data-i="${a.index}" class="text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-rose-100 transition flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">delete</span>${t('common.delete')}</button>
         </div>
       </td>`;
-  }
+    }
 
-  // --- ACTIVE column: live reachability ---------------------------------
-  const healthCache = {};  // host -> true|false (evita ri-ping al cambio lingua)
+    // --- ACTIVE column: live reachability ---------------------------------
+    const healthCache = {};  // host -> true|false (evita ri-ping al cambio lingua)
 
-  function statusBadge(ok) {
-    return ok
-      ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-emerald-200 bg-emerald-50 text-emerald-700 font-label-caps text-[10px] rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${t('assets.available')}</span>`
-      : `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-rose-200 bg-rose-50 text-rose-700 font-label-caps text-[10px] rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>${t('assets.not_available')}</span>`;
-  }
-  function statusCell(host) {
-    if (host in healthCache) return statusBadge(healthCache[host]);
-    return `<span class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-400"><span class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>${t('assets.checking')}</span>`;
-  }
-  async function runHealthChecks() {
-    for (const a of assets) {
-      if (a.ip in healthCache) continue;
-      try {
-        const r = await fetch('/api/asset/health?host=' + encodeURIComponent(a.ip));
-        const d = await r.json();
-        healthCache[a.ip] = !!d.reachable;
-      } catch (_) {
-        healthCache[a.ip] = false;
+    function statusBadge(reachable, ssh_ok) {
+      if (!reachable)
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-rose-200 bg-rose-50 text-rose-700 font-label-caps text-[10px] rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>${t('assets.not_available')}</span>`;
+      if (ssh_ok === null)
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-emerald-200 bg-emerald-50 text-emerald-700 font-label-caps text-[10px] rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${t('assets.available')}</span>`;
+      if (ssh_ok)
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-emerald-200 bg-emerald-50 text-emerald-700 font-label-caps text-[10px] rounded-full"><span class="material-symbols-outlined text-[12px]">lock</span>SSH OK</span>`;
+      return `<span class="inline-flex items-center gap-1 px-2.5 py-1 border border-orange-200 bg-orange-50 text-orange-700 font-label-caps text-[10px] rounded-full"><span class="material-symbols-outlined text-[12px]">lock_open</span>SSH FAIL</span>`;
+    }
+    function statusCell(a) {
+      const key = a.index;
+      if (key in healthCache) return statusBadge(healthCache[key].reachable, healthCache[key].ssh_ok);
+      return `<span class="inline-flex items-center gap-1 font-label-caps text-[10px] text-slate-400"><span class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>${t('assets.checking')}</span>`;
+    }
+    async function runHealthChecks() {
+      for (const a of assets) {
+        if (a.index in healthCache) continue;
+        try {
+          const r = await fetch('/api/asset/health?host=' + encodeURIComponent(a.ip) + '&index=' + a.index);
+          const d = await r.json();
+          healthCache[a.index] = { reachable: !!d.reachable, ssh_ok: d.ssh_ok ?? null };
+        } catch (_) {
+          healthCache[a.index] = { reachable: false, ssh_ok: null };
+        }
+        const cell = document.getElementById('act-' + a.index);
+        if (cell) cell.innerHTML = statusBadge(healthCache[a.index].reachable, healthCache[a.index].ssh_ok);
       }
-      const cell = document.getElementById('act-' + a.index);
-      if (cell) cell.innerHTML = statusBadge(healthCache[a.ip]);
     }
-  }
 
-  function render() {
-    rows.innerHTML = '';
-    countEl.textContent = t('assets.count', { n: assets.length });
-    empty.classList.toggle('hidden', assets.length > 0);
-    updateSortIcons();
-    const sorted = sortArray(assets, assetSort.field, assetSort.dir);
-    const total = sorted.length;
-    const page = assetPageSize===0 ? sorted : sorted.slice(assetPage*assetPageSize, assetPage*assetPageSize+assetPageSize);
-    page.forEach((a) => {
-      const tr = document.createElement('tr');
-      tr.className = 'hover:bg-white/60 transition-colors';
-      tr.innerHTML = rowHtml(a);
-      rows.appendChild(tr);
-    });
-    renderPaginator('assetsPager', total, assetPage, assetPageSize, (p,sz)=>{assetPage=p;assetPageSize=sz;render();});
-    runHealthChecks();
-  }
+    function render() {
+      rows.innerHTML = '';
+      countEl.textContent = t('assets.count', { n: assets.length });
+      empty.classList.toggle('hidden', assets.length > 0);
+      updateSortIcons();
+      const sorted = sortArray(assets, assetSort.field, assetSort.dir);
+      const total = sorted.length;
+      const page = assetPageSize === 0 ? sorted : sorted.slice(assetPage * assetPageSize, assetPage * assetPageSize + assetPageSize);
+      page.forEach((a) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-white/60 transition-colors';
+        tr.innerHTML = rowHtml(a);
+        rows.appendChild(tr);
+      });
+      renderPaginator('assetsPager', total, assetPage, assetPageSize, (p, sz) => { assetPage = p; assetPageSize = sz; render(); });
+      runHealthChecks();
+    }
 
-  async function load() {
-    try {
-      const r = await fetch('/api/assets/all');
+    async function load() {
+      try {
+        const r = await fetch('/api/assets/all');
+        const d = await r.json();
+        assets = d.assets || [];
+        editingIndex = null;
+        render();
+      } catch (e) {
+        showToast(t('assets.load_failed'), false);
+      }
+    }
+
+    async function createAsset() {
+      const ip = $('new-ip').value.trim();
+      if (!ip) { $('new-ip').focus(); return; }
+      const body = {
+        ip, username: $('new-user').value.trim(), password: $('new-pass').value.trim(),
+        os_type: $('new-ostype').value, os_major_version: $('new-osver').value.trim()
+      };
+      const r = await fetch('/api/assets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json();
-      assets = d.assets || [];
-      editingIndex = null;
-      render();
-    } catch (e) {
-      showToast(t('assets.load_failed'), false);
+      if (!r.ok) { showToast(d.error || t('assets.err_create'), false); return; }
+      $('new-ip').value = ''; $('new-user').value = ''; $('new-pass').value = '';
+      $('new-ostype').value = ''; $('new-osver').value = '';
+      showToast(t('assets.added'));
+      await load();
     }
-  }
 
-  async function createAsset() {
-    const ip = $('new-ip').value.trim();
-    if (!ip) { $('new-ip').focus(); return; }
-    const body = { ip, username: $('new-user').value.trim(), password: $('new-pass').value.trim() };
-    const r = await fetch('/api/assets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const d = await r.json();
-    if (!r.ok) { showToast(d.error || t('assets.err_create'), false); return; }
-    $('new-ip').value = ''; $('new-user').value = ''; $('new-pass').value = '';
-    showToast(t('assets.added'));
-    await load();
-  }
+    async function saveEdit(index, tr) {
+      const ip = tr.querySelector('.edit-ip').value.trim();
+      if (!ip) { tr.querySelector('.edit-ip').focus(); return; }
+      const body = {
+        ip, username: tr.querySelector('.edit-user').value.trim(), password: tr.querySelector('.edit-pass').value.trim(),
+        os_type: tr.querySelector('.edit-ostype').value, os_major_version: tr.querySelector('.edit-osver').value.trim()
+      };
+      const r = await fetch(`/api/assets/${index}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (!r.ok) { showToast(d.error || t('assets.err_update'), false); return; }
+      showToast(t('assets.updated'));
+      await load();
+    }
 
-  async function saveEdit(index, tr) {
-    const ip = tr.querySelector('.edit-ip').value.trim();
-    if (!ip) { tr.querySelector('.edit-ip').focus(); return; }
-    const body = { ip, username: tr.querySelector('.edit-user').value.trim(), password: tr.querySelector('.edit-pass').value.trim() };
-    const r = await fetch(`/api/assets/${index}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const d = await r.json();
-    if (!r.ok) { showToast(d.error || t('assets.err_update'), false); return; }
-    showToast(t('assets.updated'));
-    await load();
-  }
+    async function deleteAsset(index) {
+      const a = assets.find((x) => x.index === index);
+      if (!confirm(t('assets.confirm_delete', { ip: (a ? a.ip : index) }))) return;
+      const r = await fetch(`/api/assets/${index}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (!r.ok) { showToast(d.error || t('assets.err_delete'), false); return; }
+      showToast(t('assets.deleted'));
+      await load();
+    }
 
-  async function deleteAsset(index) {
-    const a = assets.find((x) => x.index === index);
-    if (!confirm(t('assets.confirm_delete', { ip: (a ? a.ip : index) }))) return;
-    const r = await fetch(`/api/assets/${index}`, { method: 'DELETE' });
-    const d = await r.json();
-    if (!r.ok) { showToast(d.error || t('assets.err_delete'), false); return; }
-    showToast(t('assets.deleted'));
-    await load();
-  }
+    // Event delegation sui pulsanti riga.
+    rows.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      const act = btn.dataset.act;
+      const tr = btn.closest('tr');
+      const i = btn.dataset.i !== undefined ? parseInt(btn.dataset.i, 10) : null;
+      if (act === 'edit') { editingIndex = i; render(); }
+      else if (act === 'cancel') { editingIndex = null; render(); }
+      else if (act === 'save') { saveEdit(i, tr); }
+      else if (act === 'delete') { deleteAsset(i); }
+    });
 
-  // Event delegation sui pulsanti riga.
-  rows.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-act]');
-    if (!btn) return;
-    const act = btn.dataset.act;
-    const tr = btn.closest('tr');
-    const i = btn.dataset.i !== undefined ? parseInt(btn.dataset.i, 10) : null;
-    if (act === 'edit') { editingIndex = i; render(); }
-    else if (act === 'cancel') { editingIndex = null; render(); }
-    else if (act === 'save') { saveEdit(i, tr); }
-    else if (act === 'delete') { deleteAsset(i); }
-  });
+    $('create').addEventListener('click', createAsset);
+    $('new-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') createAsset(); });
+    $('reload').addEventListener('click', load);
+    window.addEventListener('langchange', render);
 
-  $('create').addEventListener('click', createAsset);
-  $('new-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') createAsset(); });
-  $('reload').addEventListener('click', load);
-  window.addEventListener('langchange', render);
+    // Column sort
+    $('assetsTable').addEventListener('click', e => {
+      const th = e.target.closest('[data-sort]'); if (!th || !th.closest('thead')) return;
+      const f = th.dataset.sort;
+      assetSort.dir = (assetSort.field === f && assetSort.dir === 'asc') ? 'desc' : 'asc';
+      assetSort.field = f; assetPage = 0; render();
+    });
 
-  // Column sort
-  $('assetsTable').addEventListener('click', e=>{
-    const th=e.target.closest('[data-sort]'); if(!th||!th.closest('thead')) return;
-    const f=th.dataset.sort;
-    assetSort.dir=(assetSort.field===f&&assetSort.dir==='asc')?'desc':'asc';
-    assetSort.field=f; assetPage=0; render();
-  });
+    // Export (exclude password column)
+    function _buildAssetRows() {
+      return sortArray(assets, assetSort.field, assetSort.dir).map(a => ({
+        Index: a.index, IP_Host: a.ip, Username: a.username || '', Auth_Required: a.auth_required ? 'Yes' : 'No',
+        OS_Type: a.os_type || '', OS_Version: a.os_major_version || ''
+      }));
+    }
+    $('exportAssetsCSV').addEventListener('click', () => exportCSV(_buildAssetRows(), 'assets.csv'));
+    $('exportAssetsXLS').addEventListener('click', () => exportXLS(_buildAssetRows(), 'assets.xlsx'));
 
-  // Export (exclude password column)
-  function _buildAssetRows(){
-    return sortArray(assets,assetSort.field,assetSort.dir).map(a=>({
-      Index:a.index, IP_Host:a.ip, Username:a.username||'', Auth_Required:a.auth_required?'Yes':'No'
-    }));
-  }
-  $('exportAssetsCSV').addEventListener('click',()=>exportCSV(_buildAssetRows(),'assets.csv'));
-  $('exportAssetsXLS').addEventListener('click',()=>exportXLS(_buildAssetRows(),'assets.xlsx'));
+    load();
+  </script>
+</body>
 
-  load();
-</script>
-</body></html>
+</html>

@@ -5,11 +5,13 @@
 #
 # 45.33.32.156 = scanme.nmap.org (authorized public scan target by Nmap project).
 
-45.33.32.156||
-scanme.nmap.org
-93.184.216.34|admin|secret123
-scanme2.nmap.org
-zonetransfer.me
-estphp.vulnweb.com|admin|admin
-testaspnet.vulnweb.com|admin|admin
-http://testhtml5.vulnweb.com
+45.33.32.156||||
+scanme.nmap.org||||
+93.184.216.34|admin|||
+scanme2.nmap.org||||
+zonetransfer.me||||
+estphp.vulnweb.com|admin|ENC:e6b750dbd9577564cc963214249e2aa57a0621ffe920641b2033f272abc9e680dc||
+testaspnet.vulnweb.com||||
+http://testhtml5.vulnweb.com||||
+172.17.0.2|admin|ENC:admin|linux|
+172.17.0.2|admin|admin|linux|

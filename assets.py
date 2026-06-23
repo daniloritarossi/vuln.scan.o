@@ -26,6 +26,8 @@ class Asset:
     ip: str
     username: str = ""
     password: str = ""
+    os_type: str = ""          # "linux" | "windows" | ""
+    os_major_version: str = "" # e.g. "22.04", "10", "2019"
 
     @property
     def auth_required(self) -> bool:
@@ -38,6 +40,8 @@ class Asset:
             "ip": self.ip,
             "username": self.username or None,
             "auth_required": self.auth_required,
+            "os_type": self.os_type or None,
+            "os_major_version": self.os_major_version or None,
         }
 
 
@@ -59,7 +63,10 @@ def parse_line(line: str) -> Asset | None:
 
     username = parts[1].strip() if len(parts) > 1 else ""
     password = parts[2].strip() if len(parts) > 2 else ""
-    return Asset(ip=ip, username=username, password=password)
+    os_type = parts[3].strip().lower() if len(parts) > 3 else ""
+    os_major_version = parts[4].strip() if len(parts) > 4 else ""
+    return Asset(ip=ip, username=username, password=password,
+                 os_type=os_type, os_major_version=os_major_version)
 
 
 def load_assets(path: str | Path = "assets.txt") -> List[Asset]:
@@ -101,7 +108,7 @@ def save_assets(assets: List[Asset], path: str | Path = "assets.txt") -> None:
     if lines and lines[-1].strip() != "":
         lines.append("")
     for a in assets:
-        lines.append(f"{a.ip}|{a.username}|{a.password}")
+        lines.append(f"{a.ip}|{a.username}|{a.password}|{a.os_type}|{a.os_major_version}")
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

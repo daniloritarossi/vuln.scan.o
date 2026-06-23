@@ -112,6 +112,8 @@ def persist_result(scan_id: Optional[int], rd: dict) -> None:
         "cve_error": rd.get("cve_error"),
         "affected_version": rd.get("affected_version"),
         "match_basis": rd.get("match_basis"),
+        "os_type": rd.get("os_type"),
+        "os_major_version": rd.get("os_major_version"),
     }
     try:
         client.table("scan_results").insert(row).execute()
@@ -188,7 +190,7 @@ def persist_posture_asset(run_id: Optional[int], report: dict) -> None:
         row = {k: report.get(k) for k in (
             "ip", "os_guess", "method", "total_packages", "vulnerable_packages",
             "total_vulns", "score", "sev_critical", "sev_high", "sev_medium",
-            "sev_low", "sev_unknown")}
+            "sev_low", "sev_unknown", "os_type", "os_major_version")}
         row["run_id"] = run_id
         resp = client.table("posture_assets").insert(row).execute()
         asset_id = resp.data[0]["id"] if resp.data else None
