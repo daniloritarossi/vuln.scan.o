@@ -16,6 +16,7 @@ Nessuna dipendenza nuova: usa 'requests' (gia' presente) verso OSV.
 """
 
 import hashlib
+import re
 import requests
 
 from scanner import _get_simulate_auth as _sim_auth, _get_socket_timeout as _sock_timeout
@@ -75,6 +76,31 @@ CATALOG = [
 
 OS_PROFILES = ["Debian 11", "Ubuntu 20.04", "CentOS 7", "Alpine 3.16"]
 
+# Catalogo applicazioni Windows (coerente con la macchina di test: Notepad++ 7.8.1
+# e PuTTY 0.70 sono i due software vulnerabili installati). ecosystem "Windows":
+# OSV di norma non risolve queste app -> si usa il fallback cves/severity.
+WINDOWS_CATALOG = [
+    {"name": "Notepad++", "version": "7.8.1", "ecosystem": "Windows", "category": "Editor",
+     "severity": "HIGH", "cves": ["CVE-2021-3811", "CVE-2020-13808"]},
+    {"name": "PuTTY", "version": "0.70", "ecosystem": "Windows", "category": "Remote Access",
+     "severity": "HIGH", "cves": ["CVE-2019-9894", "CVE-2019-9896", "CVE-2019-9898"]},
+    {"name": "7-Zip", "version": "19.00", "ecosystem": "Windows", "category": "Compression",
+     "severity": "HIGH", "cves": ["CVE-2022-29072"]},
+    {"name": "Mozilla Firefox", "version": "78.0", "ecosystem": "Windows", "category": "Browser",
+     "severity": "CRITICAL", "cves": ["CVE-2020-15999", "CVE-2021-29967"]},
+    {"name": "Adobe Acrobat Reader DC", "version": "2019.012.20040", "ecosystem": "Windows",
+     "category": "PDF", "severity": "CRITICAL", "cves": ["CVE-2021-28550"]},
+    {"name": "VLC media player", "version": "3.0.6", "ecosystem": "Windows", "category": "Media",
+     "severity": "HIGH", "cves": ["CVE-2019-12874"]},
+    {"name": "Wireshark", "version": "3.0.0", "ecosystem": "Windows", "category": "Network",
+     "severity": "MEDIUM", "cves": ["CVE-2019-10894"]},
+    # "Puliti" (nessuna CVE) per un totale realistico.
+    {"name": "Microsoft Edge", "version": "120.0.2210.91", "ecosystem": "Windows", "category": "Browser"},
+    {"name": "Microsoft Visual C++ Redistributable", "version": "14.36.32532", "ecosystem": "Windows",
+     "category": "Runtime"},
+    {"name": "Microsoft Defender", "version": "4.18.23110", "ecosystem": "Windows", "category": "Security"},
+]
+
 
 def _seed(ip: str) -> int:
     return int(hashlib.sha256((ip or "").encode()).hexdigest(), 16)
@@ -94,6 +120,70 @@ def simulate_inventory(ip: str):
     if not any(p.get("cves") for p in inv):
         inv.extend(dict(p) for p in CATALOG[:2])
     return os_guess, inv
+
+
+def simulate_windows_inventory(ip: str, os_major: str = ""):
+    """Inventario Windows deterministico per IP: puliti sempre + subset dei
+    vulnerabili. Garantisce sempre Notepad++ e PuTTY (coerenza macchina di test)."""
+    seed = _seed(ip)
+    os_guess = f"Windows {os_major}" if os_major else "Windows 10"
+    inv = []
+    for i, pkg in enumerate(WINDOWS_CATALOG):
+        if not pkg.get("cves"):
+            inv.append(dict(pkg))
+        elif (seed >> i) & 1:
+            inv.append(dict(pkg))
+    names = {p["name"] for p in inv}
+    for must in ("Notepad++", "PuTTY"):
+        if must not in names:
+            inv.append(dict(next(p for p in WINDOWS_CATALOG if p["name"] == must)))
+    return os_guess, inv
+
+
+# Righe di intestazione/separatori da ignorare nel parsing dell'inventario Windows.
+_WIN_SKIP_RE = re.compile(r"^(name|displayname|-{2,}|=+|\s*$)", re.I)
+_WIN_VER_RE = re.compile(r"(\d+(?:\.\d+){1,3})")
+
+
+def _parse_windows_inventory(out: str):
+    """Parsa l'output PowerShell (winget list + registro Uninstall): per ogni riga
+    con DisplayName + versione produce un finding. Best-effort, deduplicato."""
+    inv = []
+    seen = set()
+    for raw in out.splitlines():
+        line = raw.rstrip()
+        if _WIN_SKIP_RE.match(line.strip()):
+            continue
+        m = _WIN_VER_RE.search(line)
+        if not m:
+            continue
+        name = line[:m.start()].strip()
+        # winget ha colonne multiple separate da spazi: il nome e' il primo campo.
+        name = re.split(r"\s{2,}", name)[0].strip()
+        key = name.lower()
+        if not name or key in seen:
+            continue
+        seen.add(key)
+        inv.append({"name": name, "version": m.group(1),
+                    "ecosystem": "Windows", "category": "Application"})
+    return inv
+
+
+def _ssh_inventory_windows(asset):
+    """Inventario REALE Windows via SSH (winget + registro). Solo se SIMULATE_AUTH=False."""
+    import paramiko
+    from scanner import _WINDOWS_INVENTORY_CMD
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.RejectPolicy())
+    try:
+        _t = _sock_timeout()
+        client.connect(asset.ip, username=asset.username, password=asset.password,
+                       timeout=_t, allow_agent=False, look_for_keys=False)
+        _, stdout, _ = client.exec_command(_WINDOWS_INVENTORY_CMD, timeout=_t * 6)
+        out = stdout.read().decode("utf-8", errors="replace")
+    finally:
+        client.close()
+    return f"windows {asset.os_major_version or ''}".strip(), _parse_windows_inventory(out)
 
 
 def _ssh_inventory(asset):
@@ -135,13 +225,21 @@ def collect_inventory(asset):
     Ritorna (os_guess, inventory, method).
     method: 'ssh' (reale) | 'sim' (simulato).
     """
+    is_windows = (asset.os_type or "").lower() == "windows"
     if not _sim_auth() and asset.auth_required:
         try:
-            os_guess, inv = _ssh_inventory(asset)
-            return os_guess, inv, "ssh"
+            if is_windows:
+                os_guess, inv = _ssh_inventory_windows(asset)
+            else:
+                os_guess, inv = _ssh_inventory(asset)
+            if inv:
+                return os_guess, inv, "ssh"
         except Exception:
             pass  # fallback su simulazione in caso di errore SSH
-    os_guess, inv = simulate_inventory(asset.ip)
+    if is_windows:
+        os_guess, inv = simulate_windows_inventory(asset.ip, asset.os_major_version)
+    else:
+        os_guess, inv = simulate_inventory(asset.ip)
     return os_guess, inv, "sim"
 
 

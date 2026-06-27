@@ -67,6 +67,35 @@ def audit_page(request: Request):
     return templates.TemplateResponse("audit.html", {"request": request})
 
 
+@app.get("/sbom", response_class=HTMLResponse)
+def sbom_page(request: Request):
+    """Pagina SBOM: Software Bill of Materials per asset dell'inventario."""
+    return templates.TemplateResponse("sbom.html", {"request": request})
+
+
+@app.get("/api/sbom")
+def api_sbom():
+    """
+    Ritorna tutti i pacchetti rilevati dall'ultima run di postura (SCA).
+    Ogni riga: {asset_ip, package, version, ecosystem, cve_count}.
+    """
+    run = fetch_posture()
+    if not run:
+        return {"rows": []}
+    rows = []
+    for asset in run.get("posture_assets") or []:
+        ip = asset.get("ip") or ""          # mai None: il filtro UI fa .toLowerCase()
+        for f in asset.get("posture_findings") or []:
+            rows.append({
+                "asset_ip":  ip,
+                "package":   f.get("package") or "",
+                "version":   f.get("version") or "",
+                "ecosystem": f.get("ecosystem") or "",
+                "cve_count": f.get("vuln_count", 0),
+            })
+    return {"rows": rows}
+
+
 @app.get("/intel", response_class=HTMLResponse)
 def intel_page(request: Request):
     """Pagina INTEL: dashboard Full Posture (ASPM-style)."""
@@ -446,6 +475,12 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
     'lang' (default 'en') seleziona la lingua della sintesi CVE generata dall'LLM.
     """
     def event_stream():
+        try:
+            yield from _event_stream_inner()
+        except Exception as exc:
+            yield _sse("error", {"message": f"Internal error: {exc}"})
+
+    def _event_stream_inner():
         # 1. Identificazione prodotto.
         # Punto 1: se il dizionario locale non trova nulla, l'LLM sarà invocato.
         _local_peek = extract_local(description)
@@ -471,6 +506,7 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         #     installata su ciascun asset. Best-effort ('' se Ollama offline).
         if not target.version:
             yield _sse("ai_call", {**_ai_tag(), "purpose": "advisory"})
+            yield ": keepalive\n\n"
             advisory_expr = extract_affected_version(target.product, description)
             affected_source = "ai" if advisory_expr else None
         else:
@@ -542,6 +578,7 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         osv = query_osv(target.product, ver)
         if osv["ids"]:
             yield _sse("ai_call", {**_ai_tag(), "purpose": "summary"})
+            yield ": keepalive\n\n"
         summary = summarize_cves(target.product, ver, osv["ids"], count=osv["count"], lang=lang)
         cve_payload = {
             "product": target.product,
@@ -558,6 +595,7 @@ def api_scan(description: str, use_osint: bool = True, lang: str = "en",
         # Punto 2: triage AI post-scan — top-3 asset critici con motivazione e azione.
         if all_results:
             yield _sse("ai_call", {**_ai_tag(), "purpose": "triage"})
+            yield ": keepalive\n\n"
             triage_text = generate_triage_report(all_results, target.product, lang=lang)
             if triage_text:
                 yield _sse("triage", {"report": triage_text, "product": target.product})

@@ -47,6 +47,11 @@ KNOWN_PRODUCTS = {
     "redis": ["redis"],
     "vsftpd": ["vsftpd"],
     "exim": ["exim"],
+    # Software client Windows (rilevati via scansione autenticata PowerShell).
+    # Nota: l'alias "notepad++" non e' matchabile con \b...\b (il '+' finale non
+    # crea word boundary), quindi si usa "notepad" come alias funzionante.
+    "notepad++": ["notepad", "npp", "notepad plus plus"],
+    "putty": ["putty"],
 }
 
 # Dipendenze note per prodotto canonico. Servono a costruire il grafo
@@ -68,6 +73,8 @@ PRODUCT_DEPENDENCIES = {
     "wordpress": ["php", "mysql"],
     "vsftpd": ["openssl", "pam"],
     "exim": ["openssl", "pcre"],
+    "notepad++": ["scintilla", "boost"],
+    "putty": ["zlib"],
 }
 
 # Versione: numeri tipo 3.10, 8.4, 1.1.1k, 2.4.49 ...

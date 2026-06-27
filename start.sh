@@ -184,21 +184,59 @@ _wizard_search() {
   fi
 }
 
-# ── Wizard: macchina Linux Docker di test ────────────────────────────────────
+# ── Helper: aggiunta asset a assets.txt (cifrata/chiaro/no) ───────────────────
+
+_add_to_assets() {
+  # _add_to_assets IP OSTYPE OSVER
+  local _ip="$1" _os="$2" _osver="$3"
+  local _add
+  _add=$(_choose "Aggiungere a assets.txt?" \
+    "Si — aggiungi con credenziali cifrate" \
+    "Si — aggiungi con password in chiaro" \
+    "No")
+  [ "$_add" = "3" ] && return
+  local _stored_pw="admin"
+  if [ "$_add" = "1" ]; then
+    if [ -x "${ENCDEC_BIN:-}" ]; then
+      local _enc
+      _enc=$("$ENCDEC_BIN" ENC "admin" 2>/dev/null | sed 's/^encrypted : //')
+      if [ -n "$_enc" ]; then
+        _stored_pw="ENC:$_enc"
+      else
+        printf '  ⚠  Cifratura fallita — password salvata in chiaro.\n' >&2
+      fi
+    else
+      printf '  ⚠  Cifratura non configurata (encdec) — password salvata in chiaro.\n' >&2
+    fi
+  fi
+  printf '%s|admin|%s|%s|%s\n' "$_ip" "$_stored_pw" "$_os" "$_osver" >> assets.txt
+  printf '  ✓  Aggiunto a assets.txt: %s (os=%s)\n' "$_ip" "$_os" >&2
+}
+
+# ── Wizard: scelta macchina di test (Linux | Windows) ─────────────────────────
 
 _wizard_test_machine() {
-  _sep "Macchina Linux di test (Docker)" >&2
-
+  _sep "Macchina di test (Docker)" >&2
   if ! docker info >/dev/null 2>&1; then
     printf '  ⚠  Docker non in esecuzione — wizard saltato.\n' >&2
     return
   fi
-
   local _c
-  _c=$(_choose "Creare macchina Linux Docker con SSH + Python 3.6 (obsoleto)?" \
-    "Si — build e avvia container di test" \
-    "No — salta")
-  [ "$_c" = "2" ] && return
+  _c=$(_choose "Quale macchina di test vuoi creare?" \
+    "Linux   — Ubuntu 20.04 + SSH + Python 3.6 (obsoleto)" \
+    "Windows — Win 11 (KVM) + Notepad++ 7.8.1 + PuTTY 0.70 (vulnerabili)" \
+    "Nessuna — salta")
+  case "$_c" in
+    1) _wizard_test_machine_linux   ;;
+    2) _wizard_test_machine_windows ;;
+    *) return ;;
+  esac
+}
+
+# ── Wizard: macchina Linux Docker di test ────────────────────────────────────
+
+_wizard_test_machine_linux() {
+  _sep "Macchina Linux di test (Docker)" >&2
 
   local _dir="$PWD/docker-test-machine"
   mkdir -p "$_dir"
@@ -247,20 +285,139 @@ DOCKEREOF
   printf '     Test: ssh admin@%s python3.6 --version\n\n' "$_ip" >&2
 
   if [ -n "$_ip" ]; then
-    local _add
-    _add=$(_choose "Aggiungere a assets.txt?" \
-      "Si — aggiungi con credenziali cifrate" \
-      "No")
-    if [ "$_add" = "1" ]; then
-      local _stored_pw="admin"
-      if [ -x "${ENCDEC_BIN:-}" ] && [ -n "${ENCDEC_PASS:-}" ]; then
-        local _enc
-        _enc=$("$ENCDEC_BIN" ENC "admin" 2>/dev/null | sed 's/^encrypted : //')
-        [ -n "$_enc" ] && _stored_pw="ENC:$_enc"
-      fi
-      printf '%s|admin|%s|linux|\n' "$_ip" "$_stored_pw" >> assets.txt
-      printf '  ✓  Aggiunto a assets.txt: %s\n' "$_ip" >&2
+    _add_to_assets "$_ip" linux ""
+  fi
+}
+
+# ── Guida: abilitare la virtualizzazione (SVM/VT-x) nel BIOS/UEFI ────────────
+# Stampata SOLO quando KVM non e' attivo (vedi _wizard_test_machine_windows).
+
+_bios_virt_help() {
+  local _vendor="${1:-VT-x / AMD-V}"
+  printf '\n  >> Abilita la virtualizzazione nel BIOS/UEFI (%s):\n' "$_vendor" >&2
+  printf '     1. Riavvio COMPLETO del PC (non sospensione).\n' >&2
+  printf '     2. All'"'"'accensione premi F2 (Lenovo: F2 o Fn+F2; in alternativa il\n' >&2
+  printf '        foro/pulsante "Novo" -> "BIOS Setup").\n' >&2
+  printf '     3. Vai in "Configuration" (o "Advanced").\n' >&2
+  printf '     4. Imposta "SVM Mode" (alias: AMD-V / Virtualization / VT-x) = Enabled.\n' >&2
+  printf '     5. F10 -> Save and Exit -> conferma. Lascia ripartire il sistema.\n\n' >&2
+}
+
+# ── Wizard: macchina Windows di test (Docker + KVM, dockurr/windows) ──────────
+# Windows non gira come container nativo su Linux: si usa dockurr/windows, che
+# avvia una VM Windows via QEMU/KVM dentro un container. Richiede /dev/kvm.
+# La VM espone SSH (OpenSSH) per la scansione autenticata PowerShell e installa
+# versioni vulnerabili di Notepad++ e PuTTY tramite gli script in ./oem.
+
+_wizard_test_machine_windows() {
+  _sep "Macchina Windows di test (Docker + KVM)" >&2
+
+  # KVM non attivo -> la VM Windows non puo' partire. Mostra una guida coerente
+  # (compresa l'abilitazione della virtualizzazione nel BIOS) SOLO in questo caso.
+  if [ ! -e /dev/kvm ]; then
+    local _mod="kvm_intel" _vendor="VT-x"
+    if grep -qi "AuthenticAMD" /proc/cpuinfo; then _mod="kvm_amd"; _vendor="AMD-V (SVM)"; fi
+
+    printf '  ⚠  KVM non attivo: /dev/kvm assente. La VM Windows non puo'"'"' partire.\n' >&2
+    printf '     (Windows nativo nanoserver/servercore NON gira su host Docker Linux;\n' >&2
+    printf '      serve una VM reale via QEMU/KVM, che richiede la virtualizzazione HW.)\n\n' >&2
+
+    if ! grep -qiE "vmx|svm" /proc/cpuinfo; then
+      # Caso A: nessun flag -> virtualizzazione spenta a livello BIOS.
+      printf '  La CPU non espone alcun flag di virtualizzazione: e'"'"' DISABILITATA nel BIOS.\n' >&2
+      _bios_virt_help "$_vendor"
+    else
+      # Caso B: flag presente ma /dev/kvm assente -> modulo non caricato OPPURE
+      # virtualizzazione bloccata/lockata nel BIOS (modprobe: "Operation not supported").
+      printf '  Step 1 — carica il modulo KVM:\n' >&2
+      printf '       sudo modprobe %s\n' "$_mod" >&2
+      printf '       ls -l /dev/kvm                 # deve comparire\n\n' >&2
+      printf '  Se "modprobe" da'"'"' "Operation not supported", la virtualizzazione e'"'"'\n' >&2
+      printf '  bloccata nel BIOS (flag visibile ma SVM/VT-x lockato): abilitala.\n' >&2
+      _bios_virt_help "$_vendor"
+      printf '  Step 2 — rendi persistente e dai i permessi:\n' >&2
+      printf '       echo "%s" | sudo tee /etc/modules-load.d/kvm.conf\n' "$_mod" >&2
+      printf '       sudo usermod -aG kvm "$USER"   # poi logout/login\n\n' >&2
     fi
+
+    printf '  Poi riprova:  ./start.sh update  ->  3  ->  2 (Windows)\n' >&2
+    printf '  In alternativa senza BIOS: emulazione software (lenta) impostando\n' >&2
+    printf '  KVM:"N" nel compose, oppure un host Windows esterno (vedi README).\n' >&2
+    return
+  fi
+
+  local _dir="$PWD/docker-test-machine-windows"
+  mkdir -p "$_dir/oem"
+
+  # docker-compose: VM Windows 11, utente admin/admin, SSH (22) e RDP (3389).
+  cat > "$_dir/compose.yml" << 'COMPOSEEOF'
+services:
+  windows:
+    image: dockurr/windows
+    container_name: vuln-test-windows-1
+    environment:
+      VERSION: "11"
+      USERNAME: "admin"
+      PASSWORD: "admin"
+      RAM_SIZE: "4G"
+      CPU_CORES: "2"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8006:8006/tcp"   # viewer web installazione dockurr
+      - "3389:3389/tcp"   # RDP
+      - "2222:22/tcp"     # SSH (host:2222 -> guest:22)
+    volumes:
+      - ./storage:/storage
+      - ./oem:/oem        # script eseguiti al primo boot di Windows
+    stop_grace_period: 2m
+    restart: on-failure
+COMPOSEEOF
+
+  # Script post-install (eseguito da dockurr al primo boot): abilita OpenSSH con
+  # shell PowerShell e installa Notepad++ 7.8.1 + PuTTY 0.70 (vulnerabili).
+  cat > "$_dir/oem/install.bat" << 'BATEOF'
+@echo off
+REM --- OpenSSH Server con shell PowerShell (per winget / Get-ItemProperty) ---
+powershell -Command "Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0"
+powershell -Command "Set-Service -Name sshd -StartupType Automatic; Start-Service sshd"
+powershell -Command "New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22"
+powershell -Command "New-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' -Name DefaultShell -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' -PropertyType String -Force"
+
+REM --- Notepad++ 7.8.1 (vulnerabile) ---
+powershell -Command "Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.8.1/npp.7.8.1.Installer.x64.exe' -OutFile C:\npp.exe"
+C:\npp.exe /S
+
+REM --- PuTTY 0.70 (vulnerabile) ---
+powershell -Command "Invoke-WebRequest -UseBasicParsing -Uri 'https://the.earth.li/~sgtatham/putty/0.70/w64/putty-64bit-0.70-installer.msi' -OutFile C:\putty.msi"
+msiexec /i C:\putty.msi /quiet /norestart
+BATEOF
+
+  docker rm -f vuln-test-windows-1 >/dev/null 2>&1 || true
+
+  printf '\n  ==> avvio VM Windows (dockurr/windows). Il primo avvio scarica e\n' >&2
+  printf '      installa Windows: puo'"'"' richiedere parecchi minuti.\n' >&2
+  ( cd "$_dir" && docker compose up -d ) >&2 || {
+    printf '  ERRORE: avvio container Windows fallito.\n' >&2; return
+  }
+
+  sleep 2
+  local _ip
+  _ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' vuln-test-windows-1 2>/dev/null)
+
+  printf '\n  ✓  Container Windows avviato (installazione in corso)\n' >&2
+  printf '     IP   : %s\n' "$_ip" >&2
+  printf '     RDP  : localhost:3389        (admin / admin)\n' >&2
+  printf '     SSH  : ssh admin@%s     (password: admin, dopo l'"'"'install)\n' "$_ip" >&2
+  printf '     Web  : http://localhost:8006 (viewer installazione dockurr)\n\n' >&2
+  printf '  Nota: la scansione autenticata funziona solo a installazione completata\n' >&2
+  printf '        (OpenSSH attivo + Notepad++/PuTTY installati).\n' >&2
+
+  if [ -n "$_ip" ]; then
+    _add_to_assets "$_ip" windows 11
   fi
 }
 
@@ -279,7 +436,7 @@ _update_menu() {
     _c=$(_choose "Cosa vuoi modificare?" \
       "AI provider (locale/remoto)" \
       "Search engine (DuckDuckGo/Serper)" \
-      "Macchina Linux Docker di test" \
+      "Macchina di test Docker (Linux/Windows)" \
       "Salva ed esci (solo configurazione, non lancia)" \
       "Salva e lancia l'app")
     case "$_c" in

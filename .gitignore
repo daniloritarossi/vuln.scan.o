@@ -1,0 +1,4 @@
+supabase/volumes/db/data
+.claude
+docker-test-machine-linux
+docker-test-machine-windows

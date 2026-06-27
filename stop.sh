@@ -11,4 +11,9 @@ if docker ps -a --format '{{.Names}}' | grep -q '^vuln-test-linux-1$'; then
   docker rm -f vuln-test-linux-1
 fi
 
+if docker ps -a --format '{{.Names}}' | grep -q '^vuln-test-windows-1$'; then
+  echo "==> stop e rimozione container di test vuln-test-windows-1"
+  docker rm -f vuln-test-windows-1
+fi
+
 echo "==> fatto. Riavvio: ./start.sh"

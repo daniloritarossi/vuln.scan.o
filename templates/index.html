@@ -368,7 +368,7 @@
           <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
             href="/intel">
             <span class="material-symbols-outlined">psychology</span>
-            <span class="">INTEL</span>
+            <span class="">SECURITY POSTURE</span>
           </a>
         </li>
         <li class="">
@@ -376,6 +376,13 @@
             href="/audit">
             <span class="material-symbols-outlined">fact_check</span>
             <span class="">AUDIT</span>
+          </a>
+        </li>
+        <li class="">
+          <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all font-label-caps text-label-caps"
+            href="/sbom">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="">SBOM</span>
           </a>
         </li>
         <li class="">
@@ -475,7 +482,7 @@
               <span class="material-symbols-outlined text-sm text-cyan-500">manage_search</span>
               <span data-i18n="dash.query_title">THREAT INTELLIGENCE QUERY</span>
             </label>
-            <div class="gemini-field flex-1 flex items-center gap-4 bg-white rounded-full px-6 py-4">
+            <div class="gemini-field flex items-center gap-4 bg-white rounded-full px-6 py-4">
               <span class="font-code-lg text-code-lg text-cyan-600 animate-pulse">&gt;</span>
               <input
                 class="bg-transparent border-none outline-none w-full font-code-lg text-code-lg text-slate-900 placeholder:text-slate-300 focus:ring-0 p-0"
@@ -510,7 +517,8 @@
             </div>
           </div>
           <!-- Scan Engine Console -->
-          <div class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden relative shadow-2xl">
+          <div
+            class="bg-[#12121c] border border-slate-800 rounded-2xl flex flex-col overflow-hidden relative shadow-2xl h-80">
             <div
               class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.08),_transparent)] pointer-events-none">
             </div>
@@ -538,6 +546,18 @@
             </div>
           </div>
         </section>
+        <!-- AI Scan progress bar (same style as intel page) -->
+        <div id="aiScanProgressWrap" class="hidden neural-panel rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span id="aiScanProgressLabel" class="font-code-sm text-code-sm text-slate-600">Identifying target…</span>
+            <span id="aiScanProgressCount" class="font-code-sm text-code-sm text-cyan-600 font-semibold"></span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div id="aiScanProgressBar"
+              class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300" style="width:0%">
+            </div>
+          </div>
+        </div>
         <!-- Network + Asset Auth affiancati in due colonne -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <!-- Colonna A: Detected Products Network -->
@@ -567,10 +587,13 @@
                 <div class="flex justify-between mb-1.5">
                   <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>NOT AVAILABLE</span>
-                  <span id="stat-not-available" class="font-code-sm text-code-sm text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded-full">0</span>
+                  <span id="stat-not-available"
+                    class="font-code-sm text-code-sm text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded-full">0</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div id="bar-not-available" class="bg-gradient-to-r from-rose-400 to-red-500 h-full transition-all duration-700" style="width:0%"></div>
+                  <div id="bar-not-available"
+                    class="bg-gradient-to-r from-rose-400 to-red-500 h-full transition-all duration-700"
+                    style="width:0%"></div>
                 </div>
               </div>
               <!-- AVAILABLE -->
@@ -578,10 +601,13 @@
                 <div class="flex justify-between mb-1.5">
                   <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>AVAILABLE</span>
-                  <span id="stat-available" class="font-code-sm text-code-sm text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">0</span>
+                  <span id="stat-available"
+                    class="font-code-sm text-code-sm text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">0</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div id="bar-available" class="bg-gradient-to-r from-emerald-400 to-green-500 h-full transition-all duration-700" style="width:0%"></div>
+                  <div id="bar-available"
+                    class="bg-gradient-to-r from-emerald-400 to-green-500 h-full transition-all duration-700"
+                    style="width:0%"></div>
                 </div>
               </div>
               <!-- SSH OK -->
@@ -589,10 +615,13 @@
                 <div class="flex justify-between mb-1.5">
                   <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[12px] text-cyan-500">lock</span>SSH OK</span>
-                  <span id="stat-ssh-ok" class="font-code-sm text-code-sm text-cyan-700 font-semibold bg-cyan-50 px-2 py-0.5 rounded-full">0</span>
+                  <span id="stat-ssh-ok"
+                    class="font-code-sm text-code-sm text-cyan-700 font-semibold bg-cyan-50 px-2 py-0.5 rounded-full">0</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div id="bar-ssh-ok" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-700" style="width:0%"></div>
+                  <div id="bar-ssh-ok"
+                    class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-700"
+                    style="width:0%"></div>
                 </div>
               </div>
               <!-- SSH FAIL -->
@@ -600,17 +629,21 @@
                 <div class="flex justify-between mb-1.5">
                   <span class="font-code-sm text-code-sm text-slate-600 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[12px] text-orange-400">lock_open</span>SSH FAIL</span>
-                  <span id="stat-ssh-fail" class="font-code-sm text-code-sm text-orange-700 font-semibold bg-orange-50 px-2 py-0.5 rounded-full">0</span>
+                  <span id="stat-ssh-fail"
+                    class="font-code-sm text-code-sm text-orange-700 font-semibold bg-orange-50 px-2 py-0.5 rounded-full">0</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div id="bar-ssh-fail" class="bg-gradient-to-r from-orange-400 to-amber-500 h-full transition-all duration-700" style="width:0%"></div>
+                  <div id="bar-ssh-fail"
+                    class="bg-gradient-to-r from-orange-400 to-amber-500 h-full transition-all duration-700"
+                    style="width:0%"></div>
                 </div>
               </div>
               <!-- footer -->
               <div class="pt-2 border-t border-slate-100/50 flex items-center justify-between">
                 <p class="font-code-sm text-[11px] text-slate-400 flex items-center gap-1.5">
                   <span id="stat-done-icon" class="material-symbols-outlined text-[14px] text-cyan-500">dns</span>
-                  <span id="stat-checking-icon" class="material-symbols-outlined text-[14px] text-cyan-400 animate-spin hidden">progress_activity</span>
+                  <span id="stat-checking-icon"
+                    class="material-symbols-outlined text-[14px] text-cyan-400 animate-spin hidden">progress_activity</span>
                   <span id="authTotal">0</span>&nbsp;<span data-i18n="dash.authn_total">total assets</span>
                 </p>
                 <span id="stat-checking-label" class="font-label-caps text-[9px] text-slate-300 hidden">CHECKING…</span>
@@ -619,18 +652,7 @@
           </div>
         </section>
 
-        <!-- AI Scan progress bar (same style as intel page) -->
-        <div id="aiScanProgressWrap" class="hidden neural-panel rounded-2xl p-4">
-          <div class="flex items-center justify-between mb-2">
-            <span id="aiScanProgressLabel" class="font-code-sm text-code-sm text-slate-600">Identifying target…</span>
-            <span id="aiScanProgressCount" class="font-code-sm text-code-sm text-cyan-600 font-semibold"></span>
-          </div>
-          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div id="aiScanProgressBar"
-              class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300" style="width:0%">
-            </div>
-          </div>
-        </div>
+
 
         <!-- Console & Assets Row -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -639,13 +661,16 @@
             <h3 class="font-label-caps text-label-caps text-slate-500 mb-6" data-i18n="dash.pipeline_title">
               IDENTIFICATION PIPELINE</h3>
             <div class="flex-1 flex flex-col justify-between gap-4 relative">
-              <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-100 z-0" id="pipe-line"></div>
+              <div
+                class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-100 z-0"
+                id="pipe-line"></div>
               <div id="pipe-parse" class="flex items-center gap-4 relative z-10 opacity-40">
                 <div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
                   <span class="material-symbols-outlined text-slate-400 text-sm">data_object</span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_parse">Parsing Input</span>
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_parse">Parsing
+                    Input</span>
                   <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
                 </div>
               </div>
@@ -654,7 +679,8 @@
                   <span class="material-symbols-outlined text-slate-400 text-sm">travel_explore</span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_osint">OSINT Correlation</span>
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_osint">OSINT
+                    Correlation</span>
                   <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
                 </div>
               </div>
@@ -663,7 +689,8 @@
                   <span class="material-symbols-outlined text-slate-400 text-sm">troubleshoot</span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_detect">Active Detection</span>
+                  <span class="font-code-sm text-code-sm text-slate-400" data-i18n="dash.pipe_detect">Active
+                    Detection</span>
                   <span class="font-label-caps text-[9px] text-slate-300 pipe-status"></span>
                 </div>
               </div>
@@ -783,13 +810,57 @@
       { dot: 'bg-rose-400', ring: 'border-rose-400', bg: 'bg-rose-50', text: 'text-rose-700', chip: 'bg-rose-50' },
     ];
 
+    // Loader "skeleton" mostrato nel canvas mentre la scansione è in corso:
+    // riprende lo stile del grafo reale (nodo centrale cyan, anelli, nodi su
+    // cerchio) così l'utente capisce che l'attività è in corso.
+    function graphLoaderCanvas() {
+      const cx = 50, cy = 50, R = 40;
+      const pts = [0, 1, 2, 3].map((i) => {
+        const a = (2 * Math.PI * i) / 4 - Math.PI / 2;
+        return { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
+      });
+      const lines = pts.map((p) =>
+        `<line x1="50%" y1="50%" x2="${p.x}%" y2="${p.y}%" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="3 4" class="opacity-50"/>`
+      ).join('');
+      const nodes = pts.map((p, i) =>
+        `<div class="absolute w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 animate-pulse"
+          style="left:calc(${p.x}% - 16px);top:calc(${p.y}% - 16px);animation-delay:${(i * 0.18).toFixed(2)}s"></div>`
+      ).join('');
+      return `
+        <svg class="absolute inset-0 w-full h-full z-0">${lines}</svg>
+        <div class="absolute inset-[8%] rounded-full border-2 border-dashed border-cyan-200/70 animate-spin" style="animation-duration:7s"></div>
+        <div class="absolute inset-[20%] rounded-full border border-indigo-200/60 animate-spin" style="animation-duration:5s;animation-direction:reverse"></div>
+        ${nodes}
+        <div class="absolute z-10" style="left:calc(50% - 28px);top:calc(50% - 28px)">
+          <div class="absolute inset-0 rounded-full border-2 border-cyan-300 animate-ping opacity-60"></div>
+          <div class="relative w-14 h-14 bg-white rounded-full border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+            <span class="material-symbols-outlined text-cyan-500 text-lg animate-spin" style="animation-duration:1.4s">progress_activity</span>
+          </div>
+        </div>`;
+    }
+    function graphLoaderLegend() {
+      const skel = (w) => `
+        <div class="flex items-center justify-between p-2 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-slate-200 animate-pulse"></div>
+            <div class="h-3 ${w} rounded bg-slate-200 animate-pulse"></div>
+          </div>
+          <div class="h-3 w-10 rounded bg-slate-100 animate-pulse"></div>
+        </div>`;
+      return `
+        <div class="flex items-center gap-2 px-2 pb-1 text-cyan-600">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="font-label-caps text-[10px] tracking-wider">${t('dash.graph_mapping')}</span>
+        </div>
+        ${skel('w-20')}${skel('w-16')}${skel('w-24')}`;
+    }
+
     function resetGraph() {
       if (graphFadeTimer) { clearTimeout(graphFadeTimer); graphFadeTimer = null; }
       graphCanvas.style.opacity = '1';
       graphLegend.style.opacity = '1';
-      graphCanvas.innerHTML = '';
-      graphLegend.innerHTML =
-        `<div class="flex items-center justify-center h-full text-slate-300 font-code-sm text-code-sm text-center px-4">${t('dash.graph_mapping')}</div>`;
+      graphCanvas.innerHTML = graphLoaderCanvas();
+      graphLegend.innerHTML = graphLoaderLegend();
     }
 
     // Relazioni note fra librerie: archi extra fra dipendenze per arricchire il grafo.
@@ -808,7 +879,7 @@
       graphLegend.style.opacity = '0';
       if (graphFadeTimer) clearTimeout(graphFadeTimer);
       graphFadeTimer = setTimeout(() => {
-        renderGraph(t);
+        try { renderGraph(t); } catch (err) { console.error('renderGraph error:', err); }
         graphCanvas.style.opacity = '1';
         graphLegend.style.opacity = '1';
       }, 320); // ~ durata fade-out (duration-500 -> taglio a 320ms per ritmo a 3s)
@@ -1007,13 +1078,13 @@
       const total = _dashStats.not_available + _dashStats.available + _dashStats.ssh_ok + _dashStats.ssh_fail + _dashStats.pending;
       const pct = (n) => (total ? (n / total) * 100 : 0) + '%';
       $('stat-not-available').textContent = _dashStats.not_available;
-      $('stat-available').textContent     = _dashStats.available;
-      $('stat-ssh-ok').textContent        = _dashStats.ssh_ok;
-      $('stat-ssh-fail').textContent      = _dashStats.ssh_fail;
-      $('bar-not-available').style.width  = pct(_dashStats.not_available);
-      $('bar-available').style.width      = pct(_dashStats.available);
-      $('bar-ssh-ok').style.width         = pct(_dashStats.ssh_ok);
-      $('bar-ssh-fail').style.width       = pct(_dashStats.ssh_fail);
+      $('stat-available').textContent = _dashStats.available;
+      $('stat-ssh-ok').textContent = _dashStats.ssh_ok;
+      $('stat-ssh-fail').textContent = _dashStats.ssh_fail;
+      $('bar-not-available').style.width = pct(_dashStats.not_available);
+      $('bar-available').style.width = pct(_dashStats.available);
+      $('bar-ssh-ok').style.width = pct(_dashStats.ssh_ok);
+      $('bar-ssh-fail').style.width = pct(_dashStats.ssh_fail);
       const busy = _dashStats.pending > 0;
       $('stat-checking-icon').classList.toggle('hidden', !busy);
       $('stat-done-icon').classList.toggle('hidden', busy);
@@ -1029,10 +1100,10 @@
         try {
           const r = await fetch('/api/asset/health?host=' + encodeURIComponent(a.ip) + '&index=' + a.index);
           const d = await r.json();
-          if (!d.reachable)        _dashStats.not_available++;
+          if (!d.reachable) _dashStats.not_available++;
           else if (d.ssh_ok === null) _dashStats.available++;
-          else if (d.ssh_ok)       _dashStats.ssh_ok++;
-          else                     _dashStats.ssh_fail++;
+          else if (d.ssh_ok) _dashStats.ssh_ok++;
+          else _dashStats.ssh_fail++;
         } catch (_) {
           _dashStats.not_available++;
         }
@@ -1161,20 +1232,24 @@
 
     const _PIPE_ICONS = { 'pipe-parse': 'data_object', 'pipe-osint': 'travel_explore', 'pipe-detect': 'troubleshoot' };
     const _PIPE_CFG = {
-      idle:    { wrap: 'flex items-center gap-4 relative z-10 opacity-40', circle: 'w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center', iconCls: 'material-symbols-outlined text-slate-400 text-sm', labelCls: 'font-code-sm text-code-sm text-slate-400', status: '' },
+      idle: { wrap: 'flex items-center gap-4 relative z-10 opacity-40', circle: 'w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center', iconCls: 'material-symbols-outlined text-slate-400 text-sm', labelCls: 'font-code-sm text-code-sm text-slate-400', status: '' },
       running: { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-white border-2 border-cyan-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-cyan-500 text-sm animate-pulse', labelCls: 'font-code-sm text-code-sm text-cyan-700 font-semibold', status: 'RUNNING…' },
-      done:    { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-emerald-500 text-sm', labelCls: 'font-code-sm text-code-sm text-emerald-700 font-semibold', status: 'DONE', icon: 'check_circle' },
-      error:   { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-rose-50 border-2 border-rose-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-rose-500 text-sm', labelCls: 'font-code-sm text-code-sm text-rose-700 font-semibold', status: 'ERROR', icon: 'error' },
+      done: { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-emerald-500 text-sm', labelCls: 'font-code-sm text-code-sm text-emerald-700 font-semibold', status: 'DONE', icon: 'check_circle' },
+      error: { wrap: 'flex items-center gap-4 relative z-10', circle: 'w-8 h-8 rounded-full bg-rose-50 border-2 border-rose-400 flex items-center justify-center shadow-sm', iconCls: 'material-symbols-outlined text-rose-500 text-sm', labelCls: 'font-code-sm text-code-sm text-rose-700 font-semibold', status: 'ERROR', icon: 'error' },
     };
     function setPipeStep(id, state) {
       const el = $(id); if (!el) return;
       const cfg = _PIPE_CFG[state] || _PIPE_CFG.idle;
       el.className = cfg.wrap;
-      el.querySelector('div').className = cfg.circle;
+      const circle = el.querySelector('div');
+      if (circle) circle.className = cfg.circle;
       const icon = el.querySelector('span.material-symbols-outlined');
-      icon.className = cfg.iconCls;
-      icon.textContent = cfg.icon || _PIPE_ICONS[id];
-      el.querySelector('.pipe-status').textContent = cfg.status;
+      if (icon) {
+        icon.className = cfg.iconCls;
+        icon.textContent = cfg.icon || _PIPE_ICONS[id];
+      }
+      const statusEl = el.querySelector('.pipe-status');
+      if (statusEl) statusEl.textContent = cfg.status;
     }
     function resetPipeline() {
       ['pipe-parse', 'pipe-osint', 'pipe-detect'].forEach(id => setPipeStep(id, 'idle'));
@@ -1183,6 +1258,7 @@
 
     // --- Scan sequence -----------------------------------------------------
     let es = null;
+    let _scanDone = false;
     function runScan() {
       const desc = input.value.trim();
       if (!desc) { input.focus(); return; }
@@ -1233,6 +1309,7 @@
       });
 
       let _pipeDetectStarted = false;
+      _scanDone = false;
       es.addEventListener('result', (e) => {
         const r = JSON.parse(e.data);
         if (!_pipeDetectStarted) {
@@ -1295,9 +1372,9 @@
           : `<span class="text-cyan-400">ollama</span>`;
         const modelTag = `<span class="text-white bg-white/10 px-1 rounded font-code-sm">${a.model}</span>`;
         const purposeLabel = a.purpose === 'advisory' ? 'advisory extraction'
-                           : a.purpose === 'extract' ? 'product identification'
-                           : a.purpose === 'triage' ? 'triage analysis'
-                           : 'CVE summary';
+          : a.purpose === 'extract' ? 'product identification'
+            : a.purpose === 'triage' ? 'triage analysis'
+              : 'CVE summary';
         log(`<span class="text-amber-400">[AI]</span> invoking ${providerTag} · ${modelTag} → ${purposeLabel}`);
       });
 
@@ -1307,9 +1384,10 @@
       });
 
       es.addEventListener('error', (e) => {
+        if (_scanDone) return;
         if (e.data) { try { log('<span class="text-rose-400">[ERR]</span> ' + JSON.parse(e.data).message); } catch (_) { } }
         else { log('<span class="text-rose-400">[ERR]</span> stream interrupted'); }
-        ['pipe-parse','pipe-osint','pipe-detect'].forEach(id => {
+        ['pipe-parse', 'pipe-osint', 'pipe-detect'].forEach(id => {
           const el = $(id);
           if (el && el.className.includes('cyan')) setPipeStep(id, 'error');
         });
@@ -1323,9 +1401,13 @@
         const step = $('pipe-detect');
         if (step) {
           step.classList.remove('opacity-60');
-          step.querySelector('div').className = 'w-8 h-8 rounded-full bg-white border-2 border-rose-300 flex items-center justify-center shadow-sm';
-          step.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-rose-500 text-sm';
-          step.querySelector('span:last-child').className = 'font-code-sm text-code-sm text-slate-900 font-semibold';
+          const detCircle = step.querySelector('div');
+          if (detCircle) detCircle.className = 'w-8 h-8 rounded-full bg-white border-2 border-rose-300 flex items-center justify-center shadow-sm';
+          const detIcon = step.querySelector('span.material-symbols-outlined');
+          if (detIcon) detIcon.className = 'material-symbols-outlined text-rose-500 text-sm';
+          // Etichetta dello step (NON l'icona): primo span dentro la colonna di testo.
+          const detLabel = step.querySelector('div.flex-col > span');
+          if (detLabel) detLabel.className = 'font-code-sm text-code-sm text-slate-900 font-semibold';
         }
         const verTxt = c.version ? ' ' + c.version : '';
         if (c.error) {
@@ -1379,20 +1461,26 @@
       });
 
       es.addEventListener('done', (e) => {
+        _scanDone = true;
+        es.close(); runBtn.disabled = false;
         const d = JSON.parse(e.data);
         const note = d.note === 'No product identified.' ? t('note.no_product') : d.note;
         log(`<span class="text-indigo-400">[SYS]</span> ${t('scan.complete', { n: d.scanned })}${note ? ' · ' + note : ''}`, 'opacity-70');
         setPipeStep('pipe-parse', 'done');
         setPipeStep('pipe-osint', 'done');
         setPipeStep('pipe-detect', 'done');
-        buildGraph(lastTarget);
+        // Render graph synchronously — bypass buildGraph's fade timer to avoid
+        // race conditions with the demo interval and opacity animation.
+        if (graphFadeTimer) { clearTimeout(graphFadeTimer); graphFadeTimer = null; }
+        graphCanvas.style.opacity = '1';
+        graphLegend.style.opacity = '1';
+        try { renderGraph(lastTarget); } catch (err) { console.error('[graph]', err); }
         computePosture();
         $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
         $('aiScanProgressLabel').textContent = `Scan complete — ${d.scanned} asset${d.scanned !== 1 ? 's' : ''} checked`;
         $('aiScanProgressBar').style.width = '100%';
         $('aiScanProgressCount').textContent = `${d.scanned}/${d.scanned}`;
         setTimeout(() => $('aiScanProgressWrap').classList.add('hidden'), 1800);
-        es.close(); runBtn.disabled = false;
       });
     }
 

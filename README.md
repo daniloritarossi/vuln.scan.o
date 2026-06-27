@@ -10,76 +10,330 @@ Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · risultati in tempo 
 
 ## Installazione
 
-Richiede: **Python 3.10+**, `pip`, `venv`, **Docker** (per Supabase).  
-Su Debian/Ubuntu: `sudo apt install python3-pip python3-venv`
+Richiede: **Python 3.10+**, `pip`, `venv`, **Docker**, **Go ≥ 1.21** (per la compilazione di `encdec`).  
+Su Debian/Ubuntu: `sudo apt install python3-pip python3-venv golang`
 
 ### Primo avvio (wizard interattivo)
 
 ```bash
 git clone <repo>
 cd vulnerability_feed_aggregator
-chmod +x start.sh
+chmod +x start.sh stop.sh
 ./start.sh
 ```
 
-Al primo avvio (nessun `config.json`) parte il **wizard**:
+---
 
-1. **Modello AI** — scelta tra:
-   - `Locale` → Ollama (modello gira sulla macchina locale; verifica raggiungibilità e scarica il modello via `ollama pull`)
-   - `Remoto` → Claude API (Anthropic; richiede API key)
-2. **Search engine OSINT** — scelta tra:
+## `start.sh` — avvio e configurazione
+
+Lo script è il punto di ingresso unico. Gestisce in sequenza: cifratura password, configurazione AI/search, macchina di test Docker, virtualenv, Supabase e server FastAPI.
+
+### Fasi di esecuzione
+
+```
+start.sh
+ │
+ ├─ 1) encdec setup      ──► prima volta: chiede prefisso segreto → patcha sorgente → compila binario
+ │                            avvii successivi: binario già presente, nessuna interazione
+ │
+ ├─ 2) Wizard / Update
+ │     ├─ AI provider    ──► Ollama locale  |  Claude API
+ │     ├─ Search engine  ──► DuckDuckGo    |  Serper
+ │     └─ Docker test    ──► crea macchina Linux vulnerabile (opzionale)
+ │
+ ├─ 3) Virtualenv        ──► crea .venv, installa requirements.txt
+ ├─ 4) Supabase          ──► avvia stack Docker (skippabile con --no-supabase)
+ └─ 5) FastAPI           ──► exec uvicorn app:app --host 127.0.0.1 --port $PORT
+```
+
+### Modalità di avvio
+
+```bash
+./start.sh                        # avvio normale (porta 8000)
+PORT=9000 ./start.sh              # porta personalizzata
+./start.sh --no-supabase          # salta Supabase
+./start.sh update                 # menu modifica configurazione
+./start.sh update --no-supabase   # modifica config senza Supabase
+```
+
+### Wizard primo avvio
+
+Al primo avvio (nessun `config.json`) il wizard chiede:
+
+1. **Prefisso segreto encdec** — inserito una sola volta; compilato nel binario (vedi sezione Cifratura password)
+2. **Modello AI**:
+   - `Locale` → Ollama (verifica raggiungibilità, esegue `ollama pull`)
+   - `Remoto` → Claude API (richiede API key)
+3. **Search engine OSINT**:
    - `DuckDuckGo` — gratuito, nessuna API key
    - `Serper` — risultati Google, richiede API key
+4. **Macchina Linux Docker di test** — opzionale (vedi sezione dedicata)
 
-Dopo le scelte il wizard scrive `config.json`, installa le dipendenze Python nel virtualenv `.venv` e lancia l'app.
-
-### Avvio successivo
-
-```bash
-./start.sh                  # avvio normale (porta 8000)
-PORT=9000 ./start.sh        # porta personalizzata
-./start.sh --no-supabase    # salta Supabase (già attivo o non necessario)
-```
-
-### Modifica configurazione
+### Menu `update`
 
 ```bash
-./start.sh update           # menu interattivo: cambia AI e/o search engine
-./start.sh update --no-supabase   # modifica config senza avviare Supabase
+./start.sh update
 ```
 
-Il menu `update` mostra la configurazione attuale e permette di:
-- Cambiare AI provider (Ollama ↔ Claude)
-- Cambiare search engine (DuckDuckGo ↔ Serper)
-- Salvare ed uscire, oppure salvare e lanciare l'app
+Mostra la configurazione corrente e permette di:
 
-### Stop
+| Opzione | Azione |
+|---|---|
+| 1 | Cambia AI provider (Ollama ↔ Claude) |
+| 2 | Cambia search engine (DuckDuckGo ↔ Serper) |
+| 3 | Crea/avvia macchina Linux Docker di test |
+| 4 | Salva ed esci (solo configurazione, non lancia l'app) |
+| 5 | Salva e lancia l'app |
+
+---
+
+## `stop.sh` — arresto completo
 
 ```bash
-./stop.sh       # ferma Supabase (i dati persistono)
-# Ctrl+C        # ferma solo il server FastAPI
+./stop.sh
 ```
+
+Esegue in sequenza:
+
+1. **Spegne lo stack Supabase** (`docker compose down`) — i dati persistono in `supabase/volumes/db/data`
+2. **Rimuove il container di test** `vuln-test-linux-1` se presente (`docker rm -f`)
+
+Il server FastAPI si ferma separatamente con `Ctrl+C` nel terminale dove gira `start.sh`.
+
+---
+
+## Cifratura password asset (`encdec`)
+
+Le password degli asset sono cifrate a riposo tramite il binario [encdec](https://github.com/daniloritarossi/encdec).
+
+### Funzionamento
+
+| Fase | Dettaglio |
+|---|---|
+| **Prima compilazione** | `start.sh` chiede un prefisso segreto (con conferma), patcha `defaultSecretKeyPrefix` in `lib/lib.go` e compila il binario in `.encdec/encdec` |
+| **Avvii successivi** | Binario già presente → nessuna interazione, nessuna password chiesta |
+| **Segreto** | Compilato dentro il binario; non esiste su disco né in variabili d'ambiente |
+| **Algoritmo** | AES-GCM machine-bound con prefisso applicativo (`ENC`/`DEC`) |
+| **Formato in `assets.txt`** | `ENC:<hex-ciphertext>` |
+
+### Flusso encrypt/decrypt
+
+```
+UI inserisce password  →  POST /api/assets
+                          └─ crypto.encrypt_password()
+                             └─ encdec ENC <plain>  →  ENC:<hex>  →  assets.txt
+
+Login SSH asset        →  scanner._scan_auth_real()
+                          └─ crypto.decrypt_password(ENC:<hex>)
+                             └─ encdec DEC <hex>  →  password in chiaro  →  paramiko
+```
+
+### Modulo `crypto.py`
+
+| Funzione | Comportamento |
+|---|---|
+| `encrypt_password(plain)` | Chiama `encdec ENC`, prefissa con `ENC:`, ritorna stringa cifrata |
+| `decrypt_password(stored)` | Stringa senza `ENC:` → ritornata invariata (retrocompat.); stringa `ENC:` → chiama `encdec DEC` |
+| `is_encrypted(val)` | `True` se la stringa inizia con `ENC:` |
+
+> Se la password non è cifrata (testo in chiaro), l'app la segnala con badge arancione **NOT ENCRYPTED** nella pagina Asset Inventory e rifiuta il login SSH in fase di health check.
+
+---
+
+## Macchine di test (Docker)
+
+Il wizard (primo avvio o `./start.sh update` → opzione 3) chiede **quale** macchina di test creare:
+
+```
+Quale macchina di test vuoi creare?
+  1) Linux   — Ubuntu 20.04 + SSH + Python 3.6 (obsoleto)
+  2) Windows — Win 11 (KVM) + Notepad++ 7.8.1 + PuTTY 0.70 (vulnerabili)
+  3) Nessuna — salta
+```
+
+Entrambe usano credenziali `admin` / `admin` e, a fine setup, offrono lo stesso sottomenu «Aggiungere a `assets.txt`?» (cifrate / chiaro / No). La riga scritta ha formato `IP|admin|<pw>|<os_type>|<os_major_version>`.
+
+### Linux — specifiche
+
+| Parametro | Valore |
+|---|---|
+| Base image | `ubuntu:20.04` |
+| Python | 3.6 (via PPA `deadsnakes` — versione obsoleta intenzionale) |
+| SSH | `openssh-server`, `PasswordAuthentication yes`, `PermitRootLogin no` |
+| Utente | `admin` / password `admin` (gruppo `sudo`) |
+| Container name | `vuln-test-linux-1` |
+| Network | Docker bridge (`172.17.0.x`) |
+
+Build idempotente: a ogni esecuzione il wizard riscrive il `Dockerfile`, ricostruisce l'immagine `vuln-test-linux` e rimuove/ricrea il container `vuln-test-linux-1`.
+
+### Ciclo di vita
+
+```bash
+# Creazione (via wizard)
+./start.sh update   # → opzione 3
+
+# Verifica
+ssh admin@172.17.0.2       # password: admin
+python3.6 --version         # Python 3.6.x (obsoleto, via deadsnakes)
+
+# Stop e rimozione
+./stop.sh                   # rimuove il container automaticamente
+```
+
+### Sottomenu «Aggiungere a `assets.txt`?»
+
+Dopo l'avvio del container il wizard chiede se aggiungerlo all'inventario, con tre scelte:
+
+| Opzione | Comportamento |
+|---|---|
+| 1 — credenziali cifrate | Cifra `admin` con `encdec` e salva `ENC:<hex>`. Se il binario `encdec` manca o la cifratura fallisce, avvisa esplicitamente e ripiega su password in chiaro |
+| 2 — password in chiaro | Salva `admin` in chiaro (nessun tentativo di cifratura) |
+| 3 — No | Non modifica `assets.txt` |
+
+La riga scritta ha sempre il formato `IP|admin|<pw>|linux|`.
+
+### Windows — specifiche
+
+Windows non gira come container nativo su un host Docker **Linux**: le immagini Windows native (`mcr.microsoft.com/windows/nanoserver`, `servercore`) hanno solo manifest Windows — `docker pull` fallisce con `no matching manifest for linux/amd64` e girano solo su un host Docker **Windows**. In più `nanoserver` è headless (niente `winget`, niente GUI) → non può ospitare Notepad++/PuTTY.
+
+Per questo il wizard usa **[`dockurr/windows`](https://github.com/dockur/windows)**, che avvia una VM Windows 11 reale tramite **QEMU/KVM** dentro un container Linux. **Richiede `/dev/kvm`**. Se `/dev/kvm` è assente il wizard **non procede** e stampa una guida coerente (vedi sotto). La guida BIOS appare **solo** in questo caso: quando KVM è già attivo non viene mostrata.
+
+#### Prerequisito: virtualizzazione hardware (KVM)
+
+Qualsiasi VM Windows locale — **dockurr/KVM, VirtualBox, VMware, Hyper-V** — richiede la virtualizzazione hardware **VT-x (Intel) / AMD-V «SVM» (AMD)**. Senza, il guest Windows a 64-bit non parte. È lo stesso prerequisito per tutte le soluzioni locali; l'unica eccezione è l'emulazione software QEMU-TCG (vedi alternative).
+
+Verifica e abilitazione:
+
+```bash
+ls -l /dev/kvm            # se esiste, KVM è già attivo: nessuna azione
+lscpu | grep -i virtual   # mostra "AMD-V" o "VT-x" se la CPU lo espone
+sudo modprobe kvm_amd     # carica il modulo (Intel: kvm_intel)
+```
+
+| Sintomo | Causa | Azione |
+|---|---|---|
+| `/dev/kvm` presente | KVM attivo | Nessuna — il wizard procede |
+| Nessun flag `svm`/`vmx` in `/proc/cpuinfo` | Virtualizzazione **disabilitata** nel BIOS | Abilitala nel BIOS (sotto) |
+| Flag presente ma `modprobe` → `Operation not supported` | SVM/VT-x **bloccato** nel BIOS (flag visibile, funzione lockata) | Abilitala nel BIOS (sotto) |
+| `modprobe` ok ma `/dev/kvm` sparisce al riavvio | Modulo non persistente | `echo kvm_amd \| sudo tee /etc/modules-load.d/kvm.conf` |
+
+**Abilitare la virtualizzazione nel BIOS/UEFI** (es. Lenovo Yoga Slim 7, AMD):
+
+1. Riavvio **completo** (non sospensione).
+2. All'accensione premi **F2** (o **Fn+F2**); in alternativa pulsante/foro **Novo** → *BIOS Setup*.
+3. **Configuration** (o *Advanced*).
+4. **SVM Mode** (alias *AMD-V* / *Virtualization* / *VT-x*) → **Enabled**.
+5. **F10** → *Save and Exit* → conferma.
+
+Al riavvio, completa e persisti:
+
+```bash
+sudo modprobe kvm_amd                                  # (Intel: kvm_intel)
+echo "kvm_amd" | sudo tee /etc/modules-load.d/kvm.conf # persiste al riavvio
+sudo usermod -aG kvm "$USER"                           # poi logout/login
+ls -l /dev/kvm                                          # crw-rw---- root kvm
+```
+
+**Alternative senza BIOS** (se non puoi/vuoi toccare il firmware):
+
+- **Emulazione software (QEMU-TCG):** in `docker-test-machine-windows/compose.yml` aggiungi `KVM: "N"` fra le `environment`. Funziona senza `/dev/kvm` ma è **molto lento** (installazione di Windows = ore).
+- **Host Windows esterno:** una VM cloud (es. **AWS Free Tier**, Windows Server `t3.micro`, 750 h/mese per 12 mesi) o un PC Windows in LAN. Abiliti OpenSSH + installi Notepad++/PuTTY e aggiungi l'IP a `assets.txt` con `os_type = windows`. Nessuna virtualizzazione locale.
+
+| Parametro | Valore |
+|---|---|
+| Immagine | `dockurr/windows` (VM Windows 11 via KVM) |
+| Software vulnerabile | **Notepad++ 7.8.1**, **PuTTY 0.70** (installati al primo boot da `oem/install.bat`) |
+| Accesso scansione | **OpenSSH** con shell PowerShell di default (porta guest 22) |
+| Utente | `admin` / password `admin` |
+| Porte host | `3389` RDP · `2222`→22 SSH · `8006` viewer installazione dockurr |
+| Container name | `vuln-test-windows-1` |
+| File generati | `docker-test-machine-windows/compose.yml`, `docker-test-machine-windows/oem/install.bat` |
+
+```bash
+# Creazione (via wizard) — la prima installazione di Windows richiede minuti
+./start.sh update   # → opzione 3 → 2 (Windows)
+
+# Avanzamento installazione
+http://localhost:8006        # viewer dockurr
+
+# Stop e rimozione (incluso il container Windows)
+./stop.sh
+```
+
+> ⚠️ La scansione autenticata Windows funziona **solo a installazione completata** (OpenSSH attivo + Notepad++/PuTTY installati). Gli URL degli installer in `oem/install.bat` puntano a versioni datate volutamente vulnerabili.
+
+#### Attendere il download dell'immagine
+
+Al primo avvio dockurr **scarica la ISO di Windows 11 dai server Microsoft** (diversi GB): a seconda della connessione possono volerci **decine di minuti**. Finché il download e la successiva installazione non sono completi, **la VM non è raggiungibile** e `ssh ...` restituisce `Connection refused`. Bisogna **aspettare** che l'immagine sia scaricata e installata prima di scansionare.
+
+Verifica lo stato di download/installazione:
+
+```bash
+docker logs -f vuln-test-windows-1
+```
+
+Le fasi nel log si susseguono così:
+
+```
+Downloading Windows 11...        ← download ISO (mostra % e ETA, es. "13%  44m16s")
+Extracting / Installing...       ← installazione
+Booting Windows...               ← primo avvio
+oem/install.bat                  ← OpenSSH + Notepad++ 7.8.1 + PuTTY 0.70
+```
+
+In alternativa, il **viewer web** mostra l'avanzamento grafico:
+
+```
+http://localhost:8006
+```
+
+Quando il log raggiunge l'esecuzione di `oem/install.bat` (OpenSSH attivo), l'asset diventa scansionabile:
+
+```bash
+ssh admin@localhost -p 2222 "winget list"   # password: admin — deve elencare Notepad++/PuTTY
+```
+
+### Logica di scansione Windows
+
+Quando un asset ha `os_type = windows`, il path autenticato (`scanner._scan_auth_real`) esegue via SSH un inventario software con PowerShell invece del comando Linux (`dpkg`):
+
+```powershell
+# 1. Programmi standard (Winget)
+winget list
+
+# 2. Registro profondo: software a 32 e 64 bit che sfuggono a winget
+Get-ItemProperty `
+  HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* , `
+  HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* `
+  | Select-Object DisplayName, DisplayVersion
+```
+
+L'output (`DisplayName` / `DisplayVersion`) viene confrontato con gli alias del prodotto target (`notepad++` → `notepad++`/`npp`/`notepad plus plus`; `putty` → `putty`); la prima versione `X.Y[.Z]` sulla riga corrispondente diventa la `detected_version`. Metodo riportato nei risultati: `auth-ssh-win`.
+
+> I comandi girano solo se `scanner.simulate_auth: false` in `config.json` (login SSH reale). Con `simulate_auth: true` (default) l'esito è simulato e deterministico, indipendente dall'OS.
 
 ---
 
 ## Architettura
 
 ```
-start.sh ──► wizard config.json ──► .venv + deps ──► Supabase ──► FastAPI
+start.sh ──► encdec setup ──► wizard config.json ──► .venv + deps ──► Supabase ──► FastAPI
 ```
 
 | File | Ruolo |
 |------|-------|
-| `app.py` | Server FastAPI: routing pagine + API REST + SSE |
+| `app.py` | Server FastAPI: routing pagine + API REST + SSE + health check SSH |
+| `crypto.py` | Wrapper encdec: cifratura/decifratura password asset |
 | `config.py` | Lettura/scrittura `config.json`; defaults embedded |
 | `osint.py` | Identifica prodotto e versione dalla descrizione testuale |
-| `scanner.py` | Scansione asset: banner grabbing TCP + audit SSH |
+| `scanner.py` | Scansione asset: banner grabbing TCP + audit SSH (con decrypt password) |
 | `cve.py` | Lookup CVE su OSV.dev + sintesi AI + remediation |
-| `posture.py` | SCA (Software Composition Analysis) per asset: inventario pacchetti + OSV |
-| `assets.py` | Parsing e CRUD inventario asset (`assets.txt` + API) |
+| `posture.py` | SCA per asset: inventario pacchetti + OSV |
+| `assets.py` | Parsing e CRUD inventario asset (`assets.txt`) |
 | `db.py` | Persistenza Supabase (best-effort) |
 | `config.json` | Configurazione runtime (generato dal wizard) |
-| `assets.txt` | Inventario asset (IP\|user\|pass) |
+| `assets.txt` | Inventario asset (`IP\|username\|ENC:<hex>`) |
+| `docker-test-machine/Dockerfile` | Immagine Linux vulnerabile per test |
 
 ---
 
@@ -89,8 +343,8 @@ start.sh ──► wizard config.json ──► .venv + deps ──► Supabase 
 
 Data una descrizione testuale (`"Buffer overflow affecting OpenSSH 8.4"`):
 
-1. **Estrazione locale** — regex + dizionario `KNOWN_PRODUCTS` (centinaia di prodotti); zero dipendenze di rete.
-2. **Fallback web** — se la locale fallisce, esegue una query sul search engine configurato (DuckDuckGo o Serper) e ri-applica il matching sul testo restituito.
+1. **Estrazione locale** — regex + dizionario `KNOWN_PRODUCTS`; zero dipendenze di rete.
+2. **Fallback web** — query sul search engine configurato (DuckDuckGo o Serper) + matching sul testo.
 
 Output: `TargetInfo` con `product`, `version`, `aliases`, `source`, `candidates`.
 
@@ -100,52 +354,106 @@ Per ogni asset dell'inventario:
 
 | Modalità | Cosa fa |
 |----------|---------|
-| **No-auth** | Banner grabbing TCP reale sulle porte del prodotto (es. 22 per SSH, 80/443 per web) |
+| **No-auth** | Banner grabbing TCP reale sulle porte del prodotto |
 | **Auth simulato** (default) | Risposta deterministica per demo e test offline |
-| **Auth reale** | Login SSH via `paramiko`, raccolta banner e path `/proc` (solo se `simulate_auth: false` in `config.json`) |
+| **Auth reale** | Login SSH via `paramiko` con password decifrata da `encdec`; solo se `simulate_auth: false`. Inventario **Linux** (`dpkg`) o **Windows** (`winget` + registro Uninstall via PowerShell) in base a `os_type` |
 
 I risultati arrivano alla UI **un asset alla volta** via Server-Sent Events.
 
+**Deep Probe** (checkbox in dashboard → `&deep=true`): solo sul path non autenticato e solo per il prodotto `python`, quando la versione non emerge dal banner. Esegue GET HTTP completi (header + corpo) per dedurre la versione; il risultato è marcato con `method: "deep-probe"`.
+
 ### 3 · Lookup CVE e sintesi AI
 
-Dopo il rilevamento della versione:
+- **OSV.dev** — query strutturata (senza API key)
+- **Sintesi AI** — Ollama o Claude API
+- **Remediation** — suggerimenti generati dall'AI
+- **Triage report** — report consolidato (lingua: `it` / `en`)
 
-- **OSV.dev** — query strutturata (senza API key) per CVE note e range di versione affetti; deterministico.
-- **Sintesi AI** — riassunto in linguaggio naturale via Ollama (locale) o Claude API; best-effort (se non raggiungibile mostra solo il conteggio).
-- **Remediation** — suggerimenti di rimedio generati dall'AI per i CVE trovati.
-- **Triage report** — report consolidato per l'intera scansione (lingua configurabile: `it` / `en`).
+**Pattern RAG** (UI: pannello `RAG · CVE INTELLIGENCE`): gli ID CVE recuperati live da OSV.dev vengono iniettati nel prompt LLM (retrieve → augment → generate), con vincolo anti-allucinazione *«non inventare identificatori non elencati»*. È un RAG architetturale via API, non a embeddings/vector store.
 
 ### 4 · Postura di sicurezza (SCA)
 
-Per ogni asset esegue una **Software Composition Analysis**:
+SCA per asset: inventario pacchetti → OSV.dev batch → score aggregato (critical / high / medium / low).
 
-- Raccoglie l'inventario pacchetti installati (SSH reale → `dpkg`/`rpm`/`pip`; simulato → catalogo realistico con versioni note vulnerabili).
-- Interroga OSV.dev in batch per ogni pacchetto.
-- Restituisce: pacchetti vulnerabili, CVE totali, distribuzione per severità (critical / high / medium / low), score aggregato.
+### 4-bis · SBOM (`/sbom`)
 
-### 5 · Gestione asset
+La pagina SBOM espone i pacchetti raccolti dall'ultima run di postura (SCA). Endpoint `GET /api/sbom` → righe `{asset_ip, package, version, ecosystem, cve_count}`. Se non esiste alcuna run di postura, ritorna `{"rows": []}`.
 
-CRUD completo dell'inventario via UI (`/assets`) e API REST:
+### 5 · Gestione asset (`/assets`)
 
-- Aggiunta, modifica, eliminazione asset
-- Health check (raggiungibilità) per ogni host
-- Formato file: `IP|username|password` (righe `#` = commenti)
+CRUD completo con:
 
-### 6 · Pagine dell'interfaccia
+- **Cifratura automatica** — password cifrata con `encdec` alla creazione/modifica; mai esposta in chiaro nelle API
+- **Badge NOT ENCRYPTED** — avviso arancione se password in chiaro (formato legacy)
+- **Health check avanzato** — colonna ACTIVE con 4 stati:
+
+| Badge | Condizione |
+|---|---|
+| 🔴 NOT AVAILABLE | Host non raggiungibile TCP |
+| 🟢 AVAILABLE | Raggiungibile, nessuna credenziale |
+| 🟢 SSH OK | Raggiungibile + login SSH riuscito (password decifrata) |
+| 🟠 SSH FAIL | Raggiungibile + login SSH fallito o password non cifrata |
+
+- Il login SSH in health check usa la password decifrata via `encdec`; se la password non è cifrata (`ENC:` mancante) l'esito è automaticamente SSH FAIL
+
+### 6 · Dashboard (`/`)
+
+Layout (dall'alto verso il basso):
+
+1. **KPI cards** — Verified Assets, Active Vulnerabilities, Security Posture Score
+2. **THREAT INTELLIGENCE QUERY** + **SCAN_ENGINE_TTY1** (console output real-time)
+3. **DETECTED PRODUCTS NETWORK** (grafo) + **ASSET AUTHENTICATION** (barre stato)
+4. Progress bar scansione + risultati
+
+#### DETECTED PRODUCTS NETWORK
+
+Grafo SVG che mappa il prodotto identificato (nodo centrale cyan) e le sue dipendenze note (`PRODUCT_DEPENDENCIES` in `osint.py`), con archi radiali prodotto→dipendenza e archi tratteggiati fra librerie correlate (`DEP_RELATIONS`).
+
+| Stato | Visuale |
+|---|---|
+| Idle (nessuna scansione) | Demo a rotazione: il grafo cambia prodotto ogni 3 s con badge `LIVE DEMO` |
+| Scansione in corso | **Loader** in stile grafo: nodo centrale con spinner, anelli rotanti, nodi placeholder pulsanti; legenda con skeleton shimmer |
+| Scansione completata | Grafo reale del prodotto rilevato + legenda con dipendenze e conteggio link inter-dipendenza |
+
+#### ASSET AUTHENTICATION
+
+Pannello con 4 barre orizzontali aggiornate in tempo reale tramite health check:
+
+| Barra | Colore | Conta |
+|---|---|---|
+| NOT AVAILABLE | Rosso | Host non raggiungibili |
+| AVAILABLE | Verde | Raggiungibili senza credenziali |
+| SSH OK | Cyan | Login SSH verificato |
+| SSH FAIL | Arancione | Raggiungibili ma login fallito |
+
+Spinner `CHECKING…` attivo durante i check; contatori si aggiornano asset per asset.
+
+#### IDENTIFICATION PIPELINE
+
+3 step collegati agli eventi SSE reali della scansione:
+
+| Step | Attiva su | Completa su |
+|---|---|---|
+| Parsing Input | Avvio scan | Evento `target` |
+| OSINT Correlation | Evento `target` | Primo evento `result` |
+| Active Detection | Primo `result` | Evento `done` |
+
+Stati visivi: `idle` (grigio) → `running` (cyan pulsante) → `done` (verde ✓) → `error` (rosso).
+
+### 7 · Pagine dell'interfaccia
 
 | Percorso | Contenuto |
 |----------|-----------|
-| `/` | Scan principale: inserisci descrizione, vedi risultati in tempo reale |
-| `/assets` | Gestione inventario asset |
+| `/` | Dashboard: scan, console, grafo prodotti, postura |
+| `/assets` | Gestione inventario asset con cifratura password e health check SSH |
 | `/audit` | Storico scansioni salvate su Supabase |
+| `/sbom` | SBOM: pacchetti rilevati dall'ultima scansione di postura (SCA), con conteggio CVE per pacchetto |
 | `/intel` | Ricerca OSINT manuale su un prodotto/versione |
-| `/settings` | Configurazione AI e search engine via UI (equivalente a `./start.sh update`) |
+| `/settings` | Configurazione AI e search engine via UI |
 
 ---
 
 ## Configurazione (`config.json`)
-
-Generato dal wizard; modificabile via `./start.sh update` o dalla pagina `/settings`.
 
 ```jsonc
 {
@@ -155,7 +463,7 @@ Generato dal wizard; modificabile via `./start.sh update` o dalla pagina `/setti
     "ollama_model": "qwen2.5:7b",
     "claude_api_key": "",
     "claude_model": "claude-haiku-4-5-20251001",
-    "ai_remediation": false         // true = genera remediation AI
+    "ai_remediation": false
   },
   "search_engine": {
     "provider": "duckduckgo",       // "duckduckgo" | "serper"
@@ -164,7 +472,7 @@ Generato dal wizard; modificabile via `./start.sh update` o dalla pagina `/setti
     "min_osint_query": 4
   },
   "scanner": {
-    "simulate_auth": true,          // false = SSH reale via paramiko
+    "simulate_auth": true,          // false = SSH reale
     "socket_timeout": 4
   },
   "osv": {
@@ -180,51 +488,46 @@ Generato dal wizard; modificabile via `./start.sh update` o dalla pagina `/setti
 
 ```
 # commento
-45.33.32.156||              # no-auth (scanme.nmap.org — host pubblico autorizzato Nmap)
-93.184.216.34|admin|secret  # auth SSH
-10.0.0.5                    # solo IP, equivale a no-auth
+45.33.32.156||||                              # no-auth (banner grab)
+172.17.0.2|admin|ENC:a1b2c3...|linux|        # auth SSH Linux, password cifrata
+172.17.0.3|admin|ENC:d4e5f6...|windows|11    # auth SSH Windows (winget+registro)
+10.0.0.5||||                                  # solo IP, equivale a no-auth
 ```
+
+Formato colonne: `IP|username|password|os_type|os_major_version`
+
+- Password in chiaro → badge ⚠️ NOT ENCRYPTED; health check SSH FAIL
+- Password `ENC:<hex>` → cifrata con encdec; health check esegue login reale
 
 ---
 
 ## Persistenza Supabase (locale, Docker)
 
-Stack lean (`supabase/docker-compose.yml`): Postgres + PostgREST + Studio + nginx. Dati persistenti su bind-mount (`supabase/volumes/db/data`).
+Stack: Postgres + PostgREST + Studio + nginx. Dati in `supabase/volumes/db/data`.
 
-| Servizio | URL | Note |
-|----------|-----|------|
-| Studio GUI | http://localhost:3001 | Table editor / SQL editor |
-| REST API | http://localhost:8001/rest/v1/ | header `apikey` + `Authorization` |
-| Postgres | localhost:5432 | accesso diretto |
+| Servizio | URL |
+|----------|-----|
+| Studio GUI | http://localhost:3001 |
+| REST API | http://localhost:8001/rest/v1/ |
+| Postgres | localhost:5432 |
 
-**Schema** (`supabase/volumes/db/init/01-schema.sql`):
+Schema:
+- `scans` — una riga per scansione (prodotto, versione, CVE summary)
+- `scan_results` — una riga per asset (ip, method, vuln\_match, cve\_count, cve\_ids)
 
-- `scans` — una riga per scansione: prodotto/versione/aliases/source/candidates + sintesi CVE
-- `scan_results` — una riga per asset: ip, method, product\_found, detected\_version, raw\_evidence, vuln\_match, cve\_count, cve\_ids
+Override env: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_PERSIST=0`.
 
-L'app si collega in modalità **best-effort**: se Supabase è spento la scansione non si interrompe.
-
-Override via env: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_PERSIST=0` (disattiva persistenza).
-
-> ⚠️ Le chiavi in `supabase/.env` sono **demo, solo per l'ambiente locale**. Non usare in produzione.
+> ⚠️ Le chiavi in `supabase/.env` sono demo, solo per ambiente locale.
 
 ---
 
-## Test moduli (senza server)
+## Sicurezza
 
-```bash
-python3 osint.py      # identifica prodotto da esempi embedded
-python3 assets.py     # dump inventario interpretato
-python3 scanner.py    # scansione (esegue banner grab reale!)
-```
-
----
-
-## Sicurezza auth SSH
-
-`scanner.py` usa `RejectPolicy` sulle host key (nessun auto-accept).  
-Con `simulate_auth: true` (default) nessun login SSH viene eseguito.  
-Con `simulate_auth: false` abilita login reali: **usare solo su host di propria titolarità**.
+- **Password a riposo** — cifrate AES-GCM con prefisso segreto compilato nel binario `encdec`; mai in chiaro su disco
+- **SSH host key** — `RejectPolicy` (nessun auto-accept)
+- **simulate_auth: true** (default) — nessun login SSH eseguito in fase di scan
+- **Health check SSH** — login reale solo se password cifrata (`ENC:`); plain text → SSH FAIL automatico
+- **API password** — endpoint `/api/assets/all` non espone mai la password; ritorna solo `has_password` (bool) e `password_encrypted` (bool)
 
 ---
 
@@ -236,5 +539,5 @@ Con `simulate_auth: false` abilita login reali: **usare solo su host di propria 
 | `Buffer overflow affecting OpenSSH 8.4` | openssh 8.4 |
 | `Critical vuln in nginx 1.21 HTTP/2 module` | nginx 1.21 |
 | `Log4Shell — Apache Log4j 2.14.1` | log4j 2.14.1 |
-
-I prodotti riconosciuti sono in `KNOWN_PRODUCTS` (`osint.py`) — estendibile aggiungendo nuove voci al dizionario.
+| `Stack overflow in Notepad++ 7.8.1` | notepad++ 7.8.1 |
+| `PuTTY 0.70 SSH host key vulnerability` | putty 0.70 |

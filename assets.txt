@@ -13,5 +13,6 @@ zonetransfer.me||||
 estphp.vulnweb.com|admin|ENC:e6b750dbd9577564cc963214249e2aa57a0621ffe920641b2033f272abc9e680dc||
 testaspnet.vulnweb.com||||
 http://testhtml5.vulnweb.com||||
-172.17.0.2|admin|ENC:admin|linux|
-172.17.0.2|admin|admin|linux|
+172.17.0.2|admin|ENC:7a3e4324ae9083b6dd896c4329cef51c7fb9e75f1fa52ea220e5343a171067ca46|linux|
+172.17.0.2|admin|ENC:aacd767c903f706aeec80ce98a02ce1d22e01a14bebf1b8439b304643bc7cc4efa|linux|
+172.19.0.2|admin|ENC:11f320242e51e655abcccdc1e8d3a2b4a1a6ca9d704531b2bd747b93374f81a50a|windows|11

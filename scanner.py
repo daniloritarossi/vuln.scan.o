@@ -357,19 +357,67 @@ def _scan_auth_simulated(asset: Asset, target: TargetInfo) -> ScanResult:
     )
 
 
+# Alias dei prodotti client Windows usati nel parsing dell'inventario PowerShell.
+_WINDOWS_ALIASES = {
+    "notepad++": ["notepad++", "notepad plus plus", "npp"],
+    "putty": ["putty"],
+}
+
+# Comando di inventario software Windows (eseguito via SSH con shell PowerShell):
+# 1) winget per i programmi standard; 2) chiavi Uninstall del registro a 32 e 64
+# bit per i software che winget non elenca. Output: DisplayName / DisplayVersion.
+_WINDOWS_INVENTORY_CMD = (
+    'powershell -NoProfile -NonInteractive -Command "'
+    'winget list; '
+    'Get-ItemProperty '
+    "'HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*',"
+    "'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' "
+    '| Select-Object DisplayName, DisplayVersion | Format-Table -AutoSize"'
+)
+
+
+def _match_windows_product(product: str, out: str):
+    """
+    Cerca il prodotto nell'output dell'inventario Windows (winget + registro).
+    Per ogni riga che contiene un alias del prodotto estrae la prima versione
+    'attaccata' (X.Y[.Z]). Ritorna (found, version|None).
+    """
+    aliases = _WINDOWS_ALIASES.get(product, [product])
+    for raw in out.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        low = line.lower()
+        if any(a in low for a in aliases):
+            m = _BANNER_VERSION_RE.search(line)
+            return True, (m.group(1) if m else None)
+    return False, None
+
+
 def _scan_auth_real(asset: Asset, target: TargetInfo) -> ScanResult:
     """
     Path autenticato REALE via SSH (paramiko). Attivo solo se SIMULATE_AUTH=False.
     Esegue un comando di inventario pacchetti e ne fa il parsing.
+
+    Linux  -> '<binario> --version' + 'dpkg -l'.
+    Windows (asset.os_type == 'windows') -> inventario via PowerShell
+             (winget list + chiavi Uninstall del registro a 32/64 bit).
 
     USARE SOLO SU HOST DI PROPRIA TITOLARITA'.
     """
     import paramiko  # import locale: dipendenza richiesta solo in questo path
 
     product = target.product or ""
-    # Per Python si usa sempre 'python3 --version'; per gli altri il binario omonimo.
-    binary = "python3" if product == "python" else product
-    cmd = f"({binary} --version 2>&1; dpkg -l 2>/dev/null | grep -i {product})"
+    is_windows = (asset.os_type or "").lower() == "windows"
+    if is_windows:
+        cmd = _WINDOWS_INVENTORY_CMD
+        method = "auth-ssh-win"
+    else:
+        # Per Python si usa sempre 'python3 --version'; altrimenti il binario omonimo.
+        binary = "python3" if product == "python" else product
+        cmd = f"({binary} --version 2>&1; dpkg -l 2>/dev/null | grep -i {product})"
+        method = "auth-ssh"
+
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.RejectPolicy())
     try:
@@ -385,21 +433,25 @@ def _scan_auth_real(asset: Asset, target: TargetInfo) -> ScanResult:
         out = stdout.read().decode("utf-8", errors="replace")
     except Exception as exc:
         return ScanResult(
-            ip=asset.ip, auth_required=True, method="auth-ssh",
+            ip=asset.ip, auth_required=True, method=method,
             product_found=False, detected_version=None,
             raw_evidence=f"SSH errore: {exc}", vuln_match="INCERTO",
         )
     finally:
         client.close()
 
-    found = _product_in_text(product, out)
-    if found and product == "python":
-        pm = _PYTHON_VERSION_RE.search(out)   # 'Python 3.9.2' da python3 --version
-        version = pm.group(1) if pm else _version_from_banner(out)
+    if is_windows:
+        found, version = _match_windows_product(product, out)
     else:
-        version = _version_from_banner(out) if found else None
+        found = _product_in_text(product, out)
+        if found and product == "python":
+            pm = _PYTHON_VERSION_RE.search(out)   # 'Python 3.9.2' da python3 --version
+            version = pm.group(1) if pm else _version_from_banner(out)
+        else:
+            version = _version_from_banner(out) if found else None
+
     return ScanResult(
-        ip=asset.ip, auth_required=True, method="auth-ssh",
+        ip=asset.ip, auth_required=True, method=method,
         product_found=found, detected_version=version,
         raw_evidence=out or "Nessun output.",
         vuln_match=_match_vuln(target, found, version),
