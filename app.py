@@ -18,6 +18,7 @@ Avvio:
 
 import json
 import socket
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse
@@ -45,8 +46,24 @@ from sbom_export import sbom_rows, build_cyclonedx, build_spdx
 BASE_DIR = Path(__file__).parent
 ASSETS_FILE = BASE_DIR / "assets.txt"
 
-app = FastAPI(title="Vulnerability Feed Aggregator")
+def _git_version() -> str:
+    """Versione app dal tag git piu' recente (es. 'v1.0.1-alfa', o
+    'v1.0.1-alfa-3-gabc1234' se HEAD e' oltre il tag). 'dev' se git assente."""
+    try:
+        out = subprocess.run(
+            ["git", "describe", "--tags", "--always"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=3,
+        )
+        return out.stdout.strip() or "dev"
+    except Exception:
+        return "dev"
+
+
+APP_VERSION = _git_version()
+
+app = FastAPI(title="Vulnerability Feed Aggregator", version=APP_VERSION)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+templates.env.globals["app_version"] = APP_VERSION
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 

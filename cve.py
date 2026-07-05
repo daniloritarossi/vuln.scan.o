@@ -376,11 +376,18 @@ def generate_triage_report(results: list[dict], product: str, lang: str = "en",
     """
     if not results:
         return ""
+    # Filtro deterministico in Python: solo asset realmente VULNERABILE/INCERTO
+    # entrano nel prompt. Non ci si affida al modello per escludere gli asset
+    # sicuri (i modelli locali piccoli ignorano l'istruzione e allucinano stati).
+    critical = [r for r in results
+                if r.get("vuln_match", "INCERTO") in ("VULNERABILE", "INCERTO")]
+    if not critical:
+        return ""
     if timeout is None:
         timeout = int(load_config()["ai"].get("triage_timeout", 60))
     language = _LANG_NAMES.get(lang, "English")
     lines = []
-    for r in results:
+    for r in critical:
         ip = r.get("ip", "?")
         vuln = r.get("vuln_match", "INCERTO")
         ver = r.get("detected_version") or "unknown"
@@ -389,12 +396,13 @@ def generate_triage_report(results: list[dict], product: str, lang: str = "en",
         lines.append(f"{ip}: status={vuln}, version={ver}, CVEs={cves}, found={found}")
     summary = "\n".join(lines)
     prompt = (
-        f"Security scan of '{product}' across {len(results)} assets:\n"
+        f"Security scan of '{product}' across {len(critical)} at-risk assets:\n"
         f"{summary}\n\n"
-        "List the top 3 most critical assets to remediate first. "
+        "These assets are ALL already confirmed VULNERABILE or INCERTO. "
+        "List the top 3 most critical to remediate first. "
         "Format each line EXACTLY as: <IP> | <risk reason> | <recommended action>. "
-        "Only include VULNERABILE or INCERTO assets. "
-        "If fewer than 3 critical assets exist, list only those. "
+        "If fewer than 3 assets are listed above, output only those. "
+        "Do NOT invent assets or statuses not present in the list. "
         f"Respond EXCLUSIVELY in {language}."
     )
     return _llm_complete(prompt, timeout)

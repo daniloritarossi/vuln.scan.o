@@ -11,7 +11,7 @@
 <nav
   class="hidden md:flex flex-col py-panel-padding gap-base-unit fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/40 backdrop-blur-xl border-r border-slate-200/50 z-40">
   <div class="px-6 mb-4">
-    <span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">CORE_NAV</span>
+    <span class="font-label-caps text-label-caps text-slate-400 tracking-[0.2em]">ACTIONS</span>
   </div>
   <ul class="flex flex-col w-full px-4 gap-2">
     {% for it in nav_items %}
@@ -32,4 +32,11 @@
     </li>
     {% endfor %}
   </ul>
+  <!-- Versione app (tag git) -->
+  <div class="mt-auto px-6 pt-4 border-t border-slate-200/50">
+    <span class="font-code-sm text-[10px] text-slate-400 flex items-center gap-1.5"
+      title="{{ app_version }}">
+      <span class="material-symbols-outlined text-[13px]">commit</span>{{ app_version }}
+    </span>
+  </div>
 </nav>

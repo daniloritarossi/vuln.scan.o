@@ -19,6 +19,9 @@
     rel="stylesheet" />
   <!-- Tailwind CSS -->
   <script src="/static/vendor/tailwind.js"></script>
+  <!-- XLSX export (SheetJS) + shared table/export helpers -->
+  <script src="/static/vendor/xlsx.full.min.js"></script>
+  <script src="/static/tableutils.js"></script>
   <!-- Tailwind Theme Config -->
   <script id="tailwind-config">
     tailwind.config = {
@@ -565,8 +568,16 @@
                 <span
                   class="ml-3 text-slate-400 font-label-caps text-label-caps tracking-widest">SCAN_ENGINE_TTY1</span>
               </div>
-              <span
-                class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
+              <div class="flex items-center gap-3">
+                <button id="scanExportXls" type="button" disabled
+                  class="flex items-center gap-1 font-label-caps text-[10px] text-slate-400 border border-slate-700 bg-slate-800/60 px-2.5 py-1 rounded-md hover:bg-slate-700 hover:text-slate-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Export scan results to XLSX">
+                  <span class="material-symbols-outlined text-[13px]">download</span>
+                  <span data-i18n="dash.export_xls">EXPORT XLS</span>
+                </button>
+                <span
+                  class="material-symbols-outlined text-slate-500 text-sm cursor-pointer hover:text-slate-300">open_in_full</span>
+              </div>
             </div>
             <div id="console" class="p-5 font-code-sm text-code-sm space-y-3 overflow-y-auto flex-1 text-slate-300">
               <p class="opacity-70"><span class="text-indigo-400">[SYS]</span> <span
@@ -1447,6 +1458,8 @@
     // score% = round( 100 * somma(pesi) / numero_asset ).  Parte da 0.
     const POSTURE_WEIGHT = { 'NON VULNERABILE': 1.0, 'INCERTO': 0.5, 'VULNERABILE': 0.0 };
     let scanResults = [];
+    // Righe complete per-asset dell'ultima scansione, per l'export XLSX.
+    let scanRows = [];
 
     // VERIFIED ASSETS: contatore asset verificati. Parte da 0 a ogni scansione,
     // +1 per ogni asset man mano che arriva il suo risultato.
@@ -1509,6 +1522,8 @@
       resetGraph();
       lastTarget = null;
       scanResults = [];
+      scanRows = [];
+      if ($('scanExportXls')) $('scanExportXls').disabled = true;
       setPosture(0);
       cveTotal = 0;
       notFoundCount = 0;
@@ -1575,6 +1590,23 @@
           setPipeStep('pipe-detect', 'running');
         }
         scanResults.push(r.vuln_match);
+        // Riga piatta per l'export XLSX (colonne analizzabili in Excel).
+        scanRows.push({
+          ip: r.ip,
+          product: (lastTarget && lastTarget.product) || '',
+          product_found: r.product_found ? 'yes' : 'no',
+          vuln_match: r.vuln_match,
+          detected_version: r.detected_version || '',
+          method: r.method || '',
+          match_basis: r.match_basis || '',
+          affected_version: r.affected_version || '',
+          cve_count: (r.cve_count === null || r.cve_count === undefined) ? '' : r.cve_count,
+          cve_ids: (r.cve_ids || []).join(' '),
+          os_type: r.os_type || '',
+          os_major_version: r.os_major_version || '',
+          remediation: r.remediation || '',
+        });
+        if ($('scanExportXls')) $('scanExportXls').disabled = false;
         verifiedCount += 1;
         $('kpiAssets').textContent = verifiedCount.toLocaleString();
         $('kpiAssetsDelta').textContent = t('dash.verified_count', { n: verifiedCount });
@@ -1743,6 +1775,17 @@
 
     runBtn.addEventListener('click', runScan);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') runScan(); });
+
+    // Export XLSX dei risultati di scansione (pannello SCAN_ENGINE_TTY1).
+    if ($('scanExportXls')) {
+      $('scanExportXls').addEventListener('click', () => {
+        if (!scanRows.length) return;
+        const slug = ((lastTarget && lastTarget.product) || 'scan')
+          .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'scan';
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        exportXLS(scanRows, `scan_${slug}_${stamp}.xlsx`);
+      });
+    }
 
     // Imposta i testi idle dipendenti da {n} (non gestibili da data-i18n statico).
     function applyIdleI18n() {

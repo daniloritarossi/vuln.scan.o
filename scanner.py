@@ -202,6 +202,18 @@ def _version_from_banner(banner: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+# Righe d'errore della shell quando il binario non esiste: contengono il nome
+# del prodotto (es. 'acrobat: command not found') e falserebbero il match.
+_SHELL_NOT_FOUND_RE = re.compile(
+    r"(command not found|: not found|not recognized|No such file)", re.I)
+
+
+def _strip_shell_not_found(text: str) -> str:
+    """Rimuove le righe di 'comando non trovato' dall'output di '<bin> --version'."""
+    return "\n".join(l for l in text.splitlines()
+                     if not _SHELL_NOT_FOUND_RE.search(l))
+
+
 def _product_in_text(product: str, text: str) -> bool:
     """True se il nome prodotto (o alias HTTP comune) compare nel testo banner."""
     text_l = text.lower()
@@ -252,6 +264,12 @@ def version_affected(detected: Optional[str], expr: str):
     """
     if not expr:
         return None
+    # Senza versione rilevata il confronto non e' determinabile -> INCERTO,
+    # anche per il vincolo 'all': non si puo' affermare VULNERABILE su un
+    # prodotto la cui presenza/versione non e' stata realmente accertata.
+    d = _norm_version(detected or "")
+    if d is None:
+        return None
     e = expr.strip().lower()
     if e in ("all", "any", "*"):
         return True
@@ -260,9 +278,6 @@ def version_affected(detected: Optional[str], expr: str):
         m = re.search(r"([0-9][0-9.]*)", e)
         cons = [("<=", m.group(1))] if m else []
     if not cons:
-        return None
-    d = _norm_version(detected or "")
-    if d is None:
         return None
     for op, ver in cons:
         b = _norm_version(ver)
@@ -595,12 +610,16 @@ def _scan_auth_real(asset: Asset, target: TargetInfo) -> ScanResult:
         if is_windows:
             found, version = _match_windows_product(product, out)
         else:
-            found = _product_in_text(product, out)
+            # Il match si basa sull'output ripulito dalle righe 'command not
+            # found': un binario assente non deve risultare presente solo perche'
+            # la shell ne ripete il nome nell'errore.
+            evidence = _strip_shell_not_found(out)
+            found = _product_in_text(product, evidence)
             if found and product == "python":
-                pm = _PYTHON_VERSION_RE.search(out)   # 'Python 3.9.2' da python3 --version
-                version = pm.group(1) if pm else _version_from_banner(out)
+                pm = _PYTHON_VERSION_RE.search(evidence)   # 'Python 3.9.2' da python3 --version
+                version = pm.group(1) if pm else _version_from_banner(evidence)
             else:
-                version = _version_from_banner(out) if found else None
+                version = _version_from_banner(evidence) if found else None
 
         # Grafo dipendenze reali (solo Linux, solo se il prodotto e' presente):
         # si riusa la stessa sessione SSH per non riautenticarsi. 'binary' e' il
