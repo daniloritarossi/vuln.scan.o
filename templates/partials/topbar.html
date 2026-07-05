@@ -2,6 +2,17 @@
    Expects one of:
      - crumbs: breadcrumb [{key, text, href?}] — last item = current page
      - top_tag_key, top_tag_text: legacy single chip (e.g. status on dashboard) #}
+<!-- Dark theme (opt-in): default light. Restore prima del paint per evitare flash. -->
+<link rel="stylesheet" href="/static/theme-dark.css" />
+<script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get('theme');
+      var t = q || localStorage.getItem('theme');
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    } catch (e) { }
+  })();
+</script>
 <!-- TopAppBar -->
 <header
   class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex justify-between items-center px-margin-desktop h-16 transition-all">
@@ -35,8 +46,28 @@
       <button data-lang-btn="en" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">EN</button>
       <button data-lang-btn="it" class="px-2 py-1 rounded-md font-label-caps text-[10px] transition-colors">IT</button>
     </div>
-    <div class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer">
+    <button id="themeToggle" type="button" aria-label="Toggle dark theme" aria-pressed="false"
+      title="Light / Dark"
+      class="text-slate-500 hover:text-cyan-600 hover:glow-sm transition-all duration-150 cursor-pointer flex items-center">
       <span class="material-symbols-outlined">sensors</span>
-    </div>
+    </button>
   </div>
 </header>
+<script>
+  (function () {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    function sync() {
+      var dark = document.documentElement.classList.contains('dark');
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    }
+    sync();
+    btn.addEventListener('click', function () {
+      var dark = document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) { }
+      sync();
+      // Notifica le pagine con grafici canvas/SVG (colori non gestibili via CSS).
+      window.dispatchEvent(new Event('themechange'));
+    });
+  })();
+</script>

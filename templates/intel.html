@@ -245,8 +245,17 @@
             <span class="font-code-sm text-[11px] text-slate-400 hidden md:block">Click CVE → zoom in &nbsp;·&nbsp;
               Click background → zoom out</span>
           </div>
-          <div id="cvePackWrap" class="relative w-full" style="min-height:500px;position:relative;">
-            <div id="cvePackContainer" class="w-full"></div>
+          <div class="flex flex-col lg:flex-row">
+            <div id="cvePackWrap" class="relative flex-1 min-w-0" style="min-height:500px;position:relative;">
+              <div id="cvePackContainer" class="w-full"></div>
+            </div>
+            <div class="lg:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100/70 flex flex-col">
+              <div class="px-4 py-3 border-b border-slate-100/70 flex items-center justify-between">
+                <span class="font-label-caps text-[10px] text-slate-400">VULNERABLE CVES · MOST CRITICAL FIRST</span>
+                <span id="cveListCount" class="font-code-sm text-[11px] text-slate-400"></span>
+              </div>
+              <div id="cveList" class="overflow-y-auto divide-y divide-slate-100/70" style="max-height:452px"></div>
+            </div>
           </div>
         </section>
 
@@ -297,6 +306,14 @@
     const esc = (s) => (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const SEV = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'];
     const SEV_COLOR = { CRITICAL: '#b91c1c', HIGH: '#ea580c', MEDIUM: '#d97706', LOW: '#eab308', UNKNOWN: '#94a3b8' };
+    // In dark le tinte -700 risultano spente: palette piu' luminosa a parita' di scala.
+    const SEV_COLOR_DARK = { CRITICAL: '#ef4444', HIGH: '#fb923c', MEDIUM: '#fbbf24', LOW: '#fde047', UNKNOWN: '#64748b' };
+    const isDark = () => document.documentElement.classList.contains('dark');
+    const sevColor = (s) => (isDark() ? SEV_COLOR_DARK : SEV_COLOR)[s] || '#94a3b8';
+    // Colori dipendenti dal tema per i canvas Chart.js (il CSS non li raggiunge).
+    const chartTheme = () => isDark()
+      ? { text: '#94a3b8', grid: 'rgba(148,163,184,0.12)', panel: '#14141f', trough: '#2a2a3f' }
+      : { text: '#666', grid: 'rgba(0,0,0,0.1)', panel: '#fff', trough: '#e2e8f0' };
     const SEV_CHIP = {
       CRITICAL: 'text-rose-700 bg-rose-50 border-rose-200', HIGH: 'text-orange-700 bg-orange-50 border-orange-200',
       MEDIUM: 'text-amber-700 bg-amber-50 border-amber-200', LOW: 'text-yellow-700 bg-yellow-50 border-yellow-200',
@@ -342,17 +359,20 @@
       const top = Object.entries(compMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
       destroyCharts();
+      const th = chartTheme();
+      Chart.defaults.color = th.text;          // tick + label legenda
+      Chart.defaults.borderColor = th.grid;    // griglie assi/radiale
       const cut = { cutout: '72%', plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false };
       // gauge
       charts.g = new Chart($('chartGauge'), {
         type: 'doughnut',
-        data: { datasets: [{ data: [avg || 0, 100 - (avg || 0)], backgroundColor: [gaugeColor(avg || 0), '#e2e8f0'], borderWidth: 0 }] },
+        data: { datasets: [{ data: [avg || 0, 100 - (avg || 0)], backgroundColor: [gaugeColor(avg || 0), th.trough], borderWidth: 0 }] },
         options: { ...cut, rotation: -90, circumference: 180, cutout: '78%' }
       });
       // severity donut
       charts.s = new Chart($('chartSev'), {
         type: 'doughnut',
-        data: { labels: SEV, datasets: [{ data: SEV.map(s => sev[s]), backgroundColor: SEV.map(s => SEV_COLOR[s]), borderWidth: 2, borderColor: '#fff' }] },
+        data: { labels: SEV, datasets: [{ data: SEV.map(s => sev[s]), backgroundColor: SEV.map(s => sevColor(s)), borderWidth: 2, borderColor: th.panel }] },
         options: {
           responsive: true, maintainAspectRatio: false, cutout: '62%',
           plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12 } } },
@@ -367,13 +387,15 @@
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 12 } } },
+          // In dark il backdrop bianco dietro i numeri della scala radiale stona.
+          scales: { r: { ticks: { backdropColor: isDark() ? 'transparent' : 'rgba(255,255,255,0.75)' } } },
           onClick: (_, els) => { if (!els.length) { setFilter(null, null); return; } setFilter('cat', catL[els[0].index]); }
         }
       });
       // top components bar (horizontal)
       charts.t = new Chart($('chartTop'), {
         type: 'bar',
-        data: { labels: top.map(t => t[0]), datasets: [{ label: 'CVEs', data: top.map(t => t[1]), backgroundColor: '#6366f1' }] },
+        data: { labels: top.map(t => t[0]), datasets: [{ label: 'CVEs', data: top.map(t => t[1]), backgroundColor: isDark() ? '#818cf8' : '#6366f1' }] },
         options: {
           indexAxis: 'y', responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
@@ -384,7 +406,7 @@
       // severity by asset (stacked)
       charts.a = new Chart($('chartAsset'), {
         type: 'bar',
-        data: { labels: assets.map(a => a.ip), datasets: SEV.map(s => ({ label: s, data: assets.map(a => a['sev_' + s.toLowerCase()] || 0), backgroundColor: SEV_COLOR[s] })) },
+        data: { labels: assets.map(a => a.ip), datasets: SEV.map(s => ({ label: s, data: assets.map(a => a['sev_' + s.toLowerCase()] || 0), backgroundColor: sevColor(s) })) },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { position: 'bottom', labels: { font: { size: 9 }, boxWidth: 10 } } },
@@ -413,7 +435,8 @@
           labels: ['Linux', 'Windows', 'Unknown'],
           datasets: [{
             data: [osCount.linux, osCount.windows, osCount.other],
-            backgroundColor: ['#0891b2', '#2563eb', '#94a3b8'], borderWidth: 2, borderColor: '#fff'
+            backgroundColor: isDark() ? ['#22d3ee', '#60a5fa', '#64748b'] : ['#0891b2', '#2563eb', '#94a3b8'],
+            borderWidth: 2, borderColor: th.panel
           }]
         },
         options: {
@@ -637,6 +660,8 @@
     }
     $('runScan').addEventListener('click', runScan);
     window.addEventListener('langchange', () => { if (assetsData.length) render(); });
+    // Toggle tema: i colori dei canvas/SVG sono calcolati in JS → serve ridisegnare.
+    window.addEventListener('themechange', () => { if (assetsData.length) render(); });
 
     // === CVE Impact Map — Zoomable Circle Packing (D3 v7) ===
     function buildCvePackData(assets) {
@@ -674,6 +699,8 @@
       const data = buildCvePackData(assets);
       if (!data.children.length) {
         container.innerHTML = '<div class="flex items-center justify-center font-code-sm text-[13px] text-slate-400" style="height:300px">No CVE data — run a scan first.</div>';
+        $('cveList').innerHTML = '';
+        $('cveListCount').textContent = '';
         return;
       }
 
@@ -706,9 +733,9 @@
         .data(root.descendants().slice(1))
         .join('circle')
         .attr('fill', d => d.children
-          ? (SEV_COLOR[d.data.severity] || '#94a3b8') + (SEV_ALPHA[d.data.severity] || '88')
-          : 'rgba(255,255,255,0.82)')
-        .attr('stroke', d => d.children ? SEV_COLOR[d.data.severity] || '#94a3b8' : '#cbd5e1')
+          ? sevColor(d.data.severity) + (SEV_ALPHA[d.data.severity] || '88')
+          : (isDark() ? 'rgba(226,232,240,0.14)' : 'rgba(255,255,255,0.82)'))
+        .attr('stroke', d => d.children ? sevColor(d.data.severity) : (isDark() ? '#475569' : '#cbd5e1'))
         .attr('stroke-width', d => d.children ? 2 : 0.5)
         .style('cursor', d => d.children ? 'zoom-in' : 'default')
         .on('mouseover', function (event, d) {
@@ -742,7 +769,7 @@
         .data(root.descendants())
         .join('text')
         .style('font-family', '"JetBrains Mono", monospace')
-        .style('fill', d => d.depth === 1 ? '#fff' : '#334155')
+        .style('fill', d => d.depth === 1 ? '#fff' : (isDark() ? '#cbd5e1' : '#334155'))
         .style('fill-opacity', d => d.parent === root ? 1 : 0)
         .style('display', d => d.parent === root ? 'inline' : 'none')
         .text(d => {
@@ -778,6 +805,28 @@
       }
 
       zoomTo([root.x, root.y, root.r * 2]);
+
+      // Lista CVE ordinata per criticità (severità, poi n. asset colpiti); click riga → zoom sul cerchio.
+      const nodeByName = new Map((root.children || []).map(c => [c.data.name, c]));
+      const items = [...data.children].sort((a, b) =>
+        (SEV.indexOf(a.severity) - SEV.indexOf(b.severity)) || (b.children.length - a.children.length));
+      const listEl = $('cveList');
+      $('cveListCount').textContent = items.length + ' CVE';
+      listEl.innerHTML = items.map((c, i) => `
+        <div data-cve="${esc(c.name)}" class="flex items-center gap-2 px-4 py-2 hover:bg-white/60 cursor-pointer transition-colors">
+          <span class="font-code-sm text-[10px] text-slate-300 w-6 text-right shrink-0">${i + 1}</span>
+          <a href="${cveUrl(c.name)}" target="_blank" rel="noopener noreferrer"
+            class="font-code-sm text-[11px] text-indigo-700 hover:underline truncate">${esc(c.name)}</a>
+          <span class="ml-auto flex items-center gap-2 shrink-0">
+            <span class="font-code-sm text-[10px] text-slate-400" title="assets affected">${c.children.length}×</span>
+            ${sevChip(c.severity)}
+          </span>
+        </div>`).join('');
+      listEl.querySelectorAll('[data-cve]').forEach(row => row.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        const n = nodeByName.get(row.dataset.cve);
+        if (n && focus !== n) zoom(e, n);
+      }));
     }
 
     loadAssetPicker();
