@@ -29,7 +29,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from assets import (load_assets, get_asset, add_asset, update_asset,
-                    set_asset_enabled, delete_asset, Asset, AssetStoreError)
+                    set_asset_enabled, update_asset_fields, delete_asset,
+                    Asset, AssetStoreError)
 from crypto import encrypt_password, is_encrypted, decrypt_password
 from config import load_config, save_config
 from osint import identify_product, extract_local
@@ -42,6 +43,7 @@ from db import (persist_scan, persist_result, update_scan_summary, fetch_audit,
                 fetch_posture, fetch_posture_runs, fetch_posture_sbom)
 from posture import scan_asset_posture
 from sbom_export import sbom_rows, build_cyclonedx, build_spdx
+from risk import assess_run_risk, compute_trend
 
 BASE_DIR = Path(__file__).parent
 ASSETS_FILE = BASE_DIR / "assets.txt"
@@ -133,6 +135,12 @@ def api_sbom_export(format: str = "cyclonedx", run_id: int | None = None):
 def intel_page(request: Request):
     """Pagina INTEL: dashboard Full Posture (ASPM-style)."""
     return templates.TemplateResponse("intel.html", {"request": request})
+
+
+@app.get("/risk", response_class=HTMLResponse)
+def risk_page(request: Request):
+    """Pagina RISK: prioritizzazione contestuale (EPSS/KEV + contesto + trend)."""
+    return templates.TemplateResponse("risk.html", {"request": request})
 
 
 @app.get("/settings", response_class=HTMLResponse)
@@ -272,6 +280,77 @@ def api_posture_runs():
     if data is None:
         return JSONResponse({"error": "Supabase unreachable", "runs": []}, status_code=503)
     return {"runs": data}
+
+
+@app.get("/api/risk")
+def api_risk(run_id: int | None = None, probe: bool = True):
+    """
+    Rischio CONTESTUALE di una run di postura (ultima se run_id assente).
+
+    Combina: severita' della postura + exploitability (EPSS + CISA KEV) +
+    reachability (porte di servizio aperte) + contesto business dell'asset
+    (ambiente, internet-facing, criticita' dall'inventario).
+
+    'probe=false' salta la sonda TCP delle porte (piu' veloce, no reachability).
+    """
+    run = fetch_posture(run_id)
+    if run is None:
+        return JSONResponse({"error": "Supabase unreachable"}, status_code=503)
+    if not run:
+        return {"risk": {"assets": [], "summary": {}, "meta": {}}}
+    try:
+        assets = load_assets(ASSETS_FILE)
+        ctx = {a.ip: {"id": a.id, "environment": a.environment,
+                      "internet_facing": a.internet_facing,
+                      "criticality": a.criticality} for a in assets}
+    except AssetStoreError:
+        ctx = {}
+    return {"risk": assess_run_risk(run, ctx, probe=probe)}
+
+
+@app.get("/api/risk/trend")
+def api_risk_trend():
+    """
+    Serie storica del rischio (score/CVE per run) + delta finding-level fra le
+    due run piu' recenti (nuove vs risolte). 503 se il DB non risponde.
+    """
+    runs = fetch_posture_runs()
+    if runs is None:
+        return JSONResponse({"error": "Supabase unreachable"}, status_code=503)
+    current = previous = None
+    if len(runs) >= 1:
+        current = fetch_posture(runs[0].get("id"))
+    if len(runs) >= 2:
+        previous = fetch_posture(runs[1].get("id"))
+    return {"trend": compute_trend(runs, current, previous)}
+
+
+@app.patch("/api/assets/{index}/context")
+async def api_assets_context(index: int, request: Request):
+    """
+    Aggiorna il contesto business di un asset (per la prioritizzazione del rischio).
+    Body (tutti opzionali): {environment, internet_facing, criticality}.
+    """
+    body = await request.json()
+    row = {}
+    if "environment" in body:
+        env = (body.get("environment") or "unknown").strip().lower()
+        if env not in ("production", "staging", "dev", "unknown"):
+            env = "unknown"
+        row["environment"] = env
+    if "internet_facing" in body:
+        row["internet_facing"] = bool(body.get("internet_facing"))
+    if "criticality" in body:
+        try:
+            c = int(body.get("criticality"))
+        except (TypeError, ValueError):
+            c = 3
+        row["criticality"] = max(1, min(5, c))
+    if not row:
+        return JSONResponse({"error": "No context fields"}, status_code=400)
+    if not update_asset_fields(index, row):
+        return JSONResponse({"error": "Invalid index or DB unreachable"}, status_code=404)
+    return {"ok": True, **row}
 
 
 @app.get("/api/audit")
@@ -492,6 +571,11 @@ async def api_assets_update(index: int, request: Request):
         os_type=os_type,
         os_major_version=(body.get("os_major_version") or "").strip(),
         enabled=enabled,
+        # Preserva il contesto business: non fa parte del form CRUD e verrebbe
+        # altrimenti resettato ai default a ogni salvataggio dell'asset.
+        environment=current.environment,
+        internet_facing=current.internet_facing,
+        criticality=current.criticality,
     ))
     if not ok:
         return JSONResponse({"error": "Supabase non raggiungibile"}, status_code=503)

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VULN.SCAN.IO · Contextual Risk</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script src="/static/vendor/tailwind.js"></script>
+  <script src="/static/vendor/chart.umd.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#00daf3", "error": "#ef4444", "on-background": "#0f172a",
+            "primary-fixed-dim": "#06b6d4", "on-surface-variant": "#64748b",
+            "on-surface": "#1e293b", "background": "#ffffff"
+          },
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px" },
+          "spacing": { "base-unit": "4px", "gutter": "16px", "margin-desktop": "32px", "margin-mobile": "16px", "panel-padding": "24px" },
+          "fontFamily": { "code-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "display-lg": ["Inter"], "code-lg": ["JetBrains Mono"], "label-caps": ["Inter"], "body-md": ["Inter"] },
+          "fontSize": {
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "code-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+            "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glow-sm { filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4)); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .neural-panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+    .shader-bg { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; background: #ffffff; }
+    body { min-height: max(884px, 100dvh); }
+  </style>
+  <script src="/static/i18n.js?v=9"></script>
+</head>
+
+<body class="bg-white text-on-background font-body-md text-body-md relative antialiased overflow-x-hidden">
+  <div class="shader-bg"><canvas id="shader" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+        (function () { const c = document.getElementById('shader'); function s() { const w = c.clientWidth || innerWidth, h = c.clientHeight || innerHeight; if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } } if (typeof ResizeObserver !== 'undefined') new ResizeObserver(s).observe(c); s(); const gl = c.getContext('webgl') || c.getContext('experimental-webgl'); if (!gl) return; const vs = `attribute vec2 p;varying vec2 u;void main(){u=p*0.5+0.5;gl_Position=vec4(p,0.0,1.0);}`; const fs = `precision highp float;uniform float t;uniform vec2 r;float g(vec2 uv,float n){vec2 q=fract(uv*n);return 1.0-(smoothstep(0.0,0.03,abs(q.x-0.5))*smoothstep(0.0,0.03,abs(q.y-0.5)));}void main(){vec2 uv=gl_FragCoord.xy/r.xy;uv.x*=r.x/r.y;vec2 v=uv+vec2(t*0.015,t*0.008);float a=g(v,8.0)*0.05,b=g(v,32.0)*0.02;vec3 col=mix(vec3(0.98,0.99,1.0),vec3(0.94,0.96,0.98),length(uv-0.5));col-=(a+b)*0.1;col+=(a+b)*vec3(0.0,0.7,0.9)*0.15;gl_FragColor=vec4(col,1.0);}`; function sh(t, s) { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; } const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); gl.useProgram(pr); const bf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW); const pl = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(pl); gl.vertexAttribPointer(pl, 2, gl.FLOAT, false, 0, 0); const ut = gl.getUniformLocation(pr, 't'), ur = gl.getUniformLocation(pr, 'r'); function rd(tm) { if (typeof ResizeObserver === 'undefined') s(); gl.viewport(0, 0, c.width, c.height); gl.uniform1f(ut, tm * 0.001); gl.uniform2f(ur, c.width, c.height); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); requestAnimationFrame(rd); } rd(0); })();
+    </script>
+  </div>
+
+{% set active_page = 'risk' %}
+{% set crumbs = [
+  {'key': 'crumb.home', 'text': 'Home', 'href': '/'},
+  {'key': 'risk.crumb', 'text': 'Contextual Risk'}
+] %}
+  {% include 'partials/topbar.html' %}
+
+  <div class="flex pt-16 h-screen w-full overflow-hidden">
+  {% include 'partials/sidebar.html' %}
+
+    <!-- Main -->
+    <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
+      <div class="mx-auto space-y-8 max-w-[1600px]">
+        <!-- Header -->
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="font-display-lg text-3xl font-bold tracking-tight text-slate-900" data-i18n="risk.header">
+              Contextual Risk Prioritization</h2>
+            <p class="font-code-sm text-code-sm text-slate-500 mt-1" data-i18n="risk.subtitle">Posture findings
+              re-scored with EPSS &amp; CISA KEV exploitability, live reachability and asset business context.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="runMeta" class="font-code-sm text-[11px] text-slate-400"></span>
+            <select id="runSelect"
+              class="font-code-sm text-[12px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-cyan-300"></select>
+            <label class="flex items-center gap-2 font-code-sm text-[11px] text-slate-600 cursor-pointer select-none"
+              title="Live TCP probe of service ports for reachability">
+              <input id="probeToggle" type="checkbox" checked class="accent-cyan-500" />
+              <span data-i18n="risk.probe">REACHABILITY PROBE</span>
+            </label>
+            <button id="refreshBtn"
+              class="bg-slate-900 text-white hover:bg-slate-800 px-5 py-2.5 rounded-lg font-label-caps text-label-caps transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 group disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-sm text-cyan-400 group-hover:rotate-180 transition-transform duration-500">refresh</span>
+              <span data-i18n="risk.refresh">RECOMPUTE</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- source availability banner -->
+        <div id="metaBanner" class="hidden neural-panel rounded-xl px-4 py-2.5 flex items-center gap-4 flex-wrap font-code-sm text-[11px]"></div>
+
+        <!-- KPIs -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div class="neural-panel p-5 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="risk.kpi_assets">ASSETS</h3>
+            <span id="kAssets" class="font-display-lg text-3xl text-slate-900">0</span>
+          </div>
+          <div class="neural-panel p-5 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-rose-500 mb-2" data-i18n="risk.kpi_critical">CRITICAL RISK</h3>
+            <span id="kCrit" class="font-display-lg text-3xl text-rose-600">0</span>
+          </div>
+          <div class="neural-panel p-5 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-amber-600 mb-2" data-i18n="risk.kpi_high">HIGH RISK</h3>
+            <span id="kHigh" class="font-display-lg text-3xl text-amber-600">0</span>
+          </div>
+          <div class="neural-panel p-5 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-error mb-2" data-i18n="risk.kpi_kev">KEV (EXPLOITED)</h3>
+            <span id="kKev" class="font-display-lg text-3xl text-error">0</span>
+          </div>
+          <div class="neural-panel p-5 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-2" data-i18n="risk.kpi_exposed">REACHABLE</h3>
+            <span id="kExposed" class="font-display-lg text-3xl text-slate-900">0</span>
+          </div>
+        </section>
+
+        <!-- Charts row -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="neural-panel p-6 rounded-2xl lg:col-span-2">
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-4" data-i18n="risk.chart_trend">POSTURE TREND
+              (SCORE &amp; CVEs PER RUN)</h3>
+            <div class="h-64"><canvas id="chartTrend"></canvas></div>
+          </div>
+          <div class="neural-panel p-6 rounded-2xl">
+            <h3 class="font-label-caps text-label-caps text-slate-500 mb-4" data-i18n="risk.chart_delta">CHANGE vs
+              PREVIOUS RUN</h3>
+            <div class="h-64 flex flex-col justify-center gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-rose-600">trending_up</span>
+                </div>
+                <div>
+                  <div id="deltaNew" class="font-display-lg text-3xl text-rose-600">0</div>
+                  <div class="font-label-caps text-[10px] text-slate-500" data-i18n="risk.delta_new">NEW FINDINGS</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-emerald-600">trending_down</span>
+                </div>
+                <div>
+                  <div id="deltaResolved" class="font-display-lg text-3xl text-emerald-600">0</div>
+                  <div class="font-label-caps text-[10px] text-slate-500" data-i18n="risk.delta_resolved">RESOLVED</div>
+                </div>
+              </div>
+              <div class="font-code-sm text-[11px] text-slate-400" id="deltaNote"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Asset risk table -->
+        <section class="neural-panel rounded-2xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-200/70 flex items-center justify-between">
+            <h3 class="font-label-caps text-label-caps text-slate-500" data-i18n="risk.table_title">ASSET RISK RANKING
+            </h3>
+            <span class="font-code-sm text-[11px] text-slate-400" data-i18n="risk.table_hint">Click a row to expand
+              exploitable findings · edit context inline</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200/70 bg-white/40 font-label-caps text-label-caps text-slate-500">
+                  <th class="px-5 py-4" data-i18n="risk.th_rank">#</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_asset">ASSET</th>
+                  <th class="px-5 py-4 w-48" data-i18n="risk.th_risk">RISK INDEX</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_posture">POSTURE</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_env">ENVIRONMENT</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_inet">INTERNET</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_crit">CRITICALITY</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_kev">KEV</th>
+                  <th class="px-5 py-4" data-i18n="risk.th_exposed">REACHABLE</th>
+                </tr>
+              </thead>
+              <tbody id="riskBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div id="emptyRisk" class="hidden p-10 text-center font-code-sm text-code-sm text-slate-400"
+            data-i18n="risk.empty">No posture data yet. Run a posture scan first.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const cveUrl = (id) => /^CVE-/i.test(id) ? `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(id)}` : `https://osv.dev/vulnerability/${encodeURIComponent(id)}`;
+
+    const isDark = () => document.documentElement.classList.contains('dark');
+    const chartTheme = () => isDark()
+      ? { text: '#94a3b8', grid: 'rgba(148,163,184,0.12)' }
+      : { text: '#666', grid: 'rgba(0,0,0,0.08)' };
+
+    const SEV_COLOR = { CRITICAL: '#b91c1c', HIGH: '#ea580c', MEDIUM: '#d97706', LOW: '#eab308', UNKNOWN: '#94a3b8' };
+    const SEV_COLOR_DARK = { CRITICAL: '#ef4444', HIGH: '#fb923c', MEDIUM: '#fbbf24', LOW: '#fde047', UNKNOWN: '#64748b' };
+    const sevColor = (s) => (isDark() ? SEV_COLOR_DARK : SEV_COLOR)[s] || '#94a3b8';
+
+    // Colore per fascia di rischio (0-100, alto = peggio).
+    function riskBucket(v) {
+      if (v >= 75) return { cls: 'text-rose-700 bg-rose-50 border-rose-200', bar: '#ef4444', label: 'CRITICAL' };
+      if (v >= 45) return { cls: 'text-orange-700 bg-orange-50 border-orange-200', bar: '#f97316', label: 'HIGH' };
+      if (v >= 20) return { cls: 'text-amber-700 bg-amber-50 border-amber-200', bar: '#f59e0b', label: 'MEDIUM' };
+      return { cls: 'text-emerald-700 bg-emerald-50 border-emerald-200', bar: '#10b981', label: 'LOW' };
+    }
+
+    let charts = {};
+    let currentRunId = null;
+
+    async function loadRuns() {
+      try {
+        const r = await fetch('/api/posture/runs');
+        const j = await r.json();
+        const runs = j.runs || [];
+        const sel = $('runSelect');
+        sel.innerHTML = runs.length
+          ? runs.map(x => `<option value="${x.id}">Run #${x.id} · ${new Date(x.created_at).toLocaleString()} · ${x.total_vulns || 0} CVE</option>`).join('')
+          : '<option value="">— no runs —</option>';
+      } catch (e) { $('runSelect').innerHTML = '<option value="">— no runs —</option>'; }
+    }
+
+    async function loadTrend() {
+      let trend = { series: [], delta: {} };
+      try {
+        const r = await fetch('/api/risk/trend');
+        if (r.ok) trend = (await r.json()).trend || trend;
+      } catch (e) { }
+      renderTrend(trend.series || []);
+      const d = trend.delta || {};
+      $('deltaNew').textContent = d.new || 0;
+      $('deltaResolved').textContent = d.resolved || 0;
+      $('deltaNote').textContent = d.prev_run_id
+        ? `${t('risk.delta_vs') || 'vs run'} #${d.prev_run_id} · ${d.unchanged || 0} ${t('risk.delta_carried') || 'carried over'}`
+        : (t('risk.delta_first') || 'First run — no previous baseline.');
+    }
+
+    function renderTrend(series) {
+      const th = chartTheme();
+      if (charts.trend) charts.trend.destroy();
+      const labels = series.map(s => '#' + s.run_id);
+      charts.trend = new Chart($('chartTrend'), {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'line', label: 'Avg posture score', yAxisID: 'y',
+              data: series.map(s => s.avg_score), borderColor: isDark() ? '#34d399' : '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.12)', tension: 0.3, fill: true, pointRadius: 3
+            },
+            {
+              type: 'bar', label: 'Total CVEs', yAxisID: 'y1',
+              data: series.map(s => s.total_vulns), backgroundColor: isDark() ? 'rgba(129,140,248,0.55)' : 'rgba(99,102,241,0.5)'
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: th.text, font: { size: 10 }, boxWidth: 12 } } },
+          scales: {
+            x: { ticks: { color: th.text, font: { size: 10 } }, grid: { color: th.grid } },
+            y: { position: 'left', min: 0, max: 100, ticks: { color: th.text, font: { size: 10 } }, grid: { color: th.grid }, title: { display: true, text: 'score', color: th.text } },
+            y1: { position: 'right', min: 0, ticks: { color: th.text, font: { size: 10 } }, grid: { drawOnChartArea: false }, title: { display: true, text: 'CVEs', color: th.text } }
+          }
+        }
+      });
+    }
+
+    async function loadRisk() {
+      const btn = $('refreshBtn'); btn.disabled = true;
+      const rid = $('runSelect').value;
+      const probe = $('probeToggle').checked ? 'true' : 'false';
+      const qs = new URLSearchParams({ probe });
+      if (rid) qs.set('run_id', rid);
+      let risk = { assets: [], summary: {}, meta: {} };
+      try {
+        const r = await fetch('/api/risk?' + qs.toString());
+        if (r.ok) risk = (await r.json()).risk || risk;
+      } catch (e) { }
+      btn.disabled = false;
+      renderRisk(risk);
+    }
+
+    function renderMeta(meta) {
+      const b = $('metaBanner');
+      if (!meta || Object.keys(meta).length === 0) { b.classList.add('hidden'); return; }
+      b.classList.remove('hidden');
+      const chip = (ok, on, off) => ok
+        ? `<span class="inline-flex items-center gap-1 text-emerald-700"><span class="material-symbols-outlined text-[14px]">check_circle</span>${on}</span>`
+        : `<span class="inline-flex items-center gap-1 text-slate-400"><span class="material-symbols-outlined text-[14px]">cloud_off</span>${off}</span>`;
+      b.innerHTML =
+        chip(meta.epss, (t('risk.src_epss') || 'EPSS live'), (t('risk.src_epss_off') || 'EPSS offline'))
+        + chip(meta.kev, `CISA KEV (${(meta.kev_total || 0).toLocaleString()})`, 'KEV offline')
+        + chip(meta.probe, (t('risk.src_probe') || 'Reachability probe on'), (t('risk.src_probe_off') || 'Reachability probe off'));
+    }
+
+    function renderRisk(risk) {
+      const assets = risk.assets || [];
+      const s = risk.summary || {};
+      currentRunId = risk.run_id;
+      renderMeta(risk.meta || {});
+      $('kAssets').textContent = s.assets || 0;
+      $('kCrit').textContent = s.critical_risk || 0;
+      $('kHigh').textContent = s.high_risk || 0;
+      $('kKev').textContent = s.kev_findings || 0;
+      $('kExposed').textContent = s.exposed_findings || 0;
+      $('runMeta').textContent = risk.run_id ? `run #${risk.run_id}` : '';
+
+      const body = $('riskBody');
+      $('emptyRisk').classList.toggle('hidden', assets.length > 0);
+      body.innerHTML = assets.map((a, i) => assetRow(a, i)).join('');
+    }
+
+    function envSelect(a) {
+      const opts = [['unknown', 'Unknown'], ['production', 'Production'], ['staging', 'Staging'], ['dev', 'Dev']];
+      return `<select data-ctx="environment" data-id="${a.asset_id}" ${a.asset_id == null ? 'disabled' : ''}
+        class="bg-white border border-slate-200 rounded-lg px-2 py-1 font-code-sm text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-cyan-300">
+        ${opts.map(([v, l]) => `<option value="${v}" ${a.environment === v ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>`;
+    }
+
+    function critSelect(a) {
+      return `<select data-ctx="criticality" data-id="${a.asset_id}" ${a.asset_id == null ? 'disabled' : ''}
+        class="bg-white border border-slate-200 rounded-lg px-2 py-1 font-code-sm text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-cyan-300">
+        ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${Number(a.criticality) === v ? 'selected' : ''}>${v}</option>`).join('')}
+      </select>`;
+    }
+
+    function assetRow(a, i) {
+      const b = riskBucket(a.risk_index);
+      const inet = a.internet_facing;
+      const findingsHtml = (a.findings || []).slice(0, 25).map(f => {
+        const sc = sevColor(f.max_severity);
+        const kev = f.kev ? `<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-label-caps text-[9px]">KEV</span>` : '';
+        const exposed = f.exposed ? `<span class="px-1.5 py-0.5 rounded bg-amber-500 text-white font-label-caps text-[9px]" title="open ports: ${(f.exposed_ports || []).join(', ')}">EXPOSED</span>` : '';
+        const epss = f.epss ? `<span class="font-code-sm text-[10px] text-slate-500" title="EPSS: probability of exploitation in 30 days">EPSS ${(f.epss * 100).toFixed(1)}%</span>` : '';
+        const cves = (f.cve_ids || []).slice(0, 4).map(c => `<a href="${cveUrl(c)}" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">${esc(c)}</a>`).join(', ');
+        return `<div class="flex items-center gap-3 py-1.5 px-4 border-b border-slate-100/60 last:border-0">
+          <span class="w-2 h-2 rounded-full shrink-0" style="background:${sc}"></span>
+          <span class="font-code-sm text-[12px] text-slate-800 font-semibold w-40 truncate" title="${esc(f.package)} ${esc(f.version)}">${esc(f.package)} <span class="text-slate-400">${esc(f.version || '')}</span></span>
+          <span class="font-label-caps text-[9px] px-1.5 py-0.5 rounded-full border" style="color:${sc};border-color:${sc}55">${esc(f.max_severity)}</span>
+          ${kev} ${exposed} ${epss}
+          <span class="font-code-sm text-[10px] text-slate-500 ml-auto truncate max-w-[40%]">${cves}</span>
+        </div>`;
+      }).join('') || `<div class="py-3 px-4 font-code-sm text-[11px] text-slate-400">${t('risk.no_findings') || 'No vulnerable findings.'}</div>`;
+
+      return `<tr class="hover:bg-white/60 transition-colors cursor-pointer risk-row" data-row="${i}">
+          <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400">${i + 1}</td>
+          <td class="px-5 py-3 font-code-sm text-code-sm text-slate-900 font-semibold">
+            <span class="material-symbols-outlined text-[15px] text-slate-400 align-middle mr-1 chevron" data-row="${i}">chevron_right</span>
+            ${esc(a.ip)}
+            <div class="font-code-sm text-[10px] text-slate-400 ml-6">${esc(a.os_guess || '')}</div>
+          </td>
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-2">
+              <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden min-w-[80px]">
+                <div class="h-full rounded-full" style="width:${a.risk_index}%;background:${b.bar}"></div>
+              </div>
+              <span class="font-code-sm text-[13px] font-bold w-8 text-right" style="color:${b.bar}">${a.risk_index}</span>
+            </div>
+            <span class="font-label-caps text-[9px] px-1.5 py-0.5 rounded-full border ${b.cls}">${b.label}</span>
+          </td>
+          <td class="px-5 py-3 font-code-sm text-code-sm text-slate-600">${a.posture_score == null ? '—' : a.posture_score}</td>
+          <td class="px-5 py-3" onclick="event.stopPropagation()">${envSelect(a)}</td>
+          <td class="px-5 py-3" onclick="event.stopPropagation()">
+            <button data-ctx="internet_facing" data-id="${a.asset_id}" data-val="${inet ? '1' : '0'}" ${a.asset_id == null ? 'disabled' : ''}
+              class="w-11 h-6 rounded-full relative transition-colors ${inet ? 'bg-cyan-500' : 'bg-slate-300'} ${a.asset_id == null ? 'opacity-40' : ''}">
+              <span class="absolute top-0.5 ${inet ? 'translate-x-5' : 'translate-x-0.5'} w-5 h-5 rounded-full bg-white transition-transform"></span>
+            </button>
+          </td>
+          <td class="px-5 py-3" onclick="event.stopPropagation()">${critSelect(a)}</td>
+          <td class="px-5 py-3">${a.kev_count ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-label-caps text-[10px]"><span class="material-symbols-outlined text-[12px]">bug_report</span>${a.kev_count}</span>` : '<span class="text-slate-300">—</span>'}</td>
+          <td class="px-5 py-3">${a.exposed_count ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-label-caps text-[10px]"><span class="material-symbols-outlined text-[12px]">lan</span>${a.exposed_count}</span>` : '<span class="text-slate-300">—</span>'}</td>
+        </tr>
+        <tr class="risk-detail hidden" data-detail="${i}"><td colspan="9" class="bg-slate-50/40 p-0">
+          <div class="px-2 py-2">${findingsHtml}</div>
+        </td></tr>`;
+    }
+
+    // Row expand/collapse.
+    $('riskBody').addEventListener('click', (e) => {
+      const row = e.target.closest('.risk-row');
+      if (!row) return;
+      const i = row.dataset.row;
+      const det = document.querySelector(`.risk-detail[data-detail="${i}"]`);
+      const chev = row.querySelector('.chevron');
+      if (det) {
+        const open = det.classList.toggle('hidden');
+        if (chev) chev.textContent = open ? 'chevron_right' : 'expand_more';
+      }
+    });
+
+    // Context editing (env / criticality / internet_facing) -> PATCH then recompute.
+    async function patchContext(id, field, value) {
+      if (id == null || id === 'null') return;
+      try {
+        await fetch(`/api/assets/${id}/context`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value })
+        });
+      } catch (e) { }
+      loadRisk();  // ripesa il rischio con il nuovo contesto
+    }
+
+    $('riskBody').addEventListener('change', (e) => {
+      const el = e.target.closest('[data-ctx]');
+      if (!el || el.tagName !== 'SELECT') return;
+      const field = el.dataset.ctx;
+      const val = field === 'criticality' ? Number(el.value) : el.value;
+      patchContext(el.dataset.id, field, val);
+    });
+    $('riskBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-ctx="internet_facing"]');
+      if (!btn) return;
+      patchContext(btn.dataset.id, 'internet_facing', btn.dataset.val !== '1');
+    });
+
+    $('refreshBtn').addEventListener('click', loadRisk);
+    $('runSelect').addEventListener('change', () => { loadRisk(); });
+    $('probeToggle').addEventListener('change', loadRisk);
+    window.addEventListener('themechange', () => { loadTrend(); });
+    window.addEventListener('langchange', () => { loadRisk(); loadTrend(); });
+
+    (async function init() {
+      await loadRuns();
+      await Promise.all([loadRisk(), loadTrend()]);
+    })();
+  </script>
+</body>
+
+</html>

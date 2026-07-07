@@ -81,6 +81,13 @@ CREATE TABLE IF NOT EXISTS public.assets (
 
 CREATE INDEX IF NOT EXISTS idx_assets_ip ON public.assets(ip);
 
+-- Contesto business dell'asset (capability ASPM: prioritizzazione contestuale).
+-- Pesano il risk score: un critical su asset prod internet-facing conta di piu'.
+ALTER TABLE public.assets
+  ADD COLUMN IF NOT EXISTS environment     text    NOT NULL DEFAULT 'unknown', -- prod|staging|dev|unknown
+  ADD COLUMN IF NOT EXISTS internet_facing boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS criticality     integer NOT NULL DEFAULT 3;          -- 1 (basso) .. 5 (alto)
+
 -- 5) FULL POSTURE (SCA): run manuale -> asset -> finding per pacchetto.
 CREATE TABLE IF NOT EXISTS public.posture_runs (
   id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

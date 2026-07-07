@@ -35,6 +35,10 @@ class Asset:
     os_type: str = ""          # "linux" | "windows" | ""
     os_major_version: str = "" # e.g. "22.04", "10", "2019"
     enabled: bool = True       # False => asset escluso dalle scansioni
+    # Contesto business (capability ASPM: prioritizzazione contestuale del rischio).
+    environment: str = "unknown"     # "production" | "staging" | "dev" | "unknown"
+    internet_facing: bool = False    # esposto su internet
+    criticality: int = 3             # 1 (basso) .. 5 (alto)
     id: Optional[int] = None   # id riga Supabase (None se non persistito)
 
     @property
@@ -51,6 +55,9 @@ class Asset:
             "os_type": self.os_type or None,
             "os_major_version": self.os_major_version or None,
             "enabled": self.enabled,
+            "environment": self.environment,
+            "internet_facing": self.internet_facing,
+            "criticality": self.criticality,
         }
 
     def to_row(self) -> dict:
@@ -62,6 +69,9 @@ class Asset:
             "os_type": self.os_type,
             "os_major_version": self.os_major_version,
             "enabled": self.enabled,
+            "environment": self.environment,
+            "internet_facing": self.internet_facing,
+            "criticality": self.criticality,
         }
 
 
@@ -74,6 +84,9 @@ def _row_to_asset(row: dict) -> Asset:
         os_type=(row.get("os_type") or "").lower(),
         os_major_version=row.get("os_major_version") or "",
         enabled=bool(row.get("enabled", True)),
+        environment=(row.get("environment") or "unknown"),
+        internet_facing=bool(row.get("internet_facing", False)),
+        criticality=int(row.get("criticality") or 3),
         id=row.get("id"),
     )
 
@@ -166,6 +179,11 @@ def update_asset(asset_id: int, asset: Asset) -> bool:
 def set_asset_enabled(asset_id: int, enabled: bool) -> bool:
     """Abilita/disabilita l'asset indicato."""
     return db.update_asset(asset_id, {"enabled": bool(enabled)})
+
+
+def update_asset_fields(asset_id: int, fields: dict) -> bool:
+    """Aggiorna un sottoinsieme di campi dell'asset (es. contesto business)."""
+    return db.update_asset(asset_id, fields)
 
 
 def delete_asset(asset_id: int) -> bool:
