@@ -1,0 +1,224 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "192.168.122.50",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "ubuntu 22.04 (os-pkgs)",
+      "Class": "os-pkgs",
+      "Type": "ubuntu",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2023-38408",
+          "PkgName": "openssh-server",
+          "InstalledVersion": "1:8.9p1-3",
+          "FixedVersion": "1:8.9p1-3ubuntu0.4",
+          "Severity": "CRITICAL",
+          "Title": "OpenSSH: remote code execution in ssh-agent PKCS#11",
+          "CweIDs": ["CWE-426"],
+          "Description": "The PKCS#11 feature in ssh-agent in OpenSSH allows remote code execution via a forwarded agent socket."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-4911",
+          "PkgName": "libc6",
+          "InstalledVersion": "2.35-0ubuntu3",
+          "FixedVersion": "2.35-0ubuntu3.4",
+          "Severity": "HIGH",
+          "Title": "glibc: buffer overflow in ld.so (Looney Tunables)",
+          "CweIDs": ["CWE-787"],
+          "Description": "A buffer overflow in the GNU C Library dynamic loader while processing the GLIBC_TUNABLES environment variable allows local privilege escalation."
+        },
+        {
+          "VulnerabilityID": "CVE-2024-0567",
+          "PkgName": "libgnutls30",
+          "InstalledVersion": "3.7.3-4ubuntu1",
+          "FixedVersion": "3.7.3-4ubuntu1.5",
+          "Severity": "MEDIUM",
+          "Title": "gnutls: certificate verification bypass",
+          "CweIDs": ["CWE-347"],
+          "Description": "A flaw in GnuTLS certificate chain verification can lead to acceptance of an invalid certificate."
+        },
+        {
+          "VulnerabilityID": "CVE-2022-3821",
+          "PkgName": "systemd",
+          "InstalledVersion": "249.11-0ubuntu3",
+          "FixedVersion": "249.11-0ubuntu3.6",
+          "Severity": "MEDIUM",
+          "Title": "systemd: off-by-one buffer overflow in format_timespan",
+          "CweIDs": ["CWE-193"],
+          "Description": "An off-by-one error in the systemd time span formatting routine can cause a denial of service."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-29491",
+          "PkgName": "libtinfo6",
+          "InstalledVersion": "6.3-2ubuntu0.1",
+          "FixedVersion": "6.3-2ubuntu0.2",
+          "Severity": "HIGH",
+          "Title": "ncurses: local privilege escalation via TERMINFO",
+          "CweIDs": ["CWE-787"],
+          "Description": "ncurses before 6.4 allows setuid applications to be manipulated through crafted TERMINFO environment variables."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-45853",
+          "PkgName": "zlib1g",
+          "InstalledVersion": "1:1.2.11.dfsg-2ubuntu9",
+          "FixedVersion": "",
+          "Severity": "CRITICAL",
+          "Title": "zlib: integer overflow in MiniZip zipOpenNewFileInZip4_64",
+          "CweIDs": ["CWE-190"],
+          "Description": "MiniZip in zlib has an integer overflow and resultant heap-based buffer overflow via a long filename."
+        },
+        {
+          "VulnerabilityID": "CVE-2022-40674",
+          "PkgName": "libexpat1",
+          "InstalledVersion": "2.4.7-1ubuntu0.1",
+          "FixedVersion": "2.4.7-1ubuntu0.2",
+          "Severity": "HIGH",
+          "Title": "expat: use-after-free in doContent",
+          "CweIDs": ["CWE-416"],
+          "Description": "libexpat has a use-after-free in the doContent function that can be triggered by crafted XML input."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-0464",
+          "PkgName": "libssl3",
+          "InstalledVersion": "3.0.2-0ubuntu1.8",
+          "FixedVersion": "3.0.2-0ubuntu1.9",
+          "Severity": "MEDIUM",
+          "Title": "openssl: denial of service via policy constraints",
+          "CweIDs": ["CWE-295"],
+          "Description": "Excessive resource use when verifying X.509 certificate chains that include policy constraints can lead to a denial of service."
+        },
+        {
+          "VulnerabilityID": "CVE-2021-33574",
+          "PkgName": "libc-bin",
+          "InstalledVersion": "2.35-0ubuntu3",
+          "FixedVersion": "2.35-0ubuntu3.1",
+          "Severity": "LOW",
+          "Title": "glibc: use-after-free in mq_notify",
+          "CweIDs": ["CWE-416"],
+          "Description": "The mq_notify function in the GNU C Library has a use-after-free that may lead to application crash."
+        }
+      ]
+    },
+    {
+      "Target": "app/requirements.txt (python-pkgs)",
+      "Class": "lang-pkgs",
+      "Type": "pip",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2024-3772",
+          "PkgName": "pydantic",
+          "InstalledVersion": "1.10.2",
+          "FixedVersion": "1.10.13",
+          "Severity": "MEDIUM",
+          "Title": "pydantic: regular expression denial of service (ReDoS)",
+          "CweIDs": ["CWE-1333"],
+          "Description": "A crafted email string can cause catastrophic backtracking in pydantic's email validation regex."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-43804",
+          "PkgName": "urllib3",
+          "InstalledVersion": "1.26.5",
+          "FixedVersion": "1.26.17",
+          "Severity": "HIGH",
+          "Title": "urllib3: Cookie header leak on cross-origin redirect",
+          "CweIDs": ["CWE-200"],
+          "Description": "urllib3 does not strip the Cookie header on cross-origin redirects, potentially leaking session data."
+        },
+        {
+          "VulnerabilityID": "CVE-2024-35195",
+          "PkgName": "requests",
+          "InstalledVersion": "2.28.1",
+          "FixedVersion": "2.32.0",
+          "Severity": "MEDIUM",
+          "Title": "requests: certificate verification bypass on session reuse",
+          "CweIDs": ["CWE-295"],
+          "Description": "When verify=False is set once on a Session it persists across subsequent requests, bypassing TLS verification."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-32681",
+          "PkgName": "requests",
+          "InstalledVersion": "2.28.1",
+          "FixedVersion": "2.31.0",
+          "Severity": "MEDIUM",
+          "Title": "requests: proxy Authorization header leak on redirect",
+          "CweIDs": ["CWE-200"],
+          "Description": "requests leaks the Proxy-Authorization header to the destination server when redirected across schemes."
+        },
+        {
+          "VulnerabilityID": "CVE-2022-40897",
+          "PkgName": "setuptools",
+          "InstalledVersion": "58.1.0",
+          "FixedVersion": "65.5.1",
+          "Severity": "HIGH",
+          "Title": "setuptools: regular expression denial of service in package_index",
+          "CweIDs": ["CWE-1333"],
+          "Description": "setuptools is vulnerable to ReDoS via crafted HTML in the package index parser."
+        },
+        {
+          "VulnerabilityID": "CVE-2024-1135",
+          "PkgName": "gunicorn",
+          "InstalledVersion": "20.1.0",
+          "FixedVersion": "22.0.0",
+          "Severity": "HIGH",
+          "Title": "gunicorn: HTTP request smuggling via Transfer-Encoding",
+          "CweIDs": ["CWE-444"],
+          "Description": "gunicorn improperly handles conflicting Transfer-Encoding headers, enabling HTTP request smuggling."
+        },
+        {
+          "VulnerabilityID": "CVE-2023-50782",
+          "PkgName": "cryptography",
+          "InstalledVersion": "3.4.8",
+          "FixedVersion": "42.0.0",
+          "Severity": "HIGH",
+          "Title": "cryptography: Bleichenbacher timing oracle in RSA decryption",
+          "CweIDs": ["CWE-208"],
+          "Description": "A timing side channel in RSA PKCS#1 v1.5 decryption allows recovery of the plaintext (Marvin attack)."
+        },
+        {
+          "VulnerabilityID": "CVE-2022-1941",
+          "PkgName": "protobuf",
+          "InstalledVersion": "3.20.1",
+          "FixedVersion": "3.20.2",
+          "Severity": "MEDIUM",
+          "Title": "protobuf: denial of service via crafted message parsing",
+          "CweIDs": ["CWE-834"],
+          "Description": "A parsing issue in protobuf-python can lead to unbounded recursion and denial of service."
+        }
+      ]
+    },
+    {
+      "Target": "app/config (secrets)",
+      "Class": "secret",
+      "Secrets": [
+        {
+          "RuleID": "aws-access-key-id",
+          "Category": "AWS",
+          "Severity": "CRITICAL",
+          "Title": "AWS Access Key ID",
+          "StartLine": 14,
+          "EndLine": 14,
+          "Match": "aws_access_key_id = ****************"
+        },
+        {
+          "RuleID": "private-key",
+          "Category": "AsymmetricPrivateKey",
+          "Severity": "HIGH",
+          "Title": "Asymmetric Private Key",
+          "StartLine": 1,
+          "EndLine": 1,
+          "Match": "-----BEGIN RSA PRIVATE KEY-----"
+        },
+        {
+          "RuleID": "generic-api-key",
+          "Category": "GenericToken",
+          "Severity": "MEDIUM",
+          "Title": "Generic API Key",
+          "StartLine": 27,
+          "EndLine": 27,
+          "Match": "api_token = ****************"
+        }
+      ]
+    }
+  ]
+}

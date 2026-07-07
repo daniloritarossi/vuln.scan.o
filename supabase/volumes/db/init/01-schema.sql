@@ -163,5 +163,46 @@ CREATE INDEX IF NOT EXISTS idx_posture_components_asset ON public.posture_compon
 GRANT ALL ON ALL TABLES    IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 
--- 6) Ricarica la cache schema di PostgREST.
+-- 6) FINDINGS UNIFICATI (ciclo di vita ASPM): dedup per fingerprint, stati di
+--    workflow (open|triaged|accepted|fixed) e SLA di remediation.
+--    Alimentata dalla postura interna (SCA) e dai report di scanner esterni
+--    ingeriti via /api/findings/import (Trivy, Grype, Nuclei, Semgrep).
+CREATE TABLE IF NOT EXISTS public.findings (
+  id                bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  fingerprint       text NOT NULL UNIQUE,   -- identita' stabile (dedup cross-tool)
+  source            text NOT NULL,          -- posture|trivy|grype|nuclei|semgrep (o 'a+b')
+  asset_ip          text,
+  title             text,
+  package           text,
+  version           text,
+  ecosystem         text,
+  location          text,                   -- target/percorso/URL del finding
+  severity          text,                   -- CRITICAL|HIGH|MEDIUM|LOW|UNKNOWN
+  cve_ids           jsonb DEFAULT '[]'::jsonb,
+  detail            text,
+  status            text NOT NULL DEFAULT 'open',  -- open|triaged|accepted|fixed
+  status_note       text DEFAULT '',
+  status_changed_at timestamptz DEFAULT now(),
+  first_seen        timestamptz NOT NULL DEFAULT now(),
+  last_seen         timestamptz NOT NULL DEFAULT now(),
+  times_seen        integer NOT NULL DEFAULT 1,    -- osservazioni (report che lo confermano)
+  reopened          integer NOT NULL DEFAULT 0,    -- riaperture automatiche post-fixed
+  sla_due           timestamptz                    -- scadenza remediation per severita'
+);
+
+-- Compliance tagging (CWE dai report; OWASP/NIS2 derivati a runtime) e
+-- riferimento al ticket di remediation (GitHub Issue / Jira).
+ALTER TABLE public.findings
+  ADD COLUMN IF NOT EXISTS cwe_ids    jsonb DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS ticket_ref text,   -- '#42' | 'SEC-101'
+  ADD COLUMN IF NOT EXISTS ticket_url text;
+
+CREATE INDEX IF NOT EXISTS idx_findings_status   ON public.findings(status);
+CREATE INDEX IF NOT EXISTS idx_findings_asset_ip ON public.findings(asset_ip);
+CREATE INDEX IF NOT EXISTS idx_findings_severity ON public.findings(severity);
+
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+
+-- 7) Ricarica la cache schema di PostgREST.
 NOTIFY pgrst, 'reload schema';

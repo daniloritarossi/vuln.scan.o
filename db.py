@@ -356,6 +356,135 @@ def fetch_posture_sbom(run_id: Optional[int] = None):
         return None
 
 
+# ---------------------------------------------------------------------------
+# FINDINGS UNIFICATI (ciclo di vita ASPM: dedup + workflow + SLA)
+# ---------------------------------------------------------------------------
+
+def fetch_findings(limit: int = 2000):
+    """
+    Tutti i finding, piu' recenti prima (per last_seen).
+    Lista (anche vuota) se il DB risponde, None se non raggiungibile.
+    """
+    client = _get_client()
+    if client is None:
+        return None
+    try:
+        resp = (client.table("findings").select("*")
+                .order("last_seen", desc=True).limit(limit).execute())
+        return resp.data or []
+    except Exception as exc:
+        logger.warning("fetch_findings fallita: %s", exc)
+        return None
+
+
+def fetch_findings_by_fps(fps: list):
+    """Righe esistenti per i fingerprint indicati. None se DB non raggiungibile."""
+    client = _get_client()
+    if client is None:
+        return None
+    if not fps:
+        return []
+    try:
+        rows = []
+        # PostgREST limita la lunghezza dell'URL: chunk della lista IN.
+        for i in range(0, len(fps), 100):
+            resp = (client.table("findings").select("*")
+                    .in_("fingerprint", fps[i:i + 100]).execute())
+            rows.extend(resp.data or [])
+        return rows
+    except Exception as exc:
+        logger.warning("fetch_findings_by_fps fallita: %s", exc)
+        return None
+
+
+def upsert_findings(rows: list) -> bool:
+    """Upsert batch su fingerprint (dedup). True se riuscito."""
+    client = _get_client()
+    if client is None or not rows:
+        return False
+    try:
+        client.table("findings").upsert(rows, on_conflict="fingerprint").execute()
+        return True
+    except Exception as exc:
+        logger.warning("upsert_findings fallita: %s", exc)
+        return False
+
+
+def set_finding_status(finding_id: int, status: str, note: str = "") -> bool:
+    """Transizione manuale di stato dal workflow UI. True se la riga esiste."""
+    client = _get_client()
+    if client is None:
+        return False
+    try:
+        resp = client.table("findings").update({
+            "status": status,
+            "status_note": note or "",
+            "status_changed_at": "now()",
+        }).eq("id", finding_id).execute()
+        return bool(resp.data)
+    except Exception as exc:
+        logger.warning("set_finding_status fallita (id=%s): %s", finding_id, exc)
+        return False
+
+
+def fetch_finding(finding_id: int):
+    """Singolo finding per id. None se assente o DB non raggiungibile."""
+    client = _get_client()
+    if client is None:
+        return None
+    try:
+        resp = client.table("findings").select("*").eq("id", finding_id).execute()
+        return resp.data[0] if resp.data else None
+    except Exception as exc:
+        logger.warning("fetch_finding fallita (id=%s): %s", finding_id, exc)
+        return None
+
+
+def set_finding_ticket(finding_id: int, ref: str, url: str) -> bool:
+    """Salva il riferimento del ticket di remediation creato per il finding."""
+    client = _get_client()
+    if client is None:
+        return False
+    try:
+        resp = client.table("findings").update({
+            "ticket_ref": ref, "ticket_url": url,
+        }).eq("id", finding_id).execute()
+        return bool(resp.data)
+    except Exception as exc:
+        logger.warning("set_finding_ticket fallita (id=%s): %s", finding_id, exc)
+        return False
+
+
+def close_stale_posture_findings(asset_ip: str, seen_fps: list) -> int:
+    """
+    Auto-fix: i finding di postura di un asset NON riosservati nell'ultima run
+    (fingerprint assente) e ancora open/triaged passano a 'fixed'.
+    Ritorna il numero di righe chiuse (0 se DB assente o niente da chiudere).
+    """
+    client = _get_client()
+    if client is None or not asset_ip:
+        return 0
+    try:
+        resp = (client.table("findings").select("id, fingerprint, status, source")
+                .eq("asset_ip", asset_ip).in_("status", ["open", "triaged"])
+                .execute())
+        seen = set(seen_fps or [])
+        stale = [r["id"] for r in (resp.data or [])
+                 if "posture" in (r.get("source") or "")
+                 and r.get("fingerprint") not in seen]
+        if not stale:
+            return 0
+        client.table("findings").update({
+            "status": "fixed",
+            "status_note": "Auto-fixed: not detected in latest posture run",
+            "status_changed_at": "now()",
+        }).in_("id", stale).execute()
+        return len(stale)
+    except Exception as exc:
+        logger.warning("close_stale_posture_findings fallita (ip=%s): %s", asset_ip, exc)
+        return 0
+
+
 def fetch_posture_runs(limit: int = 30):
     """Elenco sintetico delle run (per il selettore storico)."""
     client = _get_client()

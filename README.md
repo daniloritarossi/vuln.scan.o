@@ -329,6 +329,11 @@ start.sh ──► encdec setup ──► wizard config.json ──► .venv + d
 | `scanner.py` | Scansione asset: banner grabbing TCP + audit SSH (con decrypt password) |
 | `cve.py` | Lookup CVE su OSV.dev + sintesi AI + remediation |
 | `posture.py` | SCA per asset: inventario pacchetti + OSV |
+| `ingest.py` | Ingestione report scanner esterni (Trivy, Grype, Nuclei, Semgrep, Gitleaks, Trufflehog) |
+| `findings.py` | Ciclo di vita finding: dedup per fingerprint, stati workflow, SLA |
+| `localscan.py` | Wrapper scanner locali opzionali: gitleaks (secrets), trivy image (vuln+secret) |
+| `compliance.py` | Tagging conformità: CWE → OWASP Top 10 2021 / NIS2 art. 21(2) |
+| `ticketing.py` | Ticket di remediation da finding: GitHub Issues / Jira Cloud |
 | `assets.py` | CRUD inventario asset su Supabase (tabella `assets`) |
 | `db.py` | Persistenza Supabase (best-effort) |
 | `config.json` | Configurazione runtime (generato dal wizard) |
@@ -377,6 +382,46 @@ SCA per asset: inventario pacchetti → OSV.dev batch → score aggregato (criti
 ### 4-bis · SBOM (`/sbom`)
 
 La pagina SBOM espone i pacchetti raccolti dall'ultima run di postura (SCA). Endpoint `GET /api/sbom` → righe `{asset_ip, package, version, ecosystem, cve_count}`. Se non esiste alcuna run di postura, ritorna `{"rows": []}`.
+
+**Export standard** — `GET /api/sbom/export?format=cyclonedx|spdx` scarica la SBOM in **CycloneDX 1.5** o **SPDX 2.3** (JSON), con purl, CPE, licenze, hash, relazioni di dipendenza e CVE associate. Interoperabile con Dependency-Track e qualunque consumer SBOM standard.
+
+### 4-ter · Findings unificati (`/findings`)
+
+Ciclo di vita ASPM completo dei finding, da qualunque sorgente:
+
+**Ingestione scanner esterni** — `POST /api/findings/import` accetta i report JSON nativi di:
+
+| Tool | Formato | Contenuto |
+|------|---------|-----------|
+| **Trivy** | `trivy ... -f json` | vulnerabilità pacchetti/immagini + secret nei layer |
+| **Grype** | `grype ... -o json` | vulnerabilità pacchetti/immagini |
+| **Nuclei** | JSON export o JSONL | finding template-based su host |
+| **Semgrep** | `semgrep --json` | finding SAST su codice |
+| **Gitleaks** | `gitleaks detect -f json` | secret hardcoded in repo/directory |
+| **Trufflehog** | `trufflehog ... --json` | secret (CRITICAL se verificata live) |
+
+Il formato è riconosciuto automaticamente (`tool=auto`) o forzabile; `asset_ip` opzionale attribuisce i finding a un asset dell'inventario. Upload anche da UI (pannello IMPORT). I valori delle secret rilevate **non** vengono mai persistiti nel finding.
+
+**Scan locale** (`POST /api/findings/scan-local`, pannello LOCAL SCAN) — se i binari sono installati sul server esegue lo scanner e ne ingerisce il report:
+
+| Tipo | Tool | Target |
+|------|------|--------|
+| `secrets` | gitleaks | directory/repo locale |
+| `image` | trivy (`--scanners vuln,secret`) | immagine container |
+
+Se il binario manca, l'endpoint torna 400 con le istruzioni di installazione (nessuna dipendenza dura).
+
+**Compliance tagging** — ogni finding riceve i riferimenti di conformità, calcolati a runtime: **CWE** (dai metadati del report), **OWASP Top 10 2021** (A01–A10, dalla mappa CWE o euristica su sorgente) e **NIS2** (misure minime dell'art. 21(2) della direttiva UE 2022/2555). La pagina `/findings` aggrega i finding aperti per voce OWASP e per misura NIS2 (barre).
+
+**Ticketing** — `POST /api/findings/{id}/ticket` crea un ticket di remediation su **GitHub Issues** o **Jira Cloud** (provider e credenziali in Settings → sezione TICKETING) e ne salva il riferimento sul finding (colonna TICKET → link). Titolo, severità, asset, CVE, SLA e fingerprint nel corpo del ticket.
+
+**Dedup per fingerprint** — identità stabile calcolata su (asset, pacchetto, CVE primaria) — o location per i finding senza CVE. La sorgente NON fa parte della chiave: lo stesso difetto riportato da Trivy **e** Grype è un solo finding (source `trivy+grype`, `times_seen` incrementato). Anche i finding della postura interna (SCA) confluiscono automaticamente nello stesso ciclo di vita a ogni run.
+
+**Stati di workflow** — `open → triaged → accepted | fixed` (transizioni libere via `PATCH /api/findings/{id}/status`, cambio inline in UI). Un finding `fixed` che riappare in un report successivo viene **riaperto automaticamente** (`reopened` incrementato). I finding di postura non più osservati nell'ultima run dell'asset vengono **auto-chiusi** (`fixed`).
+
+**SLA di remediation** — scadenza calcolata alla prima osservazione in base alla severità (default: critical 7g, high 30g, medium 90g, low 180g; configurabile in `config.json`, sezione `sla`). Badge `BREACHED` in UI se oltre scadenza e non fixed/accepted.
+
+La pagina `/findings` mostra KPI (aperti, SLA violate, triage, accettati, risolti), filtri per stato/severità/sorgente/testo e tabella con cambio stato inline.
 
 ### 5 · Gestione asset (`/assets`)
 
@@ -446,7 +491,8 @@ Stati visivi: `idle` (grigio) → `running` (cyan pulsante) → `done` (verde �
 | `/` | Dashboard: scan, console, grafo prodotti, postura |
 | `/assets` | Gestione inventario asset con cifratura password e health check SSH |
 | `/audit` | Storico scansioni salvate su Supabase |
-| `/sbom` | SBOM: pacchetti rilevati dall'ultima scansione di postura (SCA), con conteggio CVE per pacchetto |
+| `/findings` | Finding unificati: import report scanner esterni, dedup, stati workflow, SLA |
+| `/sbom` | SBOM: pacchetti rilevati dall'ultima scansione di postura (SCA), con conteggio CVE per pacchetto; export CycloneDX 1.5 / SPDX 2.3 |
 | `/intel` | Ricerca OSINT manuale su un prodotto/versione |
 | `/settings` | Configurazione AI e search engine via UI |
 
@@ -477,6 +523,22 @@ Stati visivi: `idle` (grigio) → `running` (cyan pulsante) → `done` (verde �
   "osv": {
     "url": "https://api.osv.dev/v1/query",
     "timeout": 15
+  },
+  "sla": {                          // giorni di SLA remediation per severità
+    "critical": 7,
+    "high": 30,
+    "medium": 90,
+    "low": 180,
+    "unknown": 90
+  },
+  "ticketing": {                    // ticket di remediation dai finding
+    "provider": "",                 // "github" | "jira" | "" (disabilitato)
+    "github_token": "",
+    "github_repo": "",              // "owner/repo"
+    "jira_url": "",                 // "https://org.atlassian.net"
+    "jira_email": "",
+    "jira_api_token": "",
+    "jira_project_key": ""
   }
 }
 ```
@@ -511,6 +573,8 @@ Stack: Postgres + PostgREST + Studio + nginx. Dati in `supabase/volumes/db/data`
 Schema:
 - `scans` — una riga per scansione (prodotto, versione, CVE summary)
 - `scan_results` — una riga per asset (ip, method, vuln\_match, cve\_count, cve\_ids)
+- `posture_runs` / `posture_assets` / `posture_findings` / `posture_components` — Full Posture (SCA) + SBOM
+- `findings` — finding unificati: fingerprint (dedup), source, severity, cve\_ids, cwe\_ids, status, SLA, contatori riaperture/osservazioni, ticket\_ref/ticket\_url
 
 Override env: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_PERSIST=0`.
 
@@ -525,6 +589,8 @@ Override env: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_PERSIST=0`.
 - **simulate_auth: true** (default) — nessun login SSH eseguito in fase di scan
 - **Health check SSH** — login reale solo se password cifrata (`ENC:`); plain text → SSH FAIL automatico
 - **API password** — endpoint `/api/assets/all` non espone mai la password; ritorna solo `has_password` (bool) e `password_encrypted` (bool)
+- **Token ticketing** — `github_token` e `jira_api_token` mascherati (`••••`) da `GET /api/settings`; il placeholder inviato dal frontend preserva il valore salvato
+- **Secrets scanning** — i valori delle secret rilevate (gitleaks/trufflehog/trivy) non vengono mai persistiti nel finding: solo regola, percorso e metadati non sensibili
 
 ---
 

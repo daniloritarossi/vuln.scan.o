@@ -40,6 +40,24 @@ _DEFAULTS: dict = {
         "url": "https://api.osv.dev/v1/query",
         "timeout": 15,
     },
+    # Ticketing remediation (findings -> GitHub Issues / Jira).
+    "ticketing": {
+        "provider": "",            # "github" | "jira" | "" (disabilitato)
+        "github_token": "",
+        "github_repo": "",         # "owner/repo"
+        "jira_url": "",            # "https://org.atlassian.net"
+        "jira_email": "",
+        "jira_api_token": "",
+        "jira_project_key": "",
+    },
+    # Giorni di SLA remediation per severita' (ciclo di vita findings).
+    "sla": {
+        "critical": 7,
+        "high": 30,
+        "medium": 90,
+        "low": 180,
+        "unknown": 90,
+    },
 }
 
 

@@ -94,7 +94,7 @@
     }
   </style>
   <style>body { min-height: max(884px, 100dvh); }</style>
-  <script src="/static/i18n.js?v=9"></script>
+  <script src="/static/i18n.js?v=12"></script>
 </head>
 
 <body
@@ -347,6 +347,56 @@
           </div>
         </section>
 
+        <!-- ── TICKETING ─────────────────────────────────────────── -->
+        <section class="neural-panel rounded-2xl p-6 space-y-5">
+          <div class="flex items-center gap-3 mb-1">
+            <span class="material-symbols-outlined text-cyan-500">confirmation_number</span>
+            <h3 class="font-label-caps text-label-caps text-slate-800 tracking-[0.15em]" data-i18n="settings.ticketing_title">TICKETING</h3>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-code-sm text-code-sm text-slate-700 font-semibold" data-i18n="settings.provider">Provider</p>
+              <p class="font-code-sm text-code-sm text-slate-400 mt-0.5" data-i18n="settings.ticketing_hint">Create remediation tickets from findings (page FINDINGS)</p>
+            </div>
+            <div class="flex gap-2">
+              <button id="tkOff" class="px-4 py-1.5 rounded-lg font-label-caps text-label-caps border transition-all" data-i18n="settings.ticketing_off">OFF</button>
+              <button id="tkGithub" class="px-4 py-1.5 rounded-lg font-label-caps text-label-caps border transition-all">GITHUB</button>
+              <button id="tkJira" class="px-4 py-1.5 rounded-lg font-label-caps text-label-caps border transition-all">JIRA</button>
+            </div>
+          </div>
+
+          <div id="githubBlock" class="hidden grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.gh_token">GitHub Token (PAT)</label>
+              <input id="ghToken" type="password" class="setting-input" placeholder="ghp_…" />
+            </div>
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.gh_repo">Repository</label>
+              <input id="ghRepo" type="text" class="setting-input" placeholder="owner/repo" />
+            </div>
+          </div>
+
+          <div id="jiraBlock" class="hidden grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.jira_url">Jira URL</label>
+              <input id="jiraUrl" type="text" class="setting-input" placeholder="https://org.atlassian.net" />
+            </div>
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.jira_project">Project Key</label>
+              <input id="jiraProject" type="text" class="setting-input" placeholder="SEC" />
+            </div>
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.jira_email">Email</label>
+              <input id="jiraEmail" type="text" class="setting-input" placeholder="you@example.com" />
+            </div>
+            <div class="space-y-1">
+              <label class="font-code-sm text-code-sm text-slate-600 font-semibold" data-i18n="settings.jira_token">API Token</label>
+              <input id="jiraToken" type="password" class="setting-input" />
+            </div>
+          </div>
+        </section>
+
         <!-- ── OSV ───────────────────────────────────────────────── -->
         <section class="neural-panel rounded-2xl p-6 space-y-5">
           <div class="flex items-center gap-3 mb-1">
@@ -424,6 +474,23 @@
     $('aiOllama').addEventListener('click', () => applyAiProvider('ollama'));
     $('aiClaude').addEventListener('click', () => applyAiProvider('claude'));
 
+    let tkProvider = '';
+
+    function applyTkProvider(p) {
+      tkProvider = p;
+      setProviderBtn(p,
+        [$('tkOff'), p === ''],
+        [$('tkGithub'), p === 'github'],
+        [$('tkJira'), p === 'jira']
+      );
+      $('githubBlock').classList.toggle('hidden', p !== 'github');
+      $('jiraBlock').classList.toggle('hidden', p !== 'jira');
+    }
+
+    $('tkOff').addEventListener('click', () => applyTkProvider(''));
+    $('tkGithub').addEventListener('click', () => applyTkProvider('github'));
+    $('tkJira').addEventListener('click', () => applyTkProvider('jira'));
+
     // ── Toggle (simulate auth) ─────────────────────────────────────
     function applyToggle(checked) {
       const track = $('simulateAuthTrack');
@@ -496,6 +563,15 @@
         // OSV
         $('osvUrl').value = cfg.osv?.url || '';
         $('osvTimeout').value = cfg.osv?.timeout ?? 15;
+
+        // Ticketing
+        applyTkProvider(cfg.ticketing?.provider || '');
+        $('ghToken').value = cfg.ticketing?.github_token || '';
+        $('ghRepo').value = cfg.ticketing?.github_repo || '';
+        $('jiraUrl').value = cfg.ticketing?.jira_url || '';
+        $('jiraEmail').value = cfg.ticketing?.jira_email || '';
+        $('jiraToken').value = cfg.ticketing?.jira_api_token || '';
+        $('jiraProject').value = cfg.ticketing?.jira_project_key || '';
       } catch (e) {
         showToast(t('settings.load_failed') + ' ' + e.message, false);
       }
@@ -526,6 +602,15 @@
         osv: {
           url: $('osvUrl').value,
           timeout: parseInt($('osvTimeout').value) || 15,
+        },
+        ticketing: {
+          provider: tkProvider,
+          github_token: $('ghToken').value,
+          github_repo: $('ghRepo').value,
+          jira_url: $('jiraUrl').value,
+          jira_email: $('jiraEmail').value,
+          jira_api_token: $('jiraToken').value,
+          jira_project_key: $('jiraProject').value,
         },
       };
       try {

@@ -40,10 +40,19 @@ from cve import (query_osv, summarize_cves, query_osv_ids, extract_affected_vers
                  generate_triage_report)
 from db import (persist_scan, persist_result, update_scan_summary, fetch_audit,
                 create_posture_run, persist_posture_asset, finalize_posture_run,
-                fetch_posture, fetch_posture_runs, fetch_posture_sbom)
+                fetch_posture, fetch_posture_runs, fetch_posture_sbom,
+                fetch_findings, fetch_findings_by_fps, upsert_findings,
+                set_finding_status, close_stale_posture_findings)
 from posture import scan_asset_posture
 from sbom_export import sbom_rows, build_cyclonedx, build_spdx
 from risk import assess_run_risk, compute_trend
+from ingest import ingest_report, IngestError, SUPPORTED_TOOLS
+from findings import (fingerprint, merge_findings, posture_findings,
+                      summarize, is_breached, STATUSES)
+from ticketing import create_ticket, TicketError
+from localscan import run_gitleaks, run_trivy_image, LocalScanError
+from compliance import derive_compliance, compliance_summary
+from db import fetch_finding, set_finding_ticket
 
 BASE_DIR = Path(__file__).parent
 ASSETS_FILE = BASE_DIR / "assets.txt"
@@ -131,6 +140,176 @@ def api_sbom_export(format: str = "cyclonedx", run_id: int | None = None):
     })
 
 
+@app.get("/findings", response_class=HTMLResponse)
+def findings_page(request: Request):
+    """Pagina FINDINGS: ciclo di vita unificato (dedup + workflow + SLA)."""
+    return templates.TemplateResponse("findings.html", {"request": request})
+
+
+@app.get("/api/findings")
+def api_findings(status: str | None = None, severity: str | None = None,
+                 source: str | None = None, q: str | None = None):
+    """
+    Elenco finding unificati + aggregati per la UI.
+    Filtri opzionali: status, severity, source (substring), q (testo libero).
+    503 se il DB non e' raggiungibile.
+    """
+    rows = fetch_findings()
+    if rows is None:
+        return JSONResponse({"error": "Supabase unreachable", "findings": []},
+                            status_code=503)
+    summary = summarize(rows)   # aggregati sull'intero dataset, non sul filtro
+    if status:
+        rows = [r for r in rows if (r.get("status") or "open") == status]
+    if severity:
+        rows = [r for r in rows if (r.get("severity") or "").upper() == severity.upper()]
+    if source:
+        rows = [r for r in rows if source.lower() in (r.get("source") or "").lower()]
+    if q:
+        ql = q.lower()
+        rows = [r for r in rows if ql in json.dumps(r, default=str).lower()]
+    for r in rows:
+        r["sla_breached"] = is_breached(r)
+        r["compliance"] = derive_compliance(r)
+    summary["compliance"] = compliance_summary(rows)
+    return {"findings": rows, "summary": summary}
+
+
+@app.post("/api/findings/import")
+async def api_findings_import(request: Request, tool: str = "auto",
+                              asset_ip: str = ""):
+    """
+    Ingestione di un report di scanner ESTERNO (capability ASPM: aggregazione).
+    Body: JSON grezzo del report (Trivy/Grype/Semgrep JSON, Nuclei JSON/JSONL).
+    'tool' forza il parser ('auto' = riconoscimento dal contenuto).
+    'asset_ip' (opzionale) attribuisce i finding a un asset dell'inventario.
+    I finding confluiscono nel ciclo di vita unificato: dedup per fingerprint,
+    riapertura automatica dei 'fixed' riapparsi, SLA per severita'.
+    """
+    raw = await request.body()
+    try:
+        detected, normalized = ingest_report(raw, tool=tool, asset_ip=asset_ip)
+    except IngestError as exc:
+        return JSONResponse({"error": str(exc),
+                             "supported": list(SUPPORTED_TOOLS)}, status_code=400)
+    if not normalized:
+        return {"ok": True, "tool": detected, "parsed": 0,
+                "new": 0, "updated": 0, "reopened": 0}
+    fps = [fingerprint(f) for f in normalized]
+    existing = fetch_findings_by_fps(list(set(fps)))
+    if existing is None:
+        return JSONResponse({"error": "Supabase unreachable"}, status_code=503)
+    rows, stats = merge_findings(normalized, {r["fingerprint"]: r for r in existing},
+                                 cfg_sla=load_config().get("sla"))
+    if not upsert_findings(rows):
+        return JSONResponse({"error": "Persistenza fallita"}, status_code=503)
+    return {"ok": True, "tool": detected, "parsed": len(normalized), **stats}
+
+
+@app.patch("/api/findings/{finding_id}/status")
+async def api_findings_status(finding_id: int, request: Request):
+    """
+    Transizione di stato del workflow. Body: {status, note?}.
+    Stati validi: open | triaged | accepted | fixed.
+    """
+    body = await request.json()
+    status = (body.get("status") or "").strip().lower()
+    if status not in STATUSES:
+        return JSONResponse(
+            {"error": f"Stato non valido: {status}", "valid": list(STATUSES)},
+            status_code=400)
+    if not set_finding_status(finding_id, status, (body.get("note") or "").strip()):
+        return JSONResponse({"error": "Invalid id or DB unreachable"}, status_code=404)
+    return {"ok": True, "status": status}
+
+
+@app.post("/api/findings/{finding_id}/ticket")
+def api_findings_ticket(finding_id: int):
+    """
+    Crea un ticket di remediation (GitHub Issue / Jira) per il finding e ne
+    salva il riferimento. Provider e credenziali in config.json ('ticketing').
+    """
+    f = fetch_finding(finding_id)
+    if f is None:
+        return JSONResponse({"error": "Finding non trovato o DB non raggiungibile"},
+                            status_code=404)
+    if f.get("ticket_url"):
+        return {"ok": True, "already": True,
+                "ref": f.get("ticket_ref"), "url": f.get("ticket_url")}
+    try:
+        ticket = create_ticket(load_config().get("ticketing") or {}, f)
+    except TicketError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=400)
+    set_finding_ticket(finding_id, ticket["ref"], ticket["url"])
+    return {"ok": True, "already": False, **ticket}
+
+
+@app.post("/api/findings/scan-local")
+async def api_findings_scan_local(request: Request):
+    """
+    Esegue uno scanner LOCALE (binario opzionale sul server) e ne ingerisce
+    il report nel ciclo di vita unificato.
+    Body: {"type": "secrets" | "image", "target": "<path|image-ref>",
+           "asset_ip": "<opzionale>"}.
+      - secrets -> gitleaks sulla directory 'target'
+      - image   -> trivy (vuln + secret) sull'immagine container 'target'
+    """
+    body = await request.json()
+    scan_type = (body.get("type") or "").strip().lower()
+    target = (body.get("target") or "").strip()
+    asset_ip = (body.get("asset_ip") or "").strip()
+    if not target:
+        return JSONResponse({"error": "Missing target"}, status_code=400)
+    try:
+        if scan_type == "secrets":
+            raw, tool = run_gitleaks(target), "gitleaks"
+        elif scan_type == "image":
+            raw, tool = run_trivy_image(target), "trivy"
+        else:
+            return JSONResponse(
+                {"error": f"Tipo non valido: {scan_type} (secrets|image)"},
+                status_code=400)
+    except LocalScanError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=400)
+    try:
+        _, normalized = ingest_report(raw, tool=tool, asset_ip=asset_ip or target)
+    except IngestError as exc:
+        return JSONResponse({"error": f"Parsing report {tool}: {exc}"}, status_code=502)
+    if not normalized:
+        return {"ok": True, "tool": tool, "parsed": 0,
+                "new": 0, "updated": 0, "reopened": 0}
+    fps = [fingerprint(f) for f in normalized]
+    existing = fetch_findings_by_fps(list(set(fps)))
+    if existing is None:
+        return JSONResponse({"error": "Supabase unreachable"}, status_code=503)
+    rows, stats = merge_findings(normalized, {r["fingerprint"]: r for r in existing},
+                                 cfg_sla=load_config().get("sla"))
+    if not upsert_findings(rows):
+        return JSONResponse({"error": "Persistenza fallita"}, status_code=503)
+    return {"ok": True, "tool": tool, "parsed": len(normalized), **stats}
+
+
+def _sync_posture_findings(report: dict) -> None:
+    """
+    Best-effort: versa i finding della postura di UN asset nel ciclo di vita
+    unificato (dedup/riapertura) e auto-chiude quelli non piu' osservati.
+    Non solleva mai: la scansione di postura non dipende da questo passo.
+    """
+    try:
+        normalized = posture_findings(report)
+        fps = [fingerprint(f) for f in normalized]
+        existing = fetch_findings_by_fps(list(set(fps)))
+        if existing is None:
+            return
+        rows, _ = merge_findings(normalized, {r["fingerprint"]: r for r in existing},
+                                 cfg_sla=load_config().get("sla"))
+        if rows:
+            upsert_findings(rows)
+        close_stale_posture_findings(report.get("ip") or "", fps)
+    except Exception:
+        pass
+
+
 @app.get("/intel", response_class=HTMLResponse)
 def intel_page(request: Request):
     """Pagina INTEL: dashboard Full Posture (ASPM-style)."""
@@ -159,6 +338,10 @@ def api_settings_get():
         masked["ai"]["claude_api_key"] = "••••••••"
     if masked.get("search_engine", {}).get("serper_api_key"):
         masked["search_engine"]["serper_api_key"] = "••••••••"
+    if masked.get("ticketing", {}).get("github_token"):
+        masked["ticketing"]["github_token"] = "••••••••"
+    if masked.get("ticketing", {}).get("jira_api_token"):
+        masked["ticketing"]["jira_api_token"] = "••••••••"
     return masked
 
 
@@ -242,6 +425,8 @@ def api_posture_scan(ips: str | None = None):
             report["os_type"] = asset.os_type or None
             report["os_major_version"] = asset.os_major_version or None
             persist_posture_asset(run_id, report)
+            # Ciclo di vita unificato: dedup + riaperture + auto-fix (best-effort).
+            _sync_posture_findings(report)
             n += 1
             pkgs += report["total_packages"]
             vuln += report["vulnerable_packages"]
