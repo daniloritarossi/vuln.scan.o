@@ -7,7 +7,7 @@ Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · risultati in tempo 
 > ⚠️ **Uso responsabile.** Eseguire scansioni o login solo su asset di propria titolarità o per cui si dispone di autorizzazione scritta. Scansionare sistemi terzi senza permesso è illecito.
 
 ![Home](static/screens/home1.png)
-
+![Home](static/screens/home2.png)
 ---
 
 ## Installazione
