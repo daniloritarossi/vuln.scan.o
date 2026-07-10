@@ -67,6 +67,55 @@ _preflight() {
 }
 _preflight
 
+# ── Ollama: installazione, avvio e verifica modello (LLM di default) ─────────
+# Usata dal wizard AI e dal precheck a ogni avvio. Se URL locale: installa
+# ollama (script ufficiale) e avvia il server se serve. In ogni caso: pull del
+# modello se assente e verifica finale via /api/tags.
+
+_ensure_ollama() {
+  # _ensure_ollama URL MODEL
+  local _url="$1" _model="$2"
+  local _base="${_url%/api/generate}"
+  local _is_local=0
+  case "$_base" in *localhost*|*127.0.0.1*) _is_local=1 ;; esac
+
+  # URL locale + binario assente -> installazione automatica (script ufficiale)
+  if [ "$_is_local" = "1" ] && ! command -v ollama >/dev/null 2>&1; then
+    printf '  Ollama non installato — installo (script ufficiale ollama.com, sudo richiesto).\n' >&2
+    curl -fsSL https://ollama.com/install.sh | sh >&2 \
+      || printf '  ⚠  Installazione fallita — installa manualmente: https://ollama.com/download\n' >&2
+  fi
+
+  # server locale installato ma non attivo -> avvialo in background
+  if [ "$_is_local" = "1" ] && command -v ollama >/dev/null 2>&1 \
+     && ! curl -sf --max-time 3 "$_base" >/dev/null 2>&1; then
+    printf '  ==> avvio ollama serve (background)...\n' >&2
+    (ollama serve >/dev/null 2>&1 &)
+    sleep 2
+  fi
+
+  # verifica raggiungibilità + presenza modello (via /api/tags)
+  if curl -sf --max-time 3 "$_base" >/dev/null 2>&1; then
+    printf '  ✓  Ollama raggiungibile.\n' >&2
+    if ! curl -sf --max-time 5 "$_base/api/tags" 2>/dev/null | grep -q "\"$_model"; then
+      if command -v ollama >/dev/null 2>&1; then
+        printf '  ==> ollama pull %s\n' "$_model" >&2
+        ollama pull "$_model" >&2 \
+          || printf '  ⚠  pull fallito — esegui manualmente: ollama pull %s\n' "$_model" >&2
+      else
+        printf '  ⚠  Modello assente sul server remoto: esegui li'"'"' "ollama pull %s".\n' "$_model" >&2
+      fi
+    fi
+    if curl -sf --max-time 5 "$_base/api/tags" 2>/dev/null | grep -q "\"$_model"; then
+      printf '  ✓  Modello %s presente.\n' "$_model" >&2
+    else
+      printf '  ⚠  Modello %s NON verificato — le funzioni AI falliranno finche'"'"' non e'"'"' disponibile.\n' "$_model" >&2
+    fi
+  else
+    printf '  ⚠  Ollama non raggiungibile a %s\n     Assicurati che sia avviato prima di usare le funzioni AI.\n' "$_base" >&2
+  fi
+}
+
 # ── UI helpers ────────────────────────────────────────────────────────────────
 
 _ask() {
@@ -186,45 +235,7 @@ _wizard_ai() {
     _model=$(_ask "Modello Ollama" "qwen2.5:7b")
     _json_write "ai.provider=ollama" "ai.ollama_url=$_url" "ai.ollama_model=$_model"
     printf '  ✓  Provider: Ollama (%s)\n' "$_model" >&2
-    local _base="${_url%/api/generate}"
-    local _is_local=0
-    case "$_base" in *localhost*|*127.0.0.1*) _is_local=1 ;; esac
-
-    # URL locale + binario assente -> installazione automatica (script ufficiale)
-    if [ "$_is_local" = "1" ] && ! command -v ollama >/dev/null 2>&1; then
-      printf '  Ollama non installato — installo (script ufficiale ollama.com, sudo richiesto).\n' >&2
-      curl -fsSL https://ollama.com/install.sh | sh >&2 \
-        || printf '  ⚠  Installazione fallita — installa manualmente: https://ollama.com/download\n' >&2
-    fi
-
-    # server locale installato ma non attivo -> avvialo in background
-    if [ "$_is_local" = "1" ] && command -v ollama >/dev/null 2>&1 \
-       && ! curl -sf --max-time 3 "$_base" >/dev/null 2>&1; then
-      printf '  ==> avvio ollama serve (background)...\n' >&2
-      (ollama serve >/dev/null 2>&1 &)
-      sleep 2
-    fi
-
-    # verifica raggiungibilità + presenza modello (via /api/tags)
-    if curl -sf --max-time 3 "$_base" >/dev/null 2>&1; then
-      printf '  ✓  Ollama raggiungibile.\n' >&2
-      if ! curl -sf --max-time 5 "$_base/api/tags" 2>/dev/null | grep -q "\"$_model"; then
-        if command -v ollama >/dev/null 2>&1; then
-          printf '  ==> ollama pull %s\n' "$_model" >&2
-          ollama pull "$_model" >&2 \
-            || printf '  ⚠  pull fallito — esegui manualmente: ollama pull %s\n' "$_model" >&2
-        else
-          printf '  ⚠  Modello assente sul server remoto: esegui li'"'"' "ollama pull %s".\n' "$_model" >&2
-        fi
-      fi
-      if curl -sf --max-time 5 "$_base/api/tags" 2>/dev/null | grep -q "\"$_model"; then
-        printf '  ✓  Modello %s presente.\n' "$_model" >&2
-      else
-        printf '  ⚠  Modello %s NON verificato — le funzioni AI falliranno finche'"'"' non e'"'"' disponibile.\n' "$_model" >&2
-      fi
-    else
-      printf '  ⚠  Ollama non raggiungibile a %s\n     Assicurati che sia avviato prima di usare le funzioni AI.\n' "$_base" >&2
-    fi
+    _ensure_ollama "$_url" "$_model"
   else
     local _key _model
     _key=$(_ask_secret "Claude API Key")
@@ -728,6 +739,18 @@ elif [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 [ "$LAUNCH_APP" = "0" ] && exit 0
+
+# ── 0b) Precheck AI: ollama + LLM di default presenti a ogni avvio ────────────
+
+AI_PROV=$(_json_read ai provider)
+if [ "$AI_PROV" = "ollama" ] || [ -z "$AI_PROV" ]; then
+  _OLL_URL=$(_json_read ai ollama_url)
+  _OLL_MODEL=$(_json_read ai ollama_model)
+  _OLL_URL="${_OLL_URL:-http://localhost:11434/api/generate}"
+  _OLL_MODEL="${_OLL_MODEL:-qwen2.5:7b}"
+  echo "==> precheck AI: ollama + modello ${_OLL_MODEL}"
+  _ensure_ollama "$_OLL_URL" "$_OLL_MODEL"
+fi
 
 # ── 1) Virtualenv + dipendenze ────────────────────────────────────────────────
 

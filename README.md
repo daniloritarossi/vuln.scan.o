@@ -16,7 +16,7 @@ Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · real-time results v
 Requires: **Python 3.10+**, `pip`, `venv`, `curl`, `git`, **Docker** (with the `docker compose` v2 plugin), **Go ≥ 1.21** (to build `encdec`).
 On Debian/Ubuntu: `sudo apt install python3-pip python3-venv curl git golang docker-compose-plugin`
 
-**Missing dependencies are installed automatically.** At every launch `start.sh` runs a preflight on `python3`/`venv`/`curl`/`git` and, before using them, checks Go (≥ 1.21), Docker (binary + running daemon) and the `docker compose` v2 plugin: anything missing is installed via `apt` (sudo prompt) — if `apt` is unavailable or the install fails, the script aborts with manual instructions. **Ollama** does not need to be pre-installed either: if the AI wizard points at a local URL and the binary is missing, it is installed via the official `ollama.com` script, the server is started if needed, the chosen model (default `qwen2.5:7b`) is pulled and its availability verified via `/api/tags`.
+**Missing dependencies are installed automatically.** At every launch `start.sh` runs a preflight on `python3`/`venv`/`curl`/`git` and, before using them, checks Go (≥ 1.21), Docker (binary + running daemon) and the `docker compose` v2 plugin: anything missing is installed via `apt` (sudo prompt) — if `apt` is unavailable or the install fails, the script aborts with manual instructions. **Ollama and the default LLM** do not need to be pre-installed either: at **every launch** (not just the first-run wizard), if the configured AI provider is Ollama with a local URL, the script installs Ollama via the official `ollama.com` script if missing, starts the server if needed, pulls the configured model (default `qwen2.5:7b`) if absent and verifies via `/api/tags` that it is actually available.
 
 ### First run (interactive wizard)
 
@@ -52,6 +52,7 @@ start.sh
  │     ├─ Search engine  ──► DuckDuckGo    |  Serper
  │     └─ Docker test    ──► creates a vulnerable Linux machine (optional)
  │
+ ├─ 2b) AI precheck      ──► provider ollama: install ollama + pull default LLM (qwen2.5:7b) if missing
  ├─ 3) Virtualenv        ──► creates .venv, installs requirements.txt
  ├─ 4) Supabase          ──► starts Docker stack (skippable with --no-supabase)
  └─ 5) FastAPI           ──► exec uvicorn app:app --host 127.0.0.1 --port $PORT
