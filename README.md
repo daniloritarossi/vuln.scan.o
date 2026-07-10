@@ -16,7 +16,7 @@ Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · real-time results v
 Requires: **Python 3.10+**, `pip`, `venv`, `curl`, `git`, **Docker** (with the `docker compose` v2 plugin), **Go ≥ 1.21** (to build `encdec`).
 On Debian/Ubuntu: `sudo apt install python3-pip python3-venv curl git golang docker-compose-plugin`
 
-**Missing dependencies are installed automatically.** At every launch `start.sh` runs a preflight on `python3`/`venv`/`curl`/`git` and, before using them, checks Go (≥ 1.21), Docker (binary + running daemon) and the `docker compose` v2 plugin: anything missing is installed via `apt` (sudo prompt) — if `apt` is unavailable or the install fails, the script aborts with manual instructions. **Ollama and the default LLM** do not need to be pre-installed either: at **every launch** (not just the first-run wizard), if the configured AI provider is Ollama with a local URL, the script installs Ollama via the official `ollama.com` script if missing, starts the server if needed, pulls the configured model (default `qwen2.5:7b`) if absent and verifies via `/api/tags` that it is actually available.
+**Missing dependencies are installed automatically.** At every launch `start.sh` runs a preflight on `python3`/`venv`/`curl`/`git` and, before using them, checks Go (≥ 1.21), Docker (binary + running daemon) and the `docker compose` v2 plugin: anything missing is installed via `apt` (sudo prompt) — if `apt` is unavailable or the install fails, the script aborts with manual instructions. **Ollama and the default LLM** do not need to be pre-installed either. In the wizard, choosing the local provider asks **whether to install Ollama** (official `ollama.com` script) and **which model to use**: `qwen2.5:7b` (default), `llama3.1:8b`, `mistral:7b` or any custom name. The choice is saved in `config.json` (`ai.ollama_autoinstall`, `ai.ollama_model`). Then at **every launch**, if the provider is Ollama with a local URL, the script installs Ollama if missing (unless the user opted out in the wizard), starts the server if needed, pulls the configured model if absent and verifies via `/api/tags` that it is actually available.
 
 ### First run (interactive wizard)
 
@@ -74,7 +74,7 @@ On first run (no `config.json`) the wizard asks for:
 
 1. **encdec secret prefix** — entered once; compiled into the binary (see the Password Encryption section)
 2. **AI model**:
-   - `Local` → Ollama (auto-installs if missing, starts the server, runs `ollama pull`, verifies the model via `/api/tags`)
+   - `Local` → Ollama: asks whether to install it if missing, model menu (`qwen2.5:7b` default, `llama3.1:8b`, `mistral:7b`, or custom), then starts the server, runs `ollama pull`, verifies the model via `/api/tags`
    - `Remote` → Claude API (requires API key)
 3. **OSINT search engine**:
    - `DuckDuckGo` — free, no API key

@@ -73,17 +73,24 @@ _preflight
 # modello se assente e verifica finale via /api/tags.
 
 _ensure_ollama() {
-  # _ensure_ollama URL MODEL
-  local _url="$1" _model="$2"
+  # _ensure_ollama URL MODEL [INSTALL]
+  # INSTALL=1 (default): installa ollama se assente. INSTALL=0: non installare
+  # (scelta dell'utente nel wizard, salvata in ai.ollama_autoinstall).
+  local _url="$1" _model="$2" _install="${3:-1}"
   local _base="${_url%/api/generate}"
   local _is_local=0
   case "$_base" in *localhost*|*127.0.0.1*) _is_local=1 ;; esac
 
-  # URL locale + binario assente -> installazione automatica (script ufficiale)
+  # URL locale + binario assente -> installazione (script ufficiale), se consentita
   if [ "$_is_local" = "1" ] && ! command -v ollama >/dev/null 2>&1; then
-    printf '  Ollama non installato — installo (script ufficiale ollama.com, sudo richiesto).\n' >&2
-    curl -fsSL https://ollama.com/install.sh | sh >&2 \
-      || printf '  ⚠  Installazione fallita — installa manualmente: https://ollama.com/download\n' >&2
+    if [ "$_install" = "1" ]; then
+      printf '  Ollama non installato — installo (script ufficiale ollama.com, sudo richiesto).\n' >&2
+      curl -fsSL https://ollama.com/install.sh | sh >&2 \
+        || printf '  ⚠  Installazione fallita — installa manualmente: https://ollama.com/download\n' >&2
+    else
+      printf '  ⚠  Ollama assente e installazione automatica disabilitata (scelta wizard).\n' >&2
+      printf '     Per cambiare: ./start.sh update -> AI provider.\n' >&2
+    fi
   fi
 
   # server locale installato ma non attivo -> avvialo in background
@@ -186,7 +193,7 @@ DEFAULTS = {
     "ai": {
         "provider": "ollama",
         "ollama_url": "http://localhost:11434/api/generate",
-        "ollama_model": "qwen2.5:7b",
+        "ollama_model": "qwen2.5:7b", "ollama_autoinstall": True,
         "claude_api_key": "", "claude_model": "claude-haiku-4-5-20251001",
         "summary_timeout": 60, "advisory_timeout": 60,
         "extract_timeout": 30, "remediation_timeout": 30,
@@ -230,12 +237,43 @@ _wizard_ai() {
     "Remoto — Claude API (Anthropic, richiede API key)")
 
   if [ "$_c" = "1" ]; then
-    local _url _model
-    _url=$(_ask   "Ollama URL"     "http://localhost:11434/api/generate")
-    _model=$(_ask "Modello Ollama" "qwen2.5:7b")
-    _json_write "ai.provider=ollama" "ai.ollama_url=$_url" "ai.ollama_model=$_model"
+    local _url _model _install=1
+    _url=$(_ask "Ollama URL" "http://localhost:11434/api/generate")
+
+    # scelta modello LLM: default qwen2.5:7b, alternative comuni o nome libero
+    local _mc
+    _mc=$(_choose "Quale modello LLM usare? (default: qwen2.5:7b)" \
+      "qwen2.5:7b   — Qwen 2.5 7B (consigliato, ~4.7 GB)" \
+      "llama3.1:8b  — Meta Llama 3.1 8B (~4.9 GB)" \
+      "mistral:7b   — Mistral 7B (~4.1 GB)" \
+      "Altro        — inserisci il nome del modello (es. gemma2:9b)")
+    case "$_mc" in
+      1) _model="qwen2.5:7b"  ;;
+      2) _model="llama3.1:8b" ;;
+      3) _model="mistral:7b"  ;;
+      4) _model=$(_ask "Nome modello Ollama" "qwen2.5:7b") ;;
+    esac
+
+    # se URL locale e ollama assente: chiedi se installarlo
+    case "$_url" in
+      *localhost*|*127.0.0.1*)
+        if ! command -v ollama >/dev/null 2>&1; then
+          local _yn
+          _yn=$(_ask "Ollama non e' installato. Installarlo ora? (s/n)" "s")
+          case "$_yn" in
+            s|S|y|Y) _install=1 ;;
+            *)       _install=0
+                     printf '  ⚠  Installazione saltata — funzioni AI inattive finche'"'"' Ollama manca.\n' >&2 ;;
+          esac
+        fi
+        ;;
+    esac
+
+    local _auto="false"; [ "$_install" = "1" ] && _auto="true"
+    _json_write "ai.provider=ollama" "ai.ollama_url=$_url" \
+                "ai.ollama_model=$_model" "ai.ollama_autoinstall=$_auto"
     printf '  ✓  Provider: Ollama (%s)\n' "$_model" >&2
-    _ensure_ollama "$_url" "$_model"
+    _ensure_ollama "$_url" "$_model" "$_install"
   else
     local _key _model
     _key=$(_ask_secret "Claude API Key")
@@ -748,8 +786,11 @@ if [ "$AI_PROV" = "ollama" ] || [ -z "$AI_PROV" ]; then
   _OLL_MODEL=$(_json_read ai ollama_model)
   _OLL_URL="${_OLL_URL:-http://localhost:11434/api/generate}"
   _OLL_MODEL="${_OLL_MODEL:-qwen2.5:7b}"
+  # rispetta la scelta fatta nel wizard (ai.ollama_autoinstall)
+  _OLL_INST=1
+  [ "$(_json_read ai ollama_autoinstall)" = "False" ] && _OLL_INST=0
   echo "==> precheck AI: ollama + modello ${_OLL_MODEL}"
-  _ensure_ollama "$_OLL_URL" "$_OLL_MODEL"
+  _ensure_ollama "$_OLL_URL" "$_OLL_MODEL" "$_OLL_INST"
 fi
 
 # ── 1) Virtualenv + dipendenze ────────────────────────────────────────────────
