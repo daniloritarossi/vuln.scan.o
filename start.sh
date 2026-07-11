@@ -25,18 +25,67 @@ for _arg in "$@"; do
 done
 
 # ── Preflight: dipendenze di sistema richieste da wizard/encdec/venv ─────────
-# Se mancano, tenta l'installazione automatica via apt (sudo). Fallback: hint.
+# Se mancano, tenta l'installazione automatica col package manager della
+# distro (apt/dnf/yum/apk/pacman/zypper). Fallback: hint manuale.
 
-_apt_install() {
-  # _apt_install pkg... → true se installazione riuscita
-  if ! command -v apt-get >/dev/null 2>&1; then
-    printf 'apt non disponibile — installa manualmente: %s\n' "$*" >&2
+_pkg_mgr() {
+  local _m
+  for _m in apt-get dnf yum apk pacman zypper; do
+    command -v "$_m" >/dev/null 2>&1 && { echo "$_m"; return 0; }
+  done
+  return 1
+}
+
+_pkg_map() {
+  # _pkg_map MGR nome-logico → nome pacchetto per quel manager.
+  # I nomi logici usati nello script sono quelli Debian.
+  local _mgr="$1" _p="$2"
+  case "$_mgr:$_p" in
+    apt-get:*)                    echo "$_p" ;;
+    pacman:python3|pacman:python3-venv)
+                                  echo "python" ;;
+    *:python3-venv)               echo "python3" ;;  # venv incluso fuori da Debian
+    dnf:golang|yum:golang)        echo "golang" ;;
+    *:golang)                     echo "go" ;;
+    dnf:docker.io|yum:docker.io)  echo "moby-engine" ;;
+    *:docker.io)                  echo "docker" ;;
+    apk:docker-compose-plugin|apk:docker-compose-v2)
+                                  echo "docker-cli-compose" ;;
+    *:docker-compose-plugin|*:docker-compose-v2)
+                                  echo "docker-compose" ;;
+    *)                            echo "$_p" ;;
+  esac
+}
+
+_pkg_install() {
+  # _pkg_install pkg... (nomi logici stile Debian) → true se installazione riuscita
+  local _mgr _sudo="" _p _pkgs=()
+  if ! _mgr="$(_pkg_mgr)"; then
+    printf 'Nessun package manager noto (apt/dnf/yum/apk/pacman/zypper) — installa manualmente: %s\n' "$*" >&2
     return 1
   fi
-  printf '==> installo automaticamente: %s (sudo richiesto)\n' "$*" >&2
-  sudo apt-get update -qq >&2 || true
-  sudo apt-get install -y "$@" >&2
+  if [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1; then
+      _sudo="sudo"
+    else
+      printf 'Servono privilegi root e sudo non e'"'"' installato — esegui da root: %s install %s\n' "$_mgr" "$*" >&2
+      return 1
+    fi
+  fi
+  for _p in "$@"; do _pkgs+=("$(_pkg_map "$_mgr" "$_p")"); done
+  printf '==> installo automaticamente (%s): %s\n' "$_mgr" "${_pkgs[*]}" >&2
+  case "$_mgr" in
+    apt-get) $_sudo apt-get update -qq >&2 || true
+             $_sudo apt-get install -y "${_pkgs[@]}" >&2 ;;
+    dnf|yum) $_sudo "$_mgr" install -y "${_pkgs[@]}" >&2 ;;
+    apk)     $_sudo apk add "${_pkgs[@]}" >&2 ;;
+    pacman)  $_sudo pacman -Sy --noconfirm "${_pkgs[@]}" >&2 ;;
+    zypper)  $_sudo zypper --non-interactive install "${_pkgs[@]}" >&2 ;;
+  esac
 }
+
+# retrocompatibilità con i call-site esistenti
+_apt_install() { _pkg_install "$@"; }
 
 _preflight() {
   local _missing=()
@@ -49,7 +98,7 @@ _preflight() {
 
   printf 'Dipendenze di sistema mancanti: %s\n' "${_missing[*]}" >&2
   if ! _apt_install "${_missing[@]}"; then
-    printf 'ERRORE: installazione fallita. Manuale: sudo apt install %s\n' "${_missing[*]}" >&2
+    printf 'ERRORE: installazione fallita. Installa manualmente col package manager della distro: %s\n' "${_missing[*]}" >&2
     exit 1
   fi
   # ricontrollo post-install
@@ -711,7 +760,7 @@ if [ ! -x "$ENCDEC_BIN" ]; then
     [ "$_maj" -gt 1 ] || { [ "$_maj" -eq 1 ] && [ "$_min" -ge 21 ]; }
   }
   if ! _go_ok; then
-    printf '  Go >= 1.21 non trovato — provo installazione automatica (apt).\n' >&2
+    printf '  Go >= 1.21 non trovato — provo installazione automatica (package manager).\n' >&2
     _apt_install golang || true
     if ! _go_ok; then
       printf '  ERRORE: Go >= 1.21 non disponibile. Installa manualmente da https://go.dev/dl/\n' >&2
@@ -809,7 +858,7 @@ echo "==> installo/aggiorno dipendenze (requirements.txt)"
 
 if [ "$WITH_SUPABASE" = "1" ]; then
   if ! command -v docker >/dev/null 2>&1; then
-    echo "Docker non installato — provo installazione automatica (apt)." >&2
+    echo "Docker non installato — provo installazione automatica (package manager)." >&2
     _apt_install docker.io || true
     if ! command -v docker >/dev/null 2>&1; then
       echo "ERRORE: Docker non installabile automaticamente. Vedi https://docs.docker.com/engine/install/" >&2
@@ -817,8 +866,11 @@ if [ "$WITH_SUPABASE" = "1" ]; then
     fi
   fi
   if ! docker info >/dev/null 2>&1; then
-    echo "==> Docker daemon fermo — provo ad avviarlo (sudo systemctl start docker)" >&2
-    sudo systemctl start docker >/dev/null 2>&1 || true
+    echo "==> Docker daemon fermo — provo ad avviarlo" >&2
+    _sv=""; [ "$(id -u)" -ne 0 ] && _sv="sudo"
+    $_sv systemctl start docker >/dev/null 2>&1 \
+      || $_sv service docker start >/dev/null 2>&1 \
+      || $_sv rc-service docker start >/dev/null 2>&1 || true
     sleep 2
     if ! docker info >/dev/null 2>&1; then
       echo "ERRORE: Docker non in esecuzione o permessi mancanti." >&2
@@ -830,7 +882,7 @@ if [ "$WITH_SUPABASE" = "1" ]; then
     echo "Plugin 'docker compose' (v2) mancante — provo installazione automatica." >&2
     _apt_install docker-compose-plugin || _apt_install docker-compose-v2 || true
     if ! docker compose version >/dev/null 2>&1; then
-      echo "ERRORE: plugin 'docker compose' v2 non installabile. Manuale: sudo apt install docker-compose-v2" >&2
+      echo "ERRORE: plugin 'docker compose' v2 non installabile. Installa manualmente il plugin compose v2 per la tua distro." >&2
       exit 1
     fi
   fi
