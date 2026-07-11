@@ -134,6 +134,8 @@ _ensure_ollama() {
   if [ "$_is_local" = "1" ] && ! command -v ollama >/dev/null 2>&1; then
     if [ "$_install" = "1" ]; then
       printf '  Ollama non installato — installo (script ufficiale ollama.com, sudo richiesto).\n' >&2
+      # l'installer ollama richiede zstd per estrarre l'archivio
+      command -v zstd >/dev/null 2>&1 || _pkg_install zstd || true
       curl -fsSL https://ollama.com/install.sh | sh >&2 \
         || printf '  ⚠  Installazione fallita — installa manualmente: https://ollama.com/download\n' >&2
     else
