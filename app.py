@@ -41,7 +41,7 @@ from osint import identify_product, extract_local
 from scanner import scan_asset, _get_simulate_auth as _simulate_auth, version_affected
 from cve import (query_osv, summarize_cves, query_osv_ids, extract_affected_version,
                  query_osv_ecosystem, os_ecosystem, generate_remediation,
-                 generate_triage_report)
+                 generate_triage_report, compute_fix_plan)
 from db import (persist_scan, persist_result, update_scan_summary, fetch_audit,
                 create_posture_run, persist_posture_asset, finalize_posture_run,
                 fetch_posture, fetch_posture_runs, fetch_posture_sbom,
@@ -807,6 +807,14 @@ def api_posture_cve(package: str, ecosystem: str | None = None,
                     user: CurrentUser = Depends(get_current_user)):
     """Lista COMPLETA di id CVE per (pacchetto, ecosistema, versione) — 'show more' posture."""
     return query_osv_ecosystem(package, ecosystem, version)
+
+
+@app.get("/api/posture/fixplan")
+def api_posture_fixplan(package: str, ecosystem: str | None = None,
+                        version: str | None = None,
+                        user: CurrentUser = Depends(get_current_user)):
+    """Fix plan OSV: per-CVE versione 'fixed' + versione minima che risolve tutto (resolver UI)."""
+    return compute_fix_plan(package, ecosystem, version)
 
 
 @app.get("/api/posture")

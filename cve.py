@@ -182,6 +182,92 @@ def query_osv_ecosystem(name: str, ecosystem: str | None, version: str | None,
         return {"count": 0, "ids": [], "error": str(exc)}
 
 
+def _ver_key(v: str):
+    """
+    Chiave di ordinamento tollerante per versioni eterogenee (semver, Debian
+    con epoch '1:2.4.62-1', suffissi alfanumerici). Non e' un comparatore
+    perfetto per ogni schema, ma e' monotono sui casi reali OSV: epoch prima,
+    poi token numerici/alfabetici in sequenza.
+    """
+    v = (v or "").strip()
+    epoch = 0
+    head, sep, rest = v.partition(":")
+    if sep and head.isdigit():
+        epoch = int(head)
+        v = rest
+    key: list = [(0, epoch, "")]
+    for part in _re.split(r"[.\-+~_]", v):
+        for num, alpha in _re.findall(r"(\d+)|([A-Za-z]+)", part):
+            if num:
+                key.append((0, int(num), ""))
+            else:
+                key.append((1, 0, alpha.lower()))
+    return key
+
+
+def _max_ver(values: list) -> str | None:
+    vals = [x for x in values if x]
+    return max(vals, key=_ver_key) if vals else None
+
+
+def compute_fix_plan(name: str, ecosystem: str | None = None,
+                     version: str | None = None, timeout: int | None = None) -> dict:
+    """
+    Fix plan per (pacchetto, ecosistema): per ogni vulnerabilita' OSV estrae le
+    versioni 'fixed' dai range affected e calcola la versione MINIMA che le
+    risolve tutte (= max delle fixed, per-vuln si prende la fix piu' recente
+    tra i branch cosi' l'upgrade unico copre ogni caso).
+
+    Ritorna: {"package", "ecosystem", "current", "cves": [{"id", "fixed"}],
+              "fix_version": str|None, "unfixed": int, "error": str|None}.
+    """
+    base = {"package": name, "ecosystem": ecosystem, "current": version,
+            "cves": [], "fix_version": None, "unfixed": 0, "error": None}
+    if not name:
+        return base
+    if timeout is None:
+        timeout = _osv_timeout()
+    pkg: dict = {"name": _osv_pkg_name(name)}
+    if ecosystem:
+        pkg["ecosystem"] = ecosystem
+    try:
+        resp = requests.post(_osv_url(), json={"package": pkg},
+                             headers={"Content-Type": "application/json"},
+                             timeout=timeout)
+        resp.raise_for_status()
+        vulns = resp.json().get("vulns") or []
+    except Exception as exc:
+        base["error"] = str(exc)
+        return base
+
+    pname = _osv_pkg_name(name).lower()
+    eco = (ecosystem or "").lower()
+    cves = []
+    for v in vulns:
+        vid = v.get("id")
+        if not vid:
+            continue
+        fixes = []
+        for aff in (v.get("affected") or []):
+            ap = aff.get("package") or {}
+            if (ap.get("name") or "").lower() != pname:
+                continue
+            aeco = (ap.get("ecosystem") or "").lower()
+            # 'Debian' deve matchare 'Debian:11' e viceversa.
+            if eco and not (aeco == eco or aeco.startswith(eco + ":") or eco.startswith(aeco)):
+                continue
+            for rng in (aff.get("ranges") or []):
+                for ev in (rng.get("events") or []):
+                    if ev.get("fixed"):
+                        fixes.append(ev["fixed"])
+        cves.append({"id": vid, "fixed": _max_ver(fixes)})
+
+    base["cves"] = cves
+    base["fix_version"] = _max_ver([c["fixed"] for c in cves])
+    base["unfixed"] = sum(1 for c in cves if not c["fixed"])
+    return base
+
+
 # Lingue supportate per la sintesi LLM (mappa codice -> nome usato nel prompt).
 _LANG_NAMES = {"en": "English", "it": "Italian"}
 
