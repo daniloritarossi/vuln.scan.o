@@ -587,7 +587,11 @@ def _scan_auth_real(asset: Asset, target: TargetInfo) -> ScanResult:
     else:
         # Per Python si usa sempre 'python3 --version'; altrimenti il binario omonimo.
         binary = "python3" if product == "python" else product
-        cmd = f"({binary} --version 2>&1; dpkg -l 2>/dev/null | grep -i {product})"
+        # 'product'/'binary' possono derivare dall'LLM (extract_product_llm) e
+        # NON sono limitati a KNOWN_PRODUCTS: quota entrambi per impedire
+        # l'iniezione di comandi nella shell remota.
+        cmd = (f"({shlex.quote(binary)} --version 2>&1; "
+               f"dpkg -l 2>/dev/null | grep -i {shlex.quote(product)})")
         method = "auth-ssh"
 
     client = paramiko.SSHClient()

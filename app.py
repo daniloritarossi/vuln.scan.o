@@ -72,6 +72,18 @@ logger = logging.getLogger("vfa.app")
 BASE_DIR = Path(__file__).parent
 ASSETS_FILE = BASE_DIR / "assets.txt"
 
+# Flag 'Secure' del cookie di sessione: attivo di default, disattivabile solo
+# per lo sviluppo locale su http (VFA_COOKIE_SECURE=0). In produzione (dietro
+# TLS) il cookie NON deve mai viaggiare in chiaro.
+COOKIE_SECURE = os.environ.get("VFA_COOKIE_SECURE", "1") != "0"
+
+
+def _set_session_cookie(resp, user_id: int) -> None:
+    """Imposta il cookie di sessione firmato con i flag di sicurezza uniformi."""
+    resp.set_cookie(SESSION_COOKIE, make_session_token(user_id),
+                    max_age=SESSION_TTL, httponly=True,
+                    samesite="lax", secure=COOKIE_SECURE)
+
 def _git_version() -> str:
     """Versione app dal tag git piu' recente (es. 'v1.0.1-alfa', o
     'v1.0.1-alfa-3-gabc1234' se HEAD e' oltre il tag). 'dev' se git assente."""
@@ -229,8 +241,7 @@ async def api_login(request: Request):
         return JSONResponse({"error": "Credenziali non valide"}, status_code=401)
     resp = JSONResponse({"ok": True, "username": row["username"], "role": row["role"],
                          "must_change_password": bool(row.get("must_change_password"))})
-    resp.set_cookie(SESSION_COOKIE, make_session_token(row["id"]),
-                    max_age=SESSION_TTL, httponly=True, samesite="lax")
+    _set_session_cookie(resp, row["id"])
     return resp
 
 
@@ -346,8 +357,7 @@ async def api_change_password(request: Request,
         return JSONResponse({"error": "Supabase non raggiungibile"}, status_code=503)
     # Nuovo cookie: quello corrente e' invalidato da password_changed_at.
     resp = JSONResponse({"ok": True})
-    resp.set_cookie(SESSION_COOKIE, make_session_token(user.id),
-                    max_age=SESSION_TTL, httponly=True, samesite="lax")
+    _set_session_cookie(resp, user.id)
     return resp
 
 
@@ -981,7 +991,11 @@ def _check_ssh(asset: Asset, timeout: float = 3.0) -> bool:
     except RuntimeError:
         return False
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # Coerente con lo scan autenticato reale (scanner.py): carica i known_hosts
+    # e RIFIUTA host key sconosciute. AutoAddPolicy accetterebbe qualunque
+    # chiave, esponendo le credenziali dell'asset a un MITM.
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.RejectPolicy())
     try:
         client.connect(
             asset.ip,
