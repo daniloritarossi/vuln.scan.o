@@ -57,7 +57,7 @@
     .shader-bg { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; background: #ffffff; }
     body { min-height: max(884px, 100dvh); }
   </style>
-  <script src="/static/i18n.js?v=15"></script>
+  <script src="/static/i18n.js?v=16"></script>
 </head>
 
 <body class="bg-white text-on-background font-body-md text-body-md relative antialiased overflow-x-hidden">
@@ -282,8 +282,19 @@
       });
     }
 
+    // Loader nella tabella finché /api/risk non risponde (EPSS/KEV/probe possono richiedere secondi)
+    function showRiskLoader() {
+      $('emptyRisk').classList.add('hidden');
+      $('riskBody').innerHTML = `<tr><td colspan="9" class="px-5 py-14 text-center">
+        <span class="inline-flex items-center gap-3 font-code-sm text-code-sm text-slate-400">
+          <span class="material-symbols-outlined animate-spin text-cyan-500" style="font-size:20px">progress_activity</span>
+          ${t('risk.loading')}
+        </span></td></tr>`;
+    }
+
     async function loadRisk() {
       const btn = $('refreshBtn'); btn.disabled = true;
+      showRiskLoader();
       const rid = $('runSelect').value;
       const probe = $('probeToggle').checked ? 'true' : 'false';
       const qs = new URLSearchParams({ probe });

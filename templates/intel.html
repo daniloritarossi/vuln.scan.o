@@ -85,11 +85,100 @@
     body {
       min-height: max(884px, 100dvh);
     }
+
+    /* Tooltip del grafo 3D (classe generata da 3d-force-graph): allineato ai pannelli neural. */
+    #cveGraphWrap .float-tooltip-kap {
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #1e293b !important;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 0.75rem !important;
+      padding: 10px 12px !important;
+      font: 11px "JetBrains Mono", monospace !important;
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(12px);
+      max-width: 300px !important;
+      z-index: 50;
+    }
+
+    .dark #cveGraphWrap .float-tooltip-kap {
+      background: rgba(20, 20, 31, 0.92) !important;
+      color: #e2e8f0 !important;
+      border-color: rgba(71, 85, 105, 0.6);
+    }
+
+    /* Vista ampia quasi-fullscreen per i pannelli grafico (impact map / exposure graph) */
+    .panel-max {
+      position: fixed !important;
+      inset: 20px;
+      z-index: 130;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #panelBackdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* In vista ampia la lista CVE può respirare (override dell'inline max-height) */
+    .panel-max #cveList {
+      max-height: 26vh !important;
+    }
+
+    /* Toolbar controlli interazione del grafo 3D */
+    .gctl-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255, 255, 255, 0.85);
+      color: #475569;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background .15s, color .15s;
+    }
+
+    .gctl-btn:hover {
+      background: #fff;
+      color: #0891b2;
+    }
+
+    .gctl-btn.active {
+      background: #ecfeff;
+      color: #0891b2;
+      border-color: #a5f3fc;
+    }
+
+    .dark .gctl-btn {
+      background: rgba(20, 20, 31, 0.85);
+      border-color: rgba(71, 85, 105, 0.6);
+      color: #94a3b8;
+    }
+
+    .dark .gctl-btn:hover {
+      color: #22d3ee;
+    }
+
+    .dark .gctl-btn.active {
+      background: rgba(8, 51, 68, 0.8);
+      color: #22d3ee;
+      border-color: #155e75;
+    }
   </style>
-  <script src="/static/i18n.js?v=15"></script>
+  <script src="/static/i18n.js?v=16"></script>
   <script src="/static/vendor/xlsx.full.min.js"></script>
   <script src="/static/tableutils.js"></script>
   <script src="/static/vendor/d3.min.js"></script>
+  <script src="/static/vendor/3d-force-graph.min.js"></script>
 </head>
 
 <body class="bg-white text-on-background font-body-md text-body-md relative antialiased overflow-x-hidden">
@@ -99,15 +188,15 @@
     </script>
   </div>
 
-{% set active_page = 'intel' %}
-{% set crumbs = [
+  {% set active_page = 'intel' %}
+  {% set crumbs = [
   {'key': 'crumb.home', 'text': 'Home', 'href': '/'},
   {'key': 'top.intel_center', 'text': 'Security Posture'}
-] %}
+  ] %}
   {% include 'partials/topbar.html' %}
 
   <div class="flex pt-16 h-screen w-full overflow-hidden">
-  {% include 'partials/sidebar.html' %}
+    {% include 'partials/sidebar.html' %}
 
     <!-- Main -->
     <main class="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 relative w-full h-full">
@@ -234,27 +323,139 @@
           </div>
         </section>
 
-        <!-- CVE Impact Map — Zoomable Circle Packing -->
-        <section class="neural-panel rounded-2xl overflow-hidden">
-          <div class="p-5 border-b border-slate-100/70 flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h3 class="font-label-caps text-label-caps text-slate-500">CVE IMPACT MAP</h3>
-              <p class="font-code-sm text-[11px] text-slate-400 mt-0.5">Each circle = one CVE · inner circles = affected
-                assets · colour = severity</p>
+        <!-- CVE Impact Map + CVE Exposure Graph -->
+        <section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <!-- CVE Impact Map — Zoomable Circle Packing -->
+          <div id="cvePackPanel" class="neural-panel rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-100/70 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h3 class="font-label-caps text-label-caps text-slate-500">CVE IMPACT MAP</h3>
+                <p class="font-code-sm text-[11px] text-slate-400 mt-0.5">Each circle = one CVE · inner circles =
+                  affected assets · colour = severity</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-code-sm text-[11px] text-slate-400 hidden md:block">Click CVE → zoom in ·
+                  Click background → zoom out</span>
+                <button type="button" data-max-target="cvePackPanel" title="Expand view"
+                  class="panel-max-btn font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white w-8 h-8 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[16px] text-cyan-500">open_in_full</span>
+                </button>
+              </div>
             </div>
-            <span class="font-code-sm text-[11px] text-slate-400 hidden md:block">Click CVE → zoom in &nbsp;·&nbsp;
-              Click background → zoom out</span>
-          </div>
-          <div class="flex flex-col lg:flex-row">
-            <div id="cvePackWrap" class="relative flex-1 min-w-0" style="min-height:500px;position:relative;">
+            <!-- Badge-filtri CONDIVISI col grafo 3D: stesso stato server + severity per entrambi i pannelli -->
+            <div id="cvePackStats"
+              class="shrink-0 border-b border-slate-100/70 px-5 py-2.5 flex items-center gap-2 flex-wrap"></div>
+            <div class="relative">
+              <div id="packSrvPanel"
+                class="hidden absolute left-5 top-1 w-64 max-h-72 overflow-y-auto neural-panel rounded-xl p-3 z-50 shadow-xl">
+                <div class="flex items-center justify-between mb-2 px-1">
+                  <span class="font-label-caps text-[10px] text-slate-400">GRAPH SERVERS</span>
+                  <div class="flex gap-2">
+                    <button id="packSrvAll" class="font-label-caps text-[10px] text-cyan-600 hover:underline">ALL</button>
+                    <button id="packSrvNone"
+                      class="font-label-caps text-[10px] text-slate-400 hover:underline">NONE</button>
+                  </div>
+                </div>
+                <div class="flex items-center bg-white border border-slate-200 rounded-lg mb-2 overflow-hidden">
+                  <span class="flex items-center justify-center w-7 h-7 text-slate-400"><span
+                      class="material-symbols-outlined text-[14px]">search</span></span>
+                  <input id="packSrvSearch" type="text" placeholder="Filter servers…"
+                    class="bg-transparent font-code-sm text-[12px] text-slate-900 placeholder:text-slate-400 focus:outline-none pr-2 w-full" />
+                </div>
+                <div id="packSrvList" class="space-y-1"></div>
+              </div>
+            </div>
+            <div id="cvePackWrap" class="relative flex-1 min-w-0" style="min-height:420px;position:relative;">
               <div id="cvePackContainer" class="w-full"></div>
             </div>
-            <div class="lg:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100/70 flex flex-col">
-              <div class="px-4 py-3 border-b border-slate-100/70 flex items-center justify-between">
-                <span class="font-label-caps text-[10px] text-slate-400">VULNERABLE CVES · MOST CRITICAL FIRST</span>
-                <span id="cveListCount" class="font-code-sm text-[11px] text-slate-400"></span>
+            <div class="shrink-0 border-t border-slate-100/70 flex flex-col">
+              <div class="px-4 py-3 border-b border-slate-100/70 flex items-center justify-between gap-3">
+                <span class="font-label-caps text-[10px] text-slate-400 shrink-0">VULNERABLE CVES · MOST CRITICAL
+                  FIRST</span>
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <span class="flex items-center justify-center w-7 h-7 text-slate-400"><span
+                        class="material-symbols-outlined text-[14px]">search</span></span>
+                    <input id="cveSearch" type="text" placeholder="Find CVE…"
+                      class="bg-transparent font-code-sm text-[12px] text-slate-900 placeholder:text-slate-400 focus:outline-none pr-2 w-32" />
+                  </div>
+                  <span id="cveListCount" class="font-code-sm text-[11px] text-slate-400 shrink-0"></span>
+                </div>
               </div>
-              <div id="cveList" class="overflow-y-auto divide-y divide-slate-100/70" style="max-height:452px"></div>
+              <div id="cveList" class="overflow-y-auto divide-y divide-slate-100/70" style="max-height:200px"></div>
+            </div>
+          </div>
+
+          <!-- CVE Exposure Graph — 3D force-directed -->
+          <div id="cveGraphPanel" class="neural-panel rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-100/70 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h3 class="font-label-caps text-label-caps text-slate-500">CVE EXPOSURE GRAPH · 3D</h3>
+                <p class="font-code-sm text-[11px] text-slate-400 mt-0.5">Node = CVE (colour = severity, size = blast
+                  radius) or asset (cyan) · animated link = exposure path</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-code-sm text-[11px] text-slate-400 hidden md:block">Drag → rotate · Click node →
+                  focus</span>
+                <!-- Server picker (multi-select) -->
+                <div class="relative">
+                  <button id="graphSrvBtn" type="button"
+                    class="font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-cyan-500">dns</span>
+                    <span>SERVERS</span>
+                    <span id="graphSrvCount"
+                      class="text-cyan-700 bg-cyan-50 border border-cyan-100 px-1.5 rounded-full">0</span>
+                  </button>
+                  <div id="graphSrvPanel"
+                    class="hidden absolute right-0 mt-2 w-64 max-h-72 overflow-y-auto neural-panel rounded-xl p-3 z-50 shadow-xl">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                      <span class="font-label-caps text-[10px] text-slate-400">GRAPH SERVERS</span>
+                      <div class="flex gap-2">
+                        <button id="graphSrvAll"
+                          class="font-label-caps text-[10px] text-cyan-600 hover:underline">ALL</button>
+                        <button id="graphSrvNone"
+                          class="font-label-caps text-[10px] text-slate-400 hover:underline">NONE</button>
+                      </div>
+                    </div>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg mb-2 overflow-hidden">
+                      <span class="flex items-center justify-center w-7 h-7 text-slate-400"><span
+                          class="material-symbols-outlined text-[14px]">search</span></span>
+                      <input id="graphSrvSearch" type="text" placeholder="Filter servers…"
+                        class="bg-transparent font-code-sm text-[12px] text-slate-900 placeholder:text-slate-400 focus:outline-none pr-2 w-full" />
+                    </div>
+                    <div id="graphSrvList" class="space-y-1"></div>
+                  </div>
+                </div>
+                <button type="button" data-max-target="cveGraphPanel" title="Expand view"
+                  class="panel-max-btn font-label-caps text-[10px] text-slate-600 border border-slate-200 bg-white w-8 h-8 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[16px] text-cyan-500">open_in_full</span>
+                </button>
+              </div>
+            </div>
+            <!-- Badge-filtri: server nel grafo + severity (click = toggle), con conteggi; a destra CVE mostrate/condivise -->
+            <div id="cveGraphStats"
+              class="shrink-0 border-b border-slate-100/70 px-5 py-2.5 flex items-center gap-2 flex-wrap">
+            </div>
+            <div id="cveGraphWrap" class="relative flex-1 min-w-0 overflow-hidden" style="min-height:420px">
+              <div id="cveGraphContainer" class="absolute inset-0"></div>
+              <div id="cveGraphEmpty"
+                class="absolute inset-0 hidden items-center justify-center font-code-sm text-[13px] text-slate-400">
+                No CVE data — run a scan first.</div>
+              <!-- Controlli interazione camera/animazione -->
+              <div id="cveGraphCtrls" class="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+                <button type="button" data-gctl="zoomin" title="Zoom in" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">add</span></button>
+                <button type="button" data-gctl="zoomout" title="Zoom out" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">remove</span></button>
+                <button type="button" data-gctl="fit" title="Fit graph to view" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">fit_screen</span></button>
+                <button type="button" data-gctl="reset" title="Reset camera" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">restart_alt</span></button>
+                <button type="button" id="gctlRotate" data-gctl="rotate" title="Auto-rotate" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">3d_rotation</span></button>
+                <button type="button" id="gctlPause" data-gctl="pause" title="Pause animation" class="gctl-btn"><span
+                    class="material-symbols-outlined text-[18px]">pause</span></button>
+              </div>
             </div>
           </div>
         </section>
@@ -300,6 +501,8 @@
       </div>
     </main>
   </div>
+
+  <div id="panelBackdrop" class="hidden"></div>
 
   <script>
     const $ = (id) => document.getElementById(id);
@@ -451,6 +654,7 @@
 
       renderFindings(findings);
       renderCvePack(assets);
+      renderCveGraph(assets);
     }
 
     let sortState = { field: 'max_severity', dir: 'asc' };
@@ -665,6 +869,8 @@
 
     // === CVE Impact Map — Zoomable Circle Packing (D3 v7) ===
     function buildCvePackData(assets) {
+      // Filtri condivisi col grafo 3D: stessi set graphExcludedIps / graphSevOff.
+      assets = assets.filter(a => !graphExcludedIps.has(a.ip));
       const map = {};
       assets.forEach(a => {
         (a.posture_findings || a.findings || []).forEach(f => {
@@ -676,15 +882,22 @@
           });
         });
       });
+      const allCves = Object.keys(map).length;
+      const sevAvail = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
+      Object.values(map).forEach(i => sevAvail[i.severity]++);
+      const kept = Object.entries(map).filter(([, i]) => !graphSevOff.has(i.severity));
+      const servers = new Set();
+      kept.forEach(([, i]) => i.ips.forEach(ip => servers.add(ip)));
       return {
         name: 'root',
-        children: Object.entries(map)
+        children: kept
           .sort((a, b) => b[1].ips.size - a[1].ips.size)
           .map(([id, info]) => ({
             name: id,
             severity: info.severity,
             children: [...info.ips].map(ip => ({ name: ip, value: 1 }))
-          }))
+          })),
+        allCves, sevAvail, servers: servers.size, shownCves: kept.length
       };
     }
 
@@ -697,15 +910,23 @@
       if (old) old.remove();
 
       const data = buildCvePackData(assets);
+      renderPackStats(data);
+      renderSrvList('packSrvList', 'packSrvSearch');
       if (!data.children.length) {
-        container.innerHTML = '<div class="flex items-center justify-center font-code-sm text-[13px] text-slate-400" style="height:300px">No CVE data — run a scan first.</div>';
+        const hasSrv = assets.some(a => !graphExcludedIps.has(a.ip));
+        const msg = !hasSrv ? 'No servers selected — pick at least one.'
+          : data.allCves > 0 ? 'No CVEs match the severity filter — toggle a severity badge above.'
+            : 'No CVE data — run a scan first.';
+        container.innerHTML = `<div class="flex items-center justify-center font-code-sm text-[13px] text-slate-400" style="height:300px">${msg}</div>`;
+        packListState = null;
         $('cveList').innerHTML = '';
         $('cveListCount').textContent = '';
         return;
       }
 
+      // In vista ampia (panel-max) il wrap cresce con flex: usa l'altezza reale, mai meno di 420.
       const W = container.offsetWidth || 800;
-      const H = 500;
+      const H = Math.max(420, wrap.clientHeight - 2);
       const SEV_ALPHA = { CRITICAL: 'cc', HIGH: 'aa', MEDIUM: '88', LOW: '66', UNKNOWN: '55' };
       const SEV_CHIP_CLS = {
         CRITICAL: 'text-rose-700 bg-rose-50 border-rose-200', HIGH: 'text-orange-700 bg-orange-50 border-orange-200',
@@ -807,12 +1028,24 @@
       zoomTo([root.x, root.y, root.r * 2]);
 
       // Lista CVE ordinata per criticità (severità, poi n. asset colpiti); click riga → zoom sul cerchio.
+      // Stato salvato per la ricerca e la delega click (i closure zoom/focus valgono fino al prossimo render).
       const nodeByName = new Map((root.children || []).map(c => [c.data.name, c]));
       const items = [...data.children].sort((a, b) =>
         (SEV.indexOf(a.severity) - SEV.indexOf(b.severity)) || (b.children.length - a.children.length));
+      packListState = { items, nodeByName, zoom: (e, n) => { if (focus !== n) zoom(e, n); } };
+      renderCveList();
+    }
+
+    // Lista CVE con filtro di ricerca; ridisegnabile senza rifare il pack.
+    let packListState = null;
+    function renderCveList() {
       const listEl = $('cveList');
-      $('cveListCount').textContent = items.length + ' CVE';
-      listEl.innerHTML = items.map((c, i) => `
+      if (!packListState) { listEl.innerHTML = ''; $('cveListCount').textContent = ''; return; }
+      const q = ($('cveSearch').value || '').trim().toLowerCase();
+      const items = packListState.items;
+      const shown = q ? items.filter(c => c.name.toLowerCase().includes(q)) : items;
+      $('cveListCount').textContent = q ? `${shown.length} / ${items.length} CVE` : items.length + ' CVE';
+      listEl.innerHTML = shown.length ? shown.map((c, i) => `
         <div data-cve="${esc(c.name)}" class="flex items-center gap-2 px-4 py-2 hover:bg-white/60 cursor-pointer transition-colors">
           <span class="font-code-sm text-[10px] text-slate-300 w-6 text-right shrink-0">${i + 1}</span>
           <a href="${cveUrl(c.name)}" target="_blank" rel="noopener noreferrer"
@@ -821,12 +1054,382 @@
             <span class="font-code-sm text-[10px] text-slate-400" title="assets affected">${c.children.length}×</span>
             ${sevChip(c.severity)}
           </span>
-        </div>`).join('');
-      listEl.querySelectorAll('[data-cve]').forEach(row => row.addEventListener('click', (e) => {
-        if (e.target.closest('a')) return;
-        const n = nodeByName.get(row.dataset.cve);
-        if (n && focus !== n) zoom(e, n);
-      }));
+        </div>`).join('')
+        : '<p class="font-code-sm text-[11px] text-slate-400 px-4 py-3">No match.</p>';
+    }
+    $('cveSearch').addEventListener('input', renderCveList);
+    $('cveList').addEventListener('click', (e) => {
+      if (e.target.closest('a') || !packListState) return;
+      const row = e.target.closest('[data-cve]'); if (!row) return;
+      const n = packListState.nodeByName.get(row.dataset.cve);
+      if (n) packListState.zoom(e, n);
+    });
+
+    // Badge-filtri del pannello impact map (stesso stato condiviso del grafo 3D)
+    function renderPackStats(data) {
+      const srvBadge = `<button type="button" data-pack-srv title="Filter servers"
+          class="flex items-center gap-1.5 px-2.5 py-1 border rounded-full font-code-sm text-[10px]
+                 text-cyan-700 bg-cyan-50 border-cyan-200 hover:bg-cyan-100 transition-colors cursor-pointer">
+          <span class="inline-block w-2 h-2 rounded-full" style="background:${isDark() ? '#22d3ee' : '#0891b2'}"></span>
+          <span class="font-label-caps">SERVERS</span><span class="font-semibold">${data.servers}</span>
+        </button>`;
+      const sevBadges = SEV.map(s => {
+        const off = graphSevOff.has(s);
+        const cls = off
+          ? 'text-slate-400 bg-slate-50/60 border-slate-200 opacity-70 hover:opacity-100'
+          : SEV_CHIP[s] + ' hover:brightness-95';
+        return `<button type="button" data-sev="${s}" title="Toggle ${s} CVEs"
+            class="flex items-center gap-1.5 px-2.5 py-1 border rounded-full font-code-sm text-[10px] ${cls} transition-all cursor-pointer">
+            <span class="inline-block w-2 h-2 rounded-full" style="background:${sevColor(s)};${off ? 'opacity:.3' : ''}"></span>
+            <span class="font-label-caps ${off ? 'line-through' : ''}">${s}</span>
+            <span class="font-semibold">${data.sevAvail[s]}</span>
+          </button>`;
+      }).join('');
+      const info = `<span class="ml-auto font-code-sm text-[11px] text-slate-400">
+          CVE <span class="font-semibold text-slate-900">${data.shownCves}</span></span>`;
+      $('cvePackStats').innerHTML = srvBadge + sevBadges + info;
+    }
+
+    // === CVE Exposure Graph — 3D force-directed (3d-force-graph) ===
+    // Nodi: CVE (colore = severity, dimensione = n. asset colpiti) e asset (cyan).
+    // Link asset↔CVE curvi con particelle animate: cadenza/numero crescono con la severità.
+    const GRAPH_CVE_CAP = 150; // oltre, il grafo diventa illeggibile: teniamo i più critici
+    let cveGraph = null, cveGraphRO = null, cveGraphFitPending = false;
+    // Filtro server: set di IP esclusi (così i nuovi asset in arrivo da scan restano inclusi di default).
+    const graphExcludedIps = new Set();
+    // Filtro severity: set di severity spente (default: tutte accese).
+    const graphSevOff = new Set();
+
+    function buildCveGraphData(assets) {
+      assets = assets.filter(a => !graphExcludedIps.has(a.ip));
+      const cveMap = {};   // id -> {severity, ips:Set, pkgs:Set}
+      const assetMap = {}; // ip -> {os, cves:Set, pkgs:Set, sev counts}
+      assets.forEach(a => {
+        (a.posture_findings || a.findings || []).forEach(f => {
+          const sev = (f.max_severity || 'UNKNOWN').toUpperCase();
+          const pkg = f.package + (f.version ? '@' + f.version : '');
+          (f.cve_ids || []).forEach(id => {
+            if (!cveMap[id]) cveMap[id] = { severity: sev, ips: new Set(), pkgs: new Set() };
+            if (SEV.indexOf(sev) < SEV.indexOf(cveMap[id].severity)) cveMap[id].severity = sev;
+            cveMap[id].ips.add(a.ip);
+            cveMap[id].pkgs.add(pkg);
+            if (!assetMap[a.ip]) assetMap[a.ip] = { os: a.os_type || '', cves: new Set(), pkgs: new Set(), sev: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 } };
+            assetMap[a.ip].cves.add(id);
+            assetMap[a.ip].pkgs.add(pkg);
+          });
+        });
+      });
+
+      const allCves = Object.keys(cveMap).length;
+      // Severity "riscontrate" dopo il filtro server, PRIMA del filtro severity e del cap:
+      // sono i conteggi dei badge (un badge spento mostra comunque quante CVE riattiverebbe).
+      const sevAvail = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
+      Object.values(cveMap).forEach(i => sevAvail[i.severity]++);
+      // Filtro severity PRIMA del cap: le 150 mostrate sono sempre ricalcolate sui soli filtri attivi.
+      let cves = Object.entries(cveMap)
+        .filter(([, info]) => !graphSevOff.has(info.severity))
+        .sort((a, b) =>
+          (SEV.indexOf(a[1].severity) - SEV.indexOf(b[1].severity)) || (b[1].ips.size - a[1].ips.size));
+      const totalCves = cves.length;
+      cves = cves.slice(0, GRAPH_CVE_CAP);
+      const kept = new Set(cves.map(c => c[0]));
+
+      const nodes = [], links = [];
+      const usedAssets = new Set();
+      cves.forEach(([id, info]) => {
+        nodes.push({
+          id, type: 'cve', severity: info.severity,
+          ips: [...info.ips], pkgs: [...info.pkgs],
+          val: 1 + info.ips.size * 1.5
+        });
+        info.ips.forEach(ip => usedAssets.add(ip));
+      });
+      usedAssets.forEach(ip => {
+        const a = assetMap[ip];
+        const visible = [...a.cves].filter(id => kept.has(id));
+        visible.forEach(id => { a.sev[cveMap[id].severity]++; });
+        nodes.push({
+          id: 'asset:' + ip, type: 'asset', ip, os: a.os,
+          cveCount: visible.length, pkgCount: a.pkgs.size, sev: a.sev,
+          val: 2 + Math.sqrt(visible.length) * 2
+        });
+      });
+      let li = 0;
+      cves.forEach(([id, info]) => {
+        info.ips.forEach(ip => {
+          links.push({
+            source: 'asset:' + ip, target: id, severity: info.severity,
+            pkgs: [...info.pkgs],
+            curvature: 0.35,
+            rotation: (li++ * 2.399963) % (2 * Math.PI)   // angolo aureo: spalma le curve nello spazio
+          });
+        });
+      });
+      // Contatori: classificazione severity delle CVE mostrate + CVE condivise fra più server
+      const sevCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
+      let sharedCves = 0;
+      cves.forEach(([, info]) => { sevCounts[info.severity]++; if (info.ips.size > 1) sharedCves++; });
+      return { nodes, links, totalCves, allCves, shownCves: cves.length, servers: usedAssets.size, sevCounts, sevAvail, sharedCves };
+    }
+
+    function cveGraphTooltip(n) {
+      if (n.type === 'cve') {
+        const sc = SEV_CHIP[n.severity] || SEV_CHIP.UNKNOWN;
+        const pkgs = n.pkgs.slice(0, 6);
+        return `<div class="font-semibold text-[12px] mb-1">${esc(n.id)}</div>`
+          + `<span class="px-2 py-0.5 border ${sc} font-label-caps text-[10px] rounded-full">${esc(n.severity)}</span>`
+          + `<div class="mt-1.5 text-[10px] opacity-70">${n.ips.length} asset${n.ips.length !== 1 ? 's' : ''} exposed · via:</div>`
+          + `<div class="mt-0.5">${pkgs.map(p => `<span class="inline-block text-[10px] bg-slate-500/10 px-1.5 py-0.5 rounded mr-1 mb-0.5">${esc(p)}</span>`).join('')}`
+          + (n.pkgs.length > 6 ? `<span class="text-[10px] opacity-60">+${n.pkgs.length - 6} more</span>` : '') + '</div>'
+          + `<div class="mt-1 text-[10px] opacity-50">click → focus</div>`;
+      }
+      const sevLine = SEV.filter(s => n.sev[s]).map(s =>
+        `<span style="color:${sevColor(s)}" class="font-semibold">${n.sev[s]} ${s.charAt(0) + s.slice(1).toLowerCase()}</span>`).join(' · ');
+      return `<div class="font-semibold text-[12px] mb-1">${esc(n.ip)}</div>`
+        + `<div class="text-[10px] opacity-70">${esc(n.os ? n.os.toUpperCase() : 'OS unknown')} · ${n.cveCount} CVE in graph · ${n.pkgCount} vulnerable pkg${n.pkgCount !== 1 ? 's' : ''}</div>`
+        + (sevLine ? `<div class="mt-1 text-[10px]">${sevLine}</div>` : '')
+        + `<div class="mt-1 text-[10px] opacity-50">click → focus</div>`;
+    }
+
+    // --- server picker del grafo (multi-selezione) ---
+    // Ridisegna entrambi i pannelli che condividono i filtri server+severity.
+    function refreshCvePanels() { renderCvePack(assetsData); renderCveGraph(assetsData); }
+
+    // --- server picker condiviso: due istanze UI (grafo 3D + impact map), un solo stato ---
+    function srvIps() { return [...new Set(assetsData.map(a => a.ip))]; }
+    function srvVisibleIps(searchId) {
+      const q = ($(searchId).value || '').trim().toLowerCase();
+      const ips = srvIps();
+      return q ? ips.filter(ip => ip.toLowerCase().includes(q)) : ips;
+    }
+    function renderSrvList(listId, searchId) {
+      const ips = srvIps();
+      const shown = srvVisibleIps(searchId);
+      $(listId).innerHTML = shown.length ? shown.map(ip => `
+        <label class="flex items-center gap-2 px-1 py-1.5 rounded hover:bg-slate-50/60 cursor-pointer">
+          <input type="checkbox" class="graph-srv-cb accent-cyan-500" data-ip="${esc(ip)}" ${graphExcludedIps.has(ip) ? '' : 'checked'}/>
+          <span class="font-code-sm text-[12px] text-slate-700 truncate">${esc(ip)}</span>
+        </label>`).join('')
+        : `<p class="font-code-sm text-[11px] text-slate-400 px-1">${ips.length ? 'No match.' : 'No servers.'}</p>`;
+    }
+    function renderSrvPickers(assets) {
+      const ips = [...new Set(assets.map(a => a.ip))];
+      const selected = ips.filter(ip => !graphExcludedIps.has(ip));
+      $('graphSrvCount').textContent = `${selected.length}/${ips.length}`;
+      renderSrvList('graphSrvList', 'graphSrvSearch');
+      renderSrvList('packSrvList', 'packSrvSearch');
+    }
+    // Wiring identico per le due istanze del picker (ALL/NONE rispettano la ricerca attiva)
+    [['graphSrvList', 'graphSrvSearch', 'graphSrvAll', 'graphSrvNone'],
+    ['packSrvList', 'packSrvSearch', 'packSrvAll', 'packSrvNone']].forEach(([list, search, all, none]) => {
+      $(search).addEventListener('input', () => renderSrvList(list, search));
+      $(search).addEventListener('click', (e) => e.stopPropagation());
+      $(list).addEventListener('change', (e) => {
+        const cb = e.target.closest('.graph-srv-cb'); if (!cb) return;
+        if (cb.checked) graphExcludedIps.delete(cb.dataset.ip); else graphExcludedIps.add(cb.dataset.ip);
+        refreshCvePanels();
+      });
+      $(all).addEventListener('click', () => { srvVisibleIps(search).forEach(ip => graphExcludedIps.delete(ip)); refreshCvePanels(); });
+      $(none).addEventListener('click', () => { srvVisibleIps(search).forEach(ip => graphExcludedIps.add(ip)); refreshCvePanels(); });
+    });
+    $('graphSrvBtn').addEventListener('click', (e) => { e.stopPropagation(); $('graphSrvPanel').classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#graphSrvPanel') && !e.target.closest('#graphSrvBtn')) $('graphSrvPanel').classList.add('hidden');
+      if (!e.target.closest('#packSrvPanel') && !e.target.closest('[data-pack-srv]')) $('packSrvPanel').classList.add('hidden');
+    });
+
+    // badge-filtri: severity = toggle condiviso (aggiorna entrambi i pannelli), SERVERS = apre il picker
+    function wireStatsBar(statsId, srvAttr, srvPanelId) {
+      $(statsId).addEventListener('click', (e) => {
+        const sevBtn = e.target.closest('[data-sev]');
+        if (sevBtn) {
+          const s = sevBtn.dataset.sev;
+          if (graphSevOff.has(s)) graphSevOff.delete(s); else graphSevOff.add(s);
+          refreshCvePanels();
+          return;
+        }
+        if (e.target.closest(`[${srvAttr}]`)) {
+          e.stopPropagation();   // evita che il click-fuori richiuda subito il picker
+          $(srvPanelId).classList.toggle('hidden');
+        }
+      });
+    }
+    wireStatsBar('cveGraphStats', 'data-srv-badge', 'graphSrvPanel');
+    wireStatsBar('cvePackStats', 'data-pack-srv', 'packSrvPanel');
+
+    // --- vista ampia quasi-fullscreen per i pannelli grafico ---
+    let maxPanelId = null;
+    function applyPanelMax(id, on) {
+      const p = $(id);
+      p.classList.toggle('panel-max', on);
+      const ic = p.querySelector('.panel-max-btn .material-symbols-outlined');
+      if (ic) ic.textContent = on ? 'close_fullscreen' : 'open_in_full';
+    }
+    function togglePanelMax(id) {
+      const prev = maxPanelId;
+      if (prev) applyPanelMax(prev, false);
+      maxPanelId = (prev === id) ? null : id;
+      if (maxPanelId) applyPanelMax(maxPanelId, true);
+      $('panelBackdrop').classList.toggle('hidden', !maxPanelId);
+      document.body.style.overflow = maxPanelId ? 'hidden' : '';
+      // dopo il reflow: pack ricalcola W/H sul nuovo spazio, graph rifitta la camera (resize via RO)
+      requestAnimationFrame(() => {
+        if (id === 'cvePackPanel') renderCvePack(assetsData);
+        if (id === 'cveGraphPanel' && cveGraph) setTimeout(() => cveGraph.zoomToFit(600, 40), 350);
+      });
+    }
+    document.querySelectorAll('.panel-max-btn').forEach(b =>
+      b.addEventListener('click', () => togglePanelMax(b.dataset.maxTarget)));
+    $('panelBackdrop').addEventListener('click', () => { if (maxPanelId) togglePanelMax(maxPanelId); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && maxPanelId) togglePanelMax(maxPanelId); });
+
+    function renderCveGraphStats(data) {
+      // Badge SERVERS: conteggio server nel grafo, click apre il picker multi-selezione
+      const srvBadge = `<button type="button" data-srv-badge title="Filter servers"
+          class="flex items-center gap-1.5 px-2.5 py-1 border rounded-full font-code-sm text-[10px]
+                 text-cyan-700 bg-cyan-50 border-cyan-200 hover:bg-cyan-100 transition-colors cursor-pointer">
+          <span class="inline-block w-2 h-2 rounded-full" style="background:${isDark() ? '#22d3ee' : '#0891b2'}"></span>
+          <span class="font-label-caps">SERVERS</span><span class="font-semibold">${data.servers}</span>
+        </button>`;
+      // Badge severity: pill colorata quando attiva, spenta/barrata quando filtrata via; click = toggle
+      const sevBadges = SEV.map(s => {
+        const off = graphSevOff.has(s);
+        const cls = off
+          ? 'text-slate-400 bg-slate-50/60 border-slate-200 opacity-70 hover:opacity-100'
+          : SEV_CHIP[s] + ' hover:brightness-95';
+        return `<button type="button" data-sev="${s}" title="Toggle ${s} CVEs"
+            class="flex items-center gap-1.5 px-2.5 py-1 border rounded-full font-code-sm text-[10px] ${cls} transition-all cursor-pointer">
+            <span class="inline-block w-2 h-2 rounded-full" style="background:${sevColor(s)};${off ? 'opacity:.3' : ''}"></span>
+            <span class="font-label-caps ${off ? 'line-through' : ''}">${s}</span>
+            <span class="font-semibold">${data.sevAvail[s]}</span>
+          </button>`;
+      }).join('');
+      const info = `<span class="ml-auto font-code-sm text-[11px] text-slate-400">
+          CVE <span class="font-semibold text-slate-900">${data.shownCves}</span>${data.totalCves > data.shownCves ? ` / ${data.totalCves} (top most critical)` : ''}${data.servers > 1 && data.sharedCves ? ` · SHARED <span class="font-semibold text-slate-900">${data.sharedCves}</span> on 2+ servers` : ''}
+        </span>`;
+      $('cveGraphStats').innerHTML = srvBadge + sevBadges + info;
+    }
+
+    // --- controlli interazione camera/animazione del grafo 3D ---
+    let graphAutoRotate = false, graphPaused = false, graphRotTimer = null;
+
+    // Zoom: avvicina/allontana la camera lungo la direzione del target corrente
+    function graphZoom(f) {
+      if (!cveGraph) return;
+      const cam = cveGraph.cameraPosition();
+      const t = cveGraph.controls().target || { x: 0, y: 0, z: 0 };
+      cveGraph.cameraPosition({
+        x: t.x + (cam.x - t.x) * f,
+        y: t.y + (cam.y - t.y) * f,
+        z: t.z + (cam.z - t.z) * f
+      }, undefined, 300);
+    }
+
+    // Auto-rotate: orbita attorno al target mantenendo distanza e quota correnti
+    function setGraphRotate(on) {
+      graphAutoRotate = on;
+      $('gctlRotate').classList.toggle('active', on);
+      if (on && !graphRotTimer) {
+        graphRotTimer = setInterval(() => {
+          if (!cveGraph || graphPaused) return;
+          const cam = cveGraph.cameraPosition();
+          const t = cveGraph.controls().target || { x: 0, y: 0, z: 0 };
+          const dx = cam.x - t.x, dz = cam.z - t.z;
+          const r = Math.hypot(dx, dz), a = Math.atan2(dx, dz) + 0.004;
+          cveGraph.cameraPosition({ x: t.x + r * Math.sin(a), y: cam.y, z: t.z + r * Math.cos(a) });
+        }, 30);
+      } else if (!on && graphRotTimer) { clearInterval(graphRotTimer); graphRotTimer = null; }
+    }
+
+    // Pausa: congela render loop (particelle e fisica incluse)
+    function setGraphPaused(on) {
+      graphPaused = on;
+      const ic = $('gctlPause').querySelector('.material-symbols-outlined');
+      ic.textContent = on ? 'play_arrow' : 'pause';
+      $('gctlPause').classList.toggle('active', on);
+      $('gctlPause').title = on ? 'Resume animation' : 'Pause animation';
+      if (cveGraph) { if (on) cveGraph.pauseAnimation(); else cveGraph.resumeAnimation(); }
+    }
+
+    $('cveGraphCtrls').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-gctl]'); if (!b || !cveGraph) return;
+      const a = b.dataset.gctl;
+      if (a === 'zoomin') graphZoom(0.7);
+      else if (a === 'zoomout') graphZoom(1.45);
+      else if (a === 'fit') cveGraph.zoomToFit(500, 40);
+      else if (a === 'reset') {
+        setGraphRotate(false);
+        cveGraph.cameraPosition({ x: 0, y: 0, z: 900 }, { x: 0, y: 0, z: 0 }, 500);
+        setTimeout(() => cveGraph.zoomToFit(400, 40), 550);
+      }
+      else if (a === 'rotate') setGraphRotate(!graphAutoRotate);
+      else if (a === 'pause') setGraphPaused(!graphPaused);
+    });
+
+    function renderCveGraph(assets) {
+      const wrap = $('cveGraphWrap'), el = $('cveGraphContainer');
+      if (!wrap || !el || typeof ForceGraph3D === 'undefined') return;
+      const data = buildCveGraphData(assets);
+      renderSrvPickers(assets);
+      renderCveGraphStats(data);
+      const empty = $('cveGraphEmpty');
+      const hasSrv = assets.some(a => !graphExcludedIps.has(a.ip));
+      empty.textContent = data.nodes.length ? ''
+        : !hasSrv ? 'No servers selected — pick at least one.'
+          : data.allCves > 0 ? 'No CVEs match the severity filter — toggle a severity badge above.'
+            : 'No CVE data — run a scan first.';
+      empty.classList.toggle('hidden', data.nodes.length > 0);
+      empty.classList.toggle('flex', data.nodes.length === 0);
+      $('cveGraphCtrls').classList.toggle('hidden', !data.nodes.length);
+
+      if (!data.nodes.length) { if (cveGraph) { cveGraph.graphData({ nodes: [], links: [] }); cveGraph.pauseAnimation(); } return; }
+
+      const assetColor = () => isDark() ? '#22d3ee' : '#0891b2';
+      const PARTICLES = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 1, UNKNOWN: 1 };
+      const SPEED = { CRITICAL: 0.009, HIGH: 0.007, MEDIUM: 0.005, LOW: 0.004, UNKNOWN: 0.003 };
+
+      if (!cveGraph) {
+        cveGraph = ForceGraph3D()(el)
+          .backgroundColor('rgba(0,0,0,0)')
+          .showNavInfo(false)
+          .nodeVal('val')
+          .nodeOpacity(0.92)
+          .nodeResolution(12)
+          .linkCurvature('curvature')
+          .linkCurveRotation('rotation')
+          .linkOpacity(0.30)
+          .linkWidth(0.6)
+          .linkDirectionalParticleWidth(1.8)
+          .onEngineStop(() => {
+            // solo al primo assestamento dopo un caricamento dati: inquadra tutto il grafo
+            if (cveGraphFitPending) { cveGraphFitPending = false; cveGraph.zoomToFit(700, 40); }
+          })
+          .onNodeClick(node => {
+            // click → la camera orbita fino a inquadrare il nodo
+            const dist = 130, r = Math.hypot(node.x, node.y, node.z) || 1, k = 1 + dist / r;
+            cveGraph.cameraPosition({ x: node.x * k, y: node.y * k, z: node.z * k }, node, 900);
+          });
+        cveGraphRO = new ResizeObserver(() => {
+          if (cveGraph) cveGraph.width(wrap.clientWidth).height(wrap.clientHeight);
+        });
+        cveGraphRO.observe(wrap);
+      }
+      setGraphPaused(false);   // nuovi dati → riparte sempre l'animazione (e il bottone pausa si riallinea)
+      cveGraph
+        .width(wrap.clientWidth).height(wrap.clientHeight)
+        .nodeColor(n => n.type === 'asset' ? assetColor() : sevColor(n.severity))
+        .nodeLabel(cveGraphTooltip)
+        .linkColor(l => sevColor(l.severity))
+        .linkDirectionalParticles(l => PARTICLES[l.severity] || 1)
+        .linkDirectionalParticleSpeed(l => SPEED[l.severity] || 0.004)
+        .linkLabel(l => {
+          const pkgs = l.pkgs.slice(0, 4).map(esc).join(', ');
+          return `<div class="text-[10px]"><span class="font-semibold">${esc(typeof l.target === 'object' ? l.target.id : l.target)}</span>`
+            + ` → ${esc(typeof l.source === 'object' ? l.source.ip : String(l.source).replace('asset:', ''))}`
+            + `<br/>via ${pkgs}${l.pkgs.length > 4 ? ` +${l.pkgs.length - 4}` : ''}</div>`;
+        })
+        .graphData(data);
+      cveGraphFitPending = true;
     }
 
     loadAssetPicker();
