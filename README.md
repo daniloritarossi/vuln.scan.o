@@ -842,6 +842,49 @@ auth_tokens       (user_id, token_hash UNIQUE, purpose activation|reset,
 
 ---
 
+## AI usage & EU AI Act (Regulation 2024/1689)
+
+The application integrates general-purpose AI models for a small set of well-defined tasks. This section documents how AI is used, its limits, and the resulting classification under the EU AI Act — it also serves as the AI-literacy material required of deployers by **Art. 4** (in force since 2 Feb 2025).
+
+### Where AI is used
+
+| Function | Module | Purpose | Impact of an error |
+|----------|--------|---------|--------------------|
+| CVE risk summary | `cve.py · summarize_cves` | 2-sentence natural-language risk assessment shown in the scan console and audit page | Informational only — CVE list and counts come from OSV, not from the model |
+| Affected-version extraction | `cve.py · extract_affected_version` | Extracts a version constraint (e.g. `<2.5.0`) from advisory free text | Output is validated by `_sanitize_constraint` (strict regex allow-list); an unparsable answer is discarded, never guessed |
+| Product identification | `cve.py · extract_product_llm` | Identifies product/version from OSINT text when regex heuristics fail | Fallback path only; result is cross-checked against OSV before any CVE is attributed |
+| Triage report | scan pipeline | Prioritization hints on scan results | Informational only |
+
+Additionally, risk prioritization (`risk.py`) consumes **EPSS** scores — a third-party ML model published by FIRST.org — as one weighting factor alongside KEV, CVSS and asset context. The score is fetched via public API; no data about your assets is sent to FIRST (only CVE IDs).
+
+### Model providers and data flow
+
+- **Ollama (default)** — fully local inference; no data leaves your infrastructure.
+- **Claude (Anthropic API)** — optional; prompts are sent to Anthropic's API. Prompts contain **only** product names, version strings and public CVE identifiers — never asset IPs, hostnames, credentials or personal data. The UI states this next to the API-key field.
+
+### AI Act classification
+
+- The system implements **no prohibited practice** (Art. 5).
+- It does **not fall in any Annex III high-risk category**: it supports patch prioritization on IT assets and takes no decisions affecting natural persons (no biometrics, employment, credit, essential services, law enforcement).
+- Operators of this app act as **deployers** of general-purpose AI models; the GPAI provider obligations (Art. 53 ff.) rest on the model providers.
+- Resulting risk tier: **minimal/limited**. Applicable measures are transparency and AI literacy, both addressed below. No conformity assessment, CE marking or EU database registration is required.
+
+### Transparency & human oversight (Art. 50 + good practice)
+
+- Every AI-generated text in the UI carries an **AI-GENERATED badge** with a tooltip disclaimer (scan console summary, triage report, audit page summary).
+- LLM-derived advisory extractions are tagged `[AI]` in the live scan log, including provider and model name.
+- All AI output is **best-effort and advisory**: scan verdicts, CVE matching and SLA tracking never depend solely on a model answer. Treat summaries and triage hints as a starting point for human review, not as a decision.
+
+### Operator (AI-literacy) notes
+
+- LLM output can be wrong, incomplete or outdated relative to the model's training data. **Verify version constraints and risk statements against the linked CVE/OSV records before acting.**
+- A model failure degrades gracefully: the app returns empty summaries rather than blocking scans (`Best-effort` philosophy throughout).
+- Switching provider/model is a configuration change (`Settings → AI/LLM`); the model in use is always visible in the scan log (`[AI] invoking …`).
+
+> This section is a technical self-assessment, not legal advice.
+
+---
+
 ## Input examples
 
 | Input | Identified product |

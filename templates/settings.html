@@ -94,7 +94,7 @@
     }
   </style>
   <style>body { min-height: max(884px, 100dvh); }</style>
-  <script src="/static/i18n.js?v=17"></script>
+  <script src="/static/i18n.js?v=18"></script>
 </head>
 
 <body
@@ -301,6 +301,10 @@
                 <input id="claudeModel" type="text" class="setting-input" placeholder="claude-haiku-4-5-20251001" />
               </div>
             </div>
+            <p class="font-code-sm text-code-sm text-amber-600 flex items-start gap-1.5">
+              <span class="material-symbols-outlined" style="font-size:14px;margin-top:1px">info</span>
+              <span data-i18n="settings.claude_privacy">Prompts (product name, version, CVE IDs — no personal data) are sent to the Anthropic API outside your infrastructure. Use Ollama for fully local processing.</span>
+            </p>
           </div>
 
           <!-- Timeouts -->

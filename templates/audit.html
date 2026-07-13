@@ -121,7 +121,7 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  <script src="/static/i18n.js?v=17"></script>
+  <script src="/static/i18n.js?v=18"></script>
   <script src="/static/vendor/xlsx.full.min.js"></script>
   <script src="/static/tableutils.js"></script>
 </head>
@@ -447,7 +447,10 @@
           <div class="mt-4 flex items-center gap-2 flex-wrap">
             <span class="font-label-caps text-label-caps text-slate-400">${t('audit.deps')}</span> ${depChips}
           </div>
-          ${s.cve_summary ? `<p class="mt-4 font-body-md text-sm text-slate-600 leading-relaxed bg-indigo-50/50 border border-indigo-100 p-3 rounded-lg">${esc(s.cve_summary)}</p>` : ''}
+          ${s.cve_summary ? `<div class="mt-4 bg-indigo-50/50 border border-indigo-100 p-3 rounded-lg">
+            <p class="font-body-md text-sm text-slate-600 leading-relaxed">${esc(s.cve_summary)}</p>
+            <p class="font-label-caps text-[10px] text-amber-600 tracking-wider mt-2" title="${t('ai.disclaimer')}">⚠ ${t('ai.badge')}</p>
+          </div>` : ''}
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">

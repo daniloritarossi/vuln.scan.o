@@ -236,7 +236,7 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  <script src="/static/i18n.js?v=17"></script>
+  <script src="/static/i18n.js?v=18"></script>
 </head>
 
 <body
@@ -1712,7 +1712,8 @@
             `<p class="text-indigo-200 text-[11px] font-label-caps tracking-wider">RAG · CVE INTELLIGENCE</p>` +
             (idsHtml ? `<div class="flex flex-wrap gap-1">${idsHtml}${c.count > c.ids.length ? `<span class="text-indigo-300 text-[10px] px-1">${t('cve.more', { n: c.count - c.ids.length })}</span>` : ''}</div>` : '') +
             (c.summary
-              ? `<p class="text-slate-200 leading-relaxed">${c.summary.replace(/</g, '&lt;')}</p>`
+              ? `<p class="text-slate-200 leading-relaxed">${c.summary.replace(/</g, '&lt;')}</p>` +
+                `<p class="text-amber-300/80 text-[10px] font-label-caps tracking-wider" title="${t('ai.disclaimer')}">⚠ ${t('ai.badge')}</p>`
               : `<p class="text-slate-400 text-[11px]">${t('cve.no_summary')}</p>`);
           consoleEl.insertBefore(div, promptEl);
           consoleEl.scrollTop = consoleEl.scrollHeight;
@@ -1744,7 +1745,8 @@
           `<p class="text-violet-300 text-[11px] font-label-caps tracking-wider mb-2">` +
           `<span class="material-symbols-outlined text-[13px] align-middle mr-1">priority_high</span>` +
           `AI · TRIAGE REPORT · ${(tr.product || '').toUpperCase()}</p>` +
-          rowsHtml;
+          rowsHtml +
+          `<p class="text-amber-300/80 text-[10px] font-label-caps tracking-wider mt-2" title="${t('ai.disclaimer')}">⚠ ${t('ai.badge')}</p>`;
         consoleEl.insertBefore(div, promptEl);
         consoleEl.scrollTop = consoleEl.scrollHeight;
       });
