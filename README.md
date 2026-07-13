@@ -4,6 +4,20 @@
   <img src="static/logo-icon-animated.svg" alt="Home" width="128">
 </p>
 
+<p align="center">
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white">
+  <img alt="Supabase local" src="https://img.shields.io/badge/Supabase-local%20Docker-3FCF8E?logo=supabase&logoColor=white">
+  <img alt="License Apache-2.0" src="https://img.shields.io/badge/License-Apache--2.0-D22128?logo=apache&logoColor=white">
+</p>
+
+<p align="center">
+  <a href="#ai-usage--eu-ai-act-regulation-20241689"><img alt="EU AI Act minimal risk" src="https://img.shields.io/badge/EU%20AI%20Act-minimal%2Flimited%20risk-06b6d4"></a>
+  <a href="#transparency--human-oversight-art-50--good-practice"><img alt="AI transparency" src="https://img.shields.io/badge/AI%20output-labeled%20%E2%9A%A0%20AI--GENERATED-6366f1"></a>
+  <a href="#model-providers-and-data-flow"><img alt="Local LLM" src="https://img.shields.io/badge/LLM-Ollama%20local%20%C2%B7%20Claude%20optional-8b5cf6"></a>
+  <a href="#model-providers-and-data-flow"><img alt="No personal data in prompts" src="https://img.shields.io/badge/prompts-no%20personal%20data-10b981"></a>
+</p>
+
 Web app for **authorized audits**: manages an asset inventory, identifies vulnerable software from a **free-text description** (even without an explicit CVE), runs network scans, enriches results with CVE data, and produces AI-driven security posture analysis.
 
 Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · real-time results via **Server-Sent Events** · persistence on **local Supabase (Docker)**.
