@@ -1,14 +1,22 @@
 # Vulnerability Feed Aggregator
 
+<p align="center">
+  <img src="static/logo-icon-animated.svg" alt="Home" width="128">
+</p>
+
 Web app for **authorized audits**: manages an asset inventory, identifies vulnerable software from a **free-text description** (even without an explicit CVE), runs network scans, enriches results with CVE data, and produces AI-driven security posture analysis.
 
 Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · real-time results via **Server-Sent Events** · persistence on **local Supabase (Docker)**.
+
+
+
 
 > ⚠️ **Responsible use.** Only run scans or logins against assets you own or are explicitly authorized to test. Scanning third-party systems without permission is illegal.
 
 ![Home](static/screens/home1.png)
 ![Home](static/screens/home2.png)
-![Home](static/screens/app_sec_posture.png)
+![Home](static/screens/home3.png)
+
 ---
 
 ## Installation

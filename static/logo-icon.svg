@@ -1,19 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <!-- Caldera — VULN.SCAN.IO: il vulcano visto dall'alto, magma al centro -->
+  <!-- Stratofeed — VULN.SCAN.IO: righe di feed impilate formano il vulcano, la vetta è l'alert -->
   <!-- White background with orange border -->
   <rect x="0" y="0" width="100" height="100" rx="16" fill="#ffffff"/>
   <rect x="0" y="0" width="100" height="100" rx="16" fill="none" stroke="#f97316" stroke-width="3"/>
 
-  <!-- Outer ring: the volcano's flank -->
-  <circle cx="50" cy="50" r="34" fill="none" stroke="#1e293b" stroke-width="8"/>
+  <!-- Summit: the erupting feed line, the found vulnerability -->
+  <path d="M42 26 H58" stroke="#f97316" stroke-width="11" stroke-linecap="round" fill="none"/>
 
-  <!-- Broken crater rim -->
-  <g fill="none" stroke="#1e293b" stroke-width="6" stroke-linecap="round" opacity="0.5">
-    <path d="M50 30 A20 20 0 0 1 67.3 40"/>
-    <path d="M67.3 60 A20 20 0 0 1 32.7 60"/>
-    <path d="M32.7 40 A20 20 0 0 1 43.2 31.2"/>
+  <!-- Strata: aggregated feed lines building the cone -->
+  <g stroke="#1e293b" stroke-width="11" stroke-linecap="round" fill="none">
+    <path d="M34 45 H66"/>
+    <path d="M26 64 H74"/>
+    <path d="M18 83 H82"/>
   </g>
-
-  <!-- Magma core: the found vulnerability -->
-  <circle cx="50" cy="50" r="9.5" fill="#f97316"/>
 </svg>
