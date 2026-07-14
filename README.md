@@ -33,6 +33,42 @@ Backend **FastAPI** · Frontend **HTML + Tailwind** (CDN) · real-time results v
 
 ---
 
+## Minimum requirements
+
+### Operating system
+
+| | Supported |
+|---|---|
+| **OS** | Linux x86_64 or arm64 (Debian/Ubuntu, Fedora/RHEL, Alpine, Arch, openSUSE — any distro with `apt`/`dnf`/`yum`/`apk`/`pacman`/`zypper`) |
+| **Also works** | Windows via **WSL2** (with Docker), Proxmox **VM** (LXC containers need `nesting=1,keyctl=1` for Docker) |
+| **Not supported** | Native Windows/macOS (the stack relies on Linux Docker, `systemd`/init and `/dev/kvm`) |
+
+### Hardware
+
+| Profile | CPU | RAM | Disk |
+|---|---|---|---|
+| **Minimum** (app + Supabase, remote AI via Claude API) | 2 cores x86_64/arm64 | 4 GB | 10 GB free |
+| **Recommended** (local AI with Ollama `qwen2.5:7b`) | 4 cores | 12 GB (~6 GB used by the 7B model) | 20 GB free (model ~4.7 GB) |
+| **+ Windows test VM** (`dockurr/windows`) | 4+ cores **with VT-x/AMD-V enabled in BIOS** + KVM module loaded (`/dev/kvm`) | +4 GB dedicated to the VM | +40 GB (Windows 11 image + storage) |
+
+Rules of thumb: each extra Ollama model adds its own size on disk (4–5 GB for 7B-class models); the Linux test container is negligible (~500 MB).
+
+### Software (auto-installed by `start.sh` when missing)
+
+- **Python 3.10+** with `venv`
+- **Docker** + `docker compose` v2 plugin (local Supabase stack)
+- **Go ≥ 1.21** (one-time `encdec` build)
+- `curl`, `git`
+- **Ollama** — only if you choose the local AI provider in the wizard
+
+### Network & client
+
+- Internet access at install time (packages, Docker images, Go/Ollama downloads) and at runtime for OSV/CVE feeds, OSINT search and GitHub update checks; runtime AI is fully offline with the local Ollama provider
+- Free local ports: **8000** (app), **8001** (Supabase REST), **3001** (Studio GUI) — plus **2222/3389/8006** if you create the Windows test VM
+- A modern browser with **WebGL** enabled (the 3D CVE impact graph requires it)
+
+---
+
 ## Installation
 
 Requires: **Python 3.10+**, `pip`, `venv`, `curl`, `git`, **Docker** (with the `docker compose` v2 plugin), **Go ≥ 1.21** (to build `encdec`).
