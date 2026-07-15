@@ -81,7 +81,7 @@ def _html_email(title: str, greeting: str, intro: str, button_label: str,
       <table role="presentation" width="560" cellpadding="0" cellspacing="0"
              style="max-width:560px;width:100%;background:#ffffff;border:1px solid #eeeeee;border-radius:12px;">
         <tr><td align="center" style="padding:32px 32px 8px;">
-          <img src="{logo_url}" width="72" height="72" alt="VULN.SCAN.IO"
+          <img src="{logo_url}" width="72" height="72" alt="VULN.SCAN.O"
                style="display:block;border:0;" />
         </td></tr>
         <tr><td align="center" style="padding:0 32px 4px;">
@@ -130,7 +130,7 @@ def send_activation(to_addr: str, username: str, token: str) -> None:
     ttl = load_config()["auth"].get("invite_ttl_hours", 48)
     text = (
         f"Hi {username},\n\n"
-        f"An account has been created for you on VULN.SCAN.IO.\n"
+        f"An account has been created for you on VULN.SCAN.O.\n"
         f"Activate it and choose your password by opening this link "
         f"(valid for {ttl} hours, single use):\n\n"
         f"  {link}\n\n"
@@ -139,14 +139,14 @@ def send_activation(to_addr: str, username: str, token: str) -> None:
     html = _html_email(
         title="Activate your account",
         greeting=f"Hi <strong>{username}</strong>,",
-        intro="An account has been created for you on VULN.SCAN.IO. "
+        intro="An account has been created for you on VULN.SCAN.O. "
               "Activate it and choose your password by clicking the button below.",
         button_label="ACTIVATE ACCOUNT",
         link=link,
         ttl_line=f"The link is valid for {ttl} hours and can be used only once.",
         footer_note="If you were not expecting this email, please ignore it.",
     )
-    _send(to_addr, "VULN.SCAN.IO — Activate your account", text, html)
+    _send(to_addr, "VULN.SCAN.O — Activate your account", text, html)
 
 
 def send_reset(to_addr: str, username: str, token: str) -> None:
@@ -155,7 +155,7 @@ def send_reset(to_addr: str, username: str, token: str) -> None:
     ttl = load_config()["auth"].get("reset_ttl_hours", 4)
     text = (
         f"Hi {username},\n\n"
-        f"A password reset was requested for your VULN.SCAN.IO account.\n"
+        f"A password reset was requested for your VULN.SCAN.O account.\n"
         f"Reset it by opening this link (valid for {ttl} hours, single use):\n\n"
         f"  {link}\n\n"
         f"If you did not request this reset, please ignore this email: "
@@ -164,7 +164,7 @@ def send_reset(to_addr: str, username: str, token: str) -> None:
     html = _html_email(
         title="Reset your password",
         greeting=f"Hi <strong>{username}</strong>,",
-        intro="A password reset was requested for your VULN.SCAN.IO account. "
+        intro="A password reset was requested for your VULN.SCAN.O account. "
               "Reset it by clicking the button below.",
         button_label="RESET PASSWORD",
         link=link,
@@ -172,4 +172,4 @@ def send_reset(to_addr: str, username: str, token: str) -> None:
         footer_note="If you did not request this reset, please ignore this email: "
                     "your current password remains valid.",
     )
-    _send(to_addr, "VULN.SCAN.IO — Reset your password", text, html)
+    _send(to_addr, "VULN.SCAN.O — Reset your password", text, html)

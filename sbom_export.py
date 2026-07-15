@@ -123,7 +123,7 @@ def build_cyclonedx(run: dict) -> dict:
         "version": 1,
         "metadata": {
             "timestamp": _iso_now(),
-            "tools": [{"vendor": "VULN.SCAN.IO", "name": "posture-sbom", "version": "1.0"}],
+            "tools": [{"vendor": "VULN.SCAN.O", "name": "posture-sbom", "version": "1.0"}],
             "component": {"type": "application", "name": "asset-fleet"},
         },
         "components": components,
@@ -204,10 +204,10 @@ def build_spdx(run: dict) -> dict:
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
         "name": "asset-fleet-sbom",
-        "documentNamespace": f"https://vuln.scan.io/spdx/{uuid.uuid4()}",
+        "documentNamespace": f"https://vuln.scan.o/spdx/{uuid.uuid4()}",
         "creationInfo": {
             "created": _iso_now(),
-            "creators": ["Tool: VULN.SCAN.IO-posture-sbom-1.0"],
+            "creators": ["Tool: VULN.SCAN.O-posture-sbom-1.0"],
         },
         "packages": packages,
         "relationships": relationships,
