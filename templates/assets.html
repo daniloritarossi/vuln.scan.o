@@ -93,7 +93,7 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  <script src="/static/i18n.js?v=18"></script>
+  <script src="/static/i18n.js?v=19"></script>
   <script src="/static/vendor/xlsx.full.min.js"></script>
   <script src="/static/tableutils.js"></script>
 </head>
@@ -246,54 +246,51 @@
               <thead id="assetsThead">
                 <tr class="border-b border-slate-200/70 bg-white/40">
                   <th data-sort="index"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">
                     #<span id="sicon-index"></span></th>
                   <th data-sort="ip"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
                     data-i18n="assets.th_host">IP / HOST<span id="sicon-ip"></span></th>
                   <th data-sort="username"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
                     data-i18n="assets.th_user">USERNAME<span id="sicon-username"></span></th>
-                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4" data-i18n="assets.th_pass">
+                  <th class="font-label-caps text-label-caps text-slate-500 px-3 py-4" data-i18n="assets.th_pass">
                     PASSWORD</th>
                   <th data-sort="auth_required"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
                     data-i18n="assets.th_auth">AUTH<span id="sicon-auth_required"></span></th>
                   <th data-sort="os_type"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
                     data-i18n="assets.th_os">OS<span id="sicon-os_type"></span></th>
-                  <th data-sort="os_major_version"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
-                    data-i18n="assets.th_osver">VER<span id="sicon-os_major_version"></span></th>
-                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4">
+                  <th class="font-label-caps text-label-caps text-slate-500 px-3 py-4">
                     <span class="inline-flex items-center gap-1">
                       <span data-i18n="assets.th_active">ACTIVE</span>
                       <span class="relative group inline-flex items-center">
                         <span
                           class="material-symbols-outlined text-[15px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
                         <span
-                          class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl"
+                          class="hidden pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal z-50 shadow-xl group-hover:block"
                           data-i18n="assets.active_tooltip">Live reachability check.</span>
                       </span>
                     </span>
                   </th>
                   <th data-sort="enabled"
-                    class="font-label-caps text-label-caps text-slate-500 px-5 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">
+                    class="font-label-caps text-label-caps text-slate-500 px-3 py-4 cursor-pointer select-none hover:text-slate-700 whitespace-nowrap">
                     <span class="inline-flex items-center gap-1">
                       <span data-i18n="assets.th_scan">SCAN</span>
                       <span class="relative group inline-flex items-center">
                         <span
                           class="material-symbols-outlined text-[15px] text-slate-400 hover:text-cyan-600 cursor-help">info</span>
                         <span
-                          class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-xl"
+                          class="hidden pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed font-body-md normal-case tracking-normal z-50 shadow-xl group-hover:block"
                           data-i18n="assets.scan_tooltip">Enable or disable this asset for scans.</span>
                       </span>
                       <span id="sicon-enabled"></span>
                     </span>
                   </th>
-                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4 whitespace-nowrap"
+                  <th class="font-label-caps text-label-caps text-slate-500 px-3 py-4 whitespace-nowrap"
                     data-i18n="assets.th_assigned">ASSIGNED TO</th>
-                  <th class="font-label-caps text-label-caps text-slate-500 px-5 py-4 text-right"
+                  <th class="font-label-caps text-label-caps text-slate-500 px-3 py-4 text-right"
                     data-i18n="assets.th_actions">ACTIONS</th>
                 </tr>
               </thead>
@@ -327,7 +324,7 @@
     let allUsers = [], allGroups = [];
 
     function updateSortIcons() {
-      ['index', 'ip', 'username', 'auth_required', 'os_type', 'os_major_version', 'enabled'].forEach(f => {
+      ['index', 'ip', 'username', 'auth_required', 'os_type', 'enabled'].forEach(f => {
         const el = document.getElementById('sicon-' + f);
         if (el) el.innerHTML = sortIcon(f, assetSort);
       });
@@ -347,8 +344,8 @@
 
     function authBadge(req) {
       return req
-        ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full">${t('common.authenticated')}</span>`
-        : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full">${t('common.not_required')}</span>`;
+        ? `<span class="px-2.5 py-1 border border-cyan-100 bg-cyan-50 text-cyan-700 font-label-caps text-[10px] rounded-full" title="${t('common.authenticated')}">${t('assets.auth_yes')}</span>`
+        : `<span class="px-2.5 py-1 border border-slate-100 bg-slate-50 text-slate-500 font-label-caps text-[10px] rounded-full" title="${t('common.not_required')}">${t('assets.auth_no')}</span>`;
     }
 
     function inputCell(val, cls) {
@@ -398,22 +395,23 @@
       const editing = editingIndex === a.index;
       if (editing) {
         return `
-        <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
-        <td class="px-5 py-3">${inputCell(a.ip, 'edit-ip')}</td>
-        <td class="px-5 py-3">${inputCell(a.username, 'edit-user')}</td>
-        <td class="px-5 py-3"><input value="" placeholder="${a.has_password ? '••••••••' : ''}" class="edit-pass bg-white border border-cyan-200 rounded-lg px-3 py-1.5 font-code-sm text-code-sm text-slate-900 w-full focus:outline-none focus:ring-1 focus:ring-cyan-300 placeholder:text-slate-400" /></td>
-        <td class="px-5 py-3 text-slate-300 font-code-sm text-[11px]">${t('assets.auto')}</td>
-        <td class="px-5 py-3">${osSelectHtml(a.os_type)}</td>
-        <td class="px-5 py-3">${inputCell(a.os_major_version, 'edit-osver')}</td>
-        <td class="px-5 py-3 text-slate-300 font-code-sm text-[11px]">—</td>
-        <td class="px-5 py-3">
+        <td class="px-3 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
+        <td class="px-3 py-3">${inputCell(a.ip, 'edit-ip')}</td>
+        <td class="px-3 py-3">${inputCell(a.username, 'edit-user')}</td>
+        <td class="px-3 py-3"><input value="" placeholder="${a.has_password ? '••••••••' : ''}" class="edit-pass bg-white border border-cyan-200 rounded-lg px-3 py-1.5 font-code-sm text-code-sm text-slate-900 w-full focus:outline-none focus:ring-1 focus:ring-cyan-300 placeholder:text-slate-400" /></td>
+        <td class="px-3 py-3 text-slate-300 font-code-sm text-[11px]">${t('assets.auto')}</td>
+        <td class="px-3 py-3">
+          <div class="flex flex-col gap-1.5">${osSelectHtml(a.os_type)}${inputCell(a.os_major_version, 'edit-osver')}</div>
+        </td>
+        <td class="px-3 py-3 text-slate-300 font-code-sm text-[11px]">—</td>
+        <td class="px-3 py-3">
           <label class="flex items-center gap-2 font-code-sm text-[11px] text-slate-600 cursor-pointer select-none">
             <input type="checkbox" class="edit-enabled h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-300" ${a.enabled ? 'checked' : ''} />
             <span>${a.enabled ? t('assets.scan_on') : t('assets.scan_off')}</span>
           </label>
         </td>
-        <td class="px-5 py-3 text-slate-300 font-code-sm text-[11px]">—</td>
-        <td class="px-5 py-3">
+        <td class="px-3 py-3 text-slate-300 font-code-sm text-[11px]">—</td>
+        <td class="px-3 py-3">
           <div class="flex items-center justify-end gap-2">
             <button data-act="save" data-i="${a.index}" class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-emerald-100 transition flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>${t('common.save')}</button>
             <button data-act="cancel" class="text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-slate-100 transition">${t('common.cancel')}</button>
@@ -428,20 +426,19 @@
         : '<span class="text-slate-300">—</span>';
       const user = a.username ? esc(a.username) : '<span class="text-slate-300">—</span>';
       return `
-      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
-      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-900 font-semibold">${esc(a.ip)}</td>
-      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-600">${user}</td>
-      <td class="px-5 py-3 font-code-sm text-code-sm text-slate-400 tracking-widest" title="${a.has_password ? (a.password_encrypted ? 'encrypted' : 'plain text — NOT ENCRYPTED') : 'empty'}">${pass}</td>
-      <td class="px-5 py-3">${authBadge(a.auth_required)}</td>
-      <td class="px-5 py-3">${osBadge(a.os_type, a.os_major_version)}</td>
-      <td class="px-5 py-3 font-code-sm text-[11px] text-slate-500">${a.os_major_version ? esc(a.os_major_version) : '<span class="text-slate-300">—</span>'}</td>
-      <td class="px-5 py-3" id="act-${a.index}">${statusCell(a)}</td>
-      <td class="px-5 py-3">${scanToggle(a)}</td>
-      <td class="px-5 py-3">${assignmentsCell(a)}</td>
-      <td class="px-5 py-3">
+      <td class="px-3 py-3 font-code-sm text-code-sm text-slate-400">${a.index}</td>
+      <td class="px-3 py-3 font-code-sm text-code-sm text-slate-900 font-semibold max-w-[160px] truncate" title="${esc(a.ip)}">${esc(a.ip)}</td>
+      <td class="px-3 py-3 font-code-sm text-code-sm text-slate-600">${user}</td>
+      <td class="px-3 py-3 font-code-sm text-code-sm text-slate-400 tracking-widest" title="${a.has_password ? (a.password_encrypted ? 'encrypted' : 'plain text — NOT ENCRYPTED') : 'empty'}">${pass}</td>
+      <td class="px-3 py-3">${authBadge(a.auth_required)}</td>
+      <td class="px-3 py-3">${osBadge(a.os_type, a.os_major_version)}</td>
+      <td class="px-3 py-3" id="act-${a.index}">${statusCell(a)}</td>
+      <td class="px-3 py-3">${scanToggle(a)}</td>
+      <td class="px-3 py-3">${assignmentsCell(a)}</td>
+      <td class="px-3 py-3">
         <div class="flex items-center justify-end gap-2">
-          ${canWrite ? `<button data-act="edit" data-i="${a.index}" class="text-cyan-600 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-cyan-100 transition flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>${t('common.edit')}</button>
-          <button data-act="delete" data-i="${a.index}" class="text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg font-label-caps text-[10px] hover:bg-rose-100 transition flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">delete</span>${t('common.delete')}</button>` : `<span class="text-slate-300 font-code-sm text-[11px]">${t('assets.readonly')}</span>`}
+          ${canWrite ? `<button data-act="edit" data-i="${a.index}" title="${t('common.edit')}" aria-label="${t('common.edit')}" class="text-cyan-600 bg-cyan-50 border border-cyan-100 h-8 w-8 rounded-lg hover:bg-cyan-100 transition flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+          <button data-act="delete" data-i="${a.index}" title="${t('common.delete')}" aria-label="${t('common.delete')}" class="text-rose-600 bg-rose-50 border border-rose-100 h-8 w-8 rounded-lg hover:bg-rose-100 transition flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">delete</span></button>` : `<span class="text-slate-300 font-code-sm text-[11px]">${t('assets.readonly')}</span>`}
         </div>
       </td>`;
     }
