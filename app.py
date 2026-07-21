@@ -1021,32 +1021,32 @@ def _check_ssh(asset: Asset, timeout: float = 3.0) -> bool:
 
 
 @app.get("/api/asset/health")
-def api_asset_health(host: str, index: int | None = None,
+def api_asset_health(host: str, index: int,
                      user: CurrentUser = Depends(get_current_user)):
     """
-    Raggiungibilita' TCP + (se index fornito e asset ha credenziali) login SSH.
+    Raggiungibilita' TCP + (se asset ha credenziali) login SSH.
     Risposta: {reachable, ssh_ok}  — ssh_ok=null se nessuna credenziale.
-    Editor: solo per asset del proprio cono di visibilita'.
+    'host' deve combaciare con l'IP dell'asset indicato da 'index' (nel cono
+    di visibilita' dell'utente): impedisce di usare l'endpoint come sonda di
+    rete verso host arbitrari (era sfruttabile anche da 'viewer').
     """
-    if user.scoped and index is not None:
-        _require_asset_in_scope(user, index)
+    _require_asset_in_scope(user, index)
+    try:
+        asset = get_asset(index, ASSETS_FILE)  # 'index' = id riga Supabase
+    except AssetStoreError:
+        asset = None
     h = _normalize_host(host)
-    if not h:
-        return {"host": host, "reachable": False, "ssh_ok": None}
+    if not asset or not h or h != _normalize_host(asset.ip):
+        raise Forbidden("Host non corrisponde all'asset indicato")
 
     reachable = _reachable(h)
     ssh_ok = None
 
-    if reachable and index is not None:
-        try:
-            asset = get_asset(index, ASSETS_FILE)  # 'index' = id riga Supabase
-        except AssetStoreError:
-            asset = None
-        if asset and asset.auth_required:
-            if is_encrypted(asset.password):
-                ssh_ok = _check_ssh(asset)
-            else:
-                ssh_ok = False  # password in chiaro: login rifiutato
+    if reachable and asset.auth_required:
+        if is_encrypted(asset.password):
+            ssh_ok = _check_ssh(asset)
+        else:
+            ssh_ok = False  # password in chiaro: login rifiutato
 
     return {"host": host, "reachable": reachable, "ssh_ok": ssh_ok}
 
